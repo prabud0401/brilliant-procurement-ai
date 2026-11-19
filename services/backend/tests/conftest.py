@@ -124,6 +124,18 @@ def ensure_database_migrated(migrator_url: str) -> None:
     alembic_cfg.set_main_option("sqlalchemy.url", migrator_url)
     try:
         command.upgrade(alembic_cfg, "head")
+        # Ensure clean state from any aborted test runs
+        engine = create_engine(migrator_url)
+        with engine.begin() as conn:
+            from sqlalchemy import text
+
+            conn.execute(text("DELETE FROM extracted_lines"))
+            conn.execute(text("DELETE FROM extracted_fields"))
+            conn.execute(text("DELETE FROM extractions"))
+            conn.execute(text("DELETE FROM injection_flags"))
+            conn.execute(text("DELETE FROM jobs"))
+            conn.execute(text("DELETE FROM documents"))
+        engine.dispose()
     except Exception:
         # Ignore if database is not reachable (e.g. during unit tests without db)
         pass

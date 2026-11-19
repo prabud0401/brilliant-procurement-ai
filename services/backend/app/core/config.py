@@ -27,6 +27,20 @@ class Settings(BaseSettings):
     AI_PROVIDER: str = "mock"
     INTEGRATIONS_MODE: str = "mock"
 
+    MAX_UPLOAD_SIZE_BYTES: int = 4 * 1024 * 1024  # 4 MB default while DI F0
+    MAX_UPLOAD_PAGES: int = 20
+    UPLOAD_RATE_LIMIT_PER_MINUTE: int = 60
+
+    AZURE_OPENAI_ENDPOINT: str | None = None
+    AZURE_OPENAI_DEPLOYMENT: str = "gpt-4o-mini"
+    AZURE_OPENAI_EMBEDDING_DEPLOYMENT: str = "text-embedding-3-small"
+    AZURE_OPENAI_API_KEY: str | None = None
+    AZURE_DOCINTEL_ENDPOINT: str | None = None
+    AZURE_DOCINTEL_KEY: str | None = None
+
+    AI_DAILY_BUDGET_AED: float = 50.0
+    AI_LOW_CONFIDENCE_THRESHOLD: float = 0.80
+
     CORS_ORIGINS: list[str] = []
 
     model_config = SettingsConfigDict(

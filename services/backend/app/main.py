@@ -25,6 +25,8 @@ from app.core.middleware import RequestIdMiddleware
 from app.core.models import User
 from app.core.policy import Principal, get_current_principal
 from app.core.security import create_access_token, verify_password
+from app.documents.router import router as documents_router
+from app.extraction.router import router as extraction_router
 
 # Simple in-memory IP rate limiter for login
 LOGIN_ATTEMPTS: dict[str, list[float]] = defaultdict(list)
@@ -184,6 +186,8 @@ def login(
 api_v1 = APIRouter(prefix="/api/v1")
 api_v1.include_router(auth_router)
 api_v1.include_router(audit_router)
+api_v1.include_router(documents_router)
+api_v1.include_router(extraction_router)
 
 
 @api_v1.get("/me", response_model=MeResponse, tags=["auth"])
