@@ -319,6 +319,14 @@ def resolve_exception(
             detail="Business role required to resolve exceptions",
         )
 
+    if exc.status == "escalated" and not is_manager:
+        raise ProblemException(
+            status_code=403,
+            code="FORBIDDEN",
+            title="Forbidden",
+            detail="Only a Manager can decide an escalated exception",
+        )
+
     if act == "accept":
         # Check Buyer restrictions
         if not is_manager and is_buyer:

@@ -300,18 +300,33 @@ class MagicMockSession:
 
 
 class _QueryProxy:
-    def __init__(self, data: dict[uuid.UUID, Any]) -> None:
+    def __init__(self, data: dict[uuid.UUID, Any], empty: bool = False) -> None:
         self.data = data
+        self.empty = empty
 
     def filter(self, *args: Any, **kwargs: Any) -> "_QueryProxy":
+        for arg in args:
+            s = str(arg)
+            if "sequence >" in s:
+                has_greater = any(getattr(obj, "sequence", 1) > 1 for obj in self.data.values())
+                if not has_greater:
+                    return _QueryProxy(self.data, empty=True)
+            if "sequence <" in s:
+                has_less = any(getattr(obj, "sequence", 2) < 2 for obj in self.data.values())
+                if not has_less:
+                    return _QueryProxy(self.data, empty=True)
         return self
 
     def first(self) -> Any:
+        if self.empty:
+            return None
         if self.data:
             return next(iter(self.data.values()))
         return None
 
     def all(self) -> list[Any]:
+        if self.empty:
+            return []
         return list(self.data.values())
 
     def order_by(self, *args: Any) -> "_QueryProxy":

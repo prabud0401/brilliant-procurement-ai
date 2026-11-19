@@ -214,10 +214,3 @@ def get_me(principal: Principal = Depends(get_current_principal)) -> MeResponse:
 
 
 app.include_router(api_v1)
-app.include_router(pr_router)
-app.include_router(po_router)
-app.include_router(approvals_router)
-app.include_router(comparisons_router)
-app.include_router(matches_router)
-app.include_router(exceptions_router)
-app.include_router(settings_router)

@@ -3,8 +3,10 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from app.approvals.routing import extract_tier_limits
 from app.approvals.schemas import (
     ApprovalBundleResponse,
     EarlierDecision,
@@ -33,13 +35,17 @@ def get_inbox(db: Session, principal: Principal) -> list[InboxItemResponse]:
             detail="Business role (Buyer or Manager) required to access inbox",
         )
 
-    # 1. Fetch pending steps assigned to this principal
+    # 1. Fetch pending steps assigned to this principal or unassigned
     steps = (
         db.query(ApprovalStep)
         .filter(
-            ApprovalStep.assigned_to == principal.id,
             ApprovalStep.status == "pending",
+            or_(
+                ApprovalStep.assigned_to == principal.id,
+                ApprovalStep.assigned_to.is_(None),
+            ),
         )
+        .order_by(ApprovalStep.created_at.asc())
         .all()
     )
 
@@ -53,12 +59,27 @@ def get_inbox(db: Session, principal: Principal) -> list[InboxItemResponse]:
                 ApprovalStep.subject_type == step.subject_type,
                 ApprovalStep.subject_id == step.subject_id,
                 ApprovalStep.sequence < step.sequence,
-                ApprovalStep.status == "pending",
+                ApprovalStep.status != "approved",
             )
             .first()
         )
         if earlier_pending:
             continue
+
+        # SOD check: same person cannot decide step 2 if they decided an earlier step
+        if step.sequence > 1:
+            earlier_decided = (
+                db.query(ApprovalStep)
+                .filter(
+                    ApprovalStep.subject_type == step.subject_type,
+                    ApprovalStep.subject_id == step.subject_id,
+                    ApprovalStep.sequence < step.sequence,
+                    ApprovalStep.decided_by == principal.id,
+                )
+                .first()
+            )
+            if earlier_decided:
+                continue
 
         if step.subject_type == "pr":
             pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == step.subject_id).first()
@@ -68,27 +89,12 @@ def get_inbox(db: Session, principal: Principal) -> list[InboxItemResponse]:
             if pr.requester_id == principal.id:
                 continue
 
-            requester = db.query(User).filter(User.id == pr.requester_id).first()
-            req_name = requester.display_name if requester else "Unknown"
-            dept_name = requester.department.name if requester and requester.department else None
-
-            items.append(
-                InboxItemResponse(
-                    step_id=step.id,
-                    subject_type="pr",
-                    subject_id=pr.id,
-                    subject_number=pr.number,
-                    title=pr.title,
-                    total_aed=pr.total_aed,
-                    requester_id=pr.requester_id,
-                    requester_name=req_name,
-                    department_id=pr.department_id,
-                    department_name=dept_name,
-                    tier=step.tier,
-                    sequence=step.sequence,
-                    created_at=step.created_at,
-                )
-            )
+            subject_total = pr.total_aed
+            subject_dept_id = pr.department_id
+            rule_snapshot = pr.rule_snapshot
+            creator_id = pr.requester_id
+            subject_number = pr.number
+            title = pr.title
         elif step.subject_type == "po":
             po = db.query(PurchaseOrder).filter(PurchaseOrder.id == step.subject_id).first()
             if not po:
@@ -97,27 +103,75 @@ def get_inbox(db: Session, principal: Principal) -> list[InboxItemResponse]:
             if po.created_by == principal.id:
                 continue
 
-            creator = db.query(User).filter(User.id == po.created_by).first()
-            creator_name = creator.display_name if creator else "Unknown"
-            dept_name = creator.department.name if creator and creator.department else None
+            subject_total = po.total
+            subject_dept_id = po.department_id
+            rule_snapshot = po.rule_snapshot
+            creator_id = po.created_by
+            subject_number = po.number
+            title = f"Purchase Order {po.number}"
+        else:
+            continue
 
-            items.append(
-                InboxItemResponse(
-                    step_id=step.id,
-                    subject_type="po",
-                    subject_id=po.id,
-                    subject_number=po.number,
-                    title=f"Purchase Order {po.number}",
-                    total_aed=po.total,
-                    requester_id=po.created_by,
-                    requester_name=creator_name,
-                    department_id=po.department_id,
-                    department_name=dept_name,
-                    tier=step.tier,
-                    sequence=step.sequence,
-                    created_at=step.created_at,
+        # Tier limits from rule_snapshot
+        tier_1_max, tier_2_max = extract_tier_limits(rule_snapshot)
+        has_mgr = "manager" in principal.roles
+        has_buyer = "buyer" in principal.roles
+
+        if not has_mgr and not has_buyer:
+            continue
+
+        if not has_mgr and has_buyer:
+            if step.tier > 1 or subject_total > tier_1_max:
+                continue
+
+        if has_mgr:
+            has_subsequent_step = (
+                db.query(ApprovalStep)
+                .filter(
+                    ApprovalStep.subject_type == step.subject_type,
+                    ApprovalStep.subject_id == step.subject_id,
+                    ApprovalStep.sequence > step.sequence,
                 )
+                .first()
+                is not None
             )
+            required_limit = (
+                tier_2_max if (step.sequence == 1 and has_subsequent_step) else subject_total
+            )
+            if principal.approval_limit_aed < required_limit:
+                continue
+
+        # Tier-2 steps: only Manager of the subject's department
+        is_tier_2 = (step.tier == 2) or (
+            tier_1_max < subject_total <= tier_2_max and step.sequence == 1
+        )
+        if is_tier_2:
+            if not has_mgr:
+                continue
+            if subject_dept_id and principal.department_id != subject_dept_id:
+                continue
+
+        requester = db.query(User).filter(User.id == creator_id).first()
+        req_name = requester.display_name if requester else "Unknown"
+        dept_name = requester.department.name if requester and requester.department else None
+
+        items.append(
+            InboxItemResponse(
+                step_id=step.id,
+                subject_type=step.subject_type,
+                subject_id=step.subject_id,
+                subject_number=subject_number,
+                title=title,
+                total_aed=subject_total,
+                requester_id=creator_id,
+                requester_name=req_name,
+                department_id=subject_dept_id,
+                department_name=dept_name,
+                tier=step.tier,
+                sequence=step.sequence,
+                created_at=step.created_at,
+            )
+        )
 
     return items
 
@@ -284,6 +338,17 @@ def record_decision(
     comment: str | None,
     principal: Principal,
 ) -> dict[str, Any]:
+    has_manager = "manager" in principal.roles
+    has_buyer = "buyer" in principal.roles
+
+    if "admin" in principal.roles and not has_manager and not has_buyer:
+        raise ProblemException(
+            status_code=403,
+            code="FORBIDDEN",
+            title="Forbidden",
+            detail="Admin without business role cannot approve",
+        )
+
     step = db.query(ApprovalStep).filter(ApprovalStep.id == step_id).first()
     if not step:
         raise ProblemException(
@@ -323,6 +388,8 @@ def record_decision(
 
     # Fetch subject and verify creator SOD
     subject_total: Decimal = Decimal("0.00")
+    subject_dept_id: uuid.UUID | None = None
+    rule_snapshot: dict[str, Any] | None = None
     pr: PurchaseRequest | None = None
     po: PurchaseOrder | None = None
 
@@ -340,6 +407,8 @@ def record_decision(
                 detail="Creator cannot approve own purchase request",
             )
         subject_total = pr.total_aed
+        subject_dept_id = pr.department_id
+        rule_snapshot = pr.rule_snapshot
     elif step.subject_type == "po":
         po = db.query(PurchaseOrder).filter(PurchaseOrder.id == step.subject_id).first()
         if not po:
@@ -354,6 +423,28 @@ def record_decision(
                 detail="Creator cannot approve own purchase order",
             )
         subject_total = po.total
+        subject_dept_id = po.department_id
+        rule_snapshot = po.rule_snapshot
+
+    # Multi-step SoD: second step of a tier-3 request needs a Manager who did NOT decide step 1
+    if step.sequence > 1:
+        earlier_decided = (
+            db.query(ApprovalStep)
+            .filter(
+                ApprovalStep.subject_type == step.subject_type,
+                ApprovalStep.subject_id == step.subject_id,
+                ApprovalStep.sequence < step.sequence,
+                ApprovalStep.decided_by == principal.id,
+            )
+            .first()
+        )
+        if earlier_decided:
+            raise ProblemException(
+                status_code=403,
+                code="SOD_BLOCKED",
+                title="Segregation of Duties Violation",
+                detail="The same person cannot decide multiple steps for the same document",
+            )
 
     # Authorization & Limits check
     has_manager = "manager" in principal.roles
@@ -367,27 +458,72 @@ def record_decision(
             detail="Admin without business role or user without spending authority cannot approve",
         )
 
+    # Tier limits from rule_snapshot (settings at submit)
+    tier_1_max, tier_2_max = extract_tier_limits(rule_snapshot)
+
     if not has_manager and has_buyer:
-        # Buyer can ONLY approve Tier 1 (<= 5000 AED)
-        if step.tier > 1 or subject_total > Decimal("5000.00"):
+        # Buyer can ONLY approve Tier 1 (<= tier_1_max AED)
+        if step.tier > 1 or subject_total > tier_1_max:
             raise ProblemException(
                 status_code=403,
                 code="ABOVE_LIMIT",
                 title="Approval Limit Exceeded",
-                detail="Buyer can only approve tier 1 items up to AED 5,000",
+                detail=f"Buyer can only approve tier 1 items up to AED {tier_1_max}",
             )
 
     if has_manager:
-        if principal.approval_limit_aed < subject_total:
+        has_subsequent_step = (
+            db.query(ApprovalStep)
+            .filter(
+                ApprovalStep.subject_type == step.subject_type,
+                ApprovalStep.subject_id == step.subject_id,
+                ApprovalStep.sequence > step.sequence,
+            )
+            .first()
+            is not None
+        )
+        required_limit = (
+            tier_2_max if (step.sequence == 1 and has_subsequent_step) else subject_total
+        )
+        if principal.approval_limit_aed < required_limit:
             raise ProblemException(
                 status_code=403,
                 code="ABOVE_LIMIT",
                 title="Approval Limit Exceeded",
                 detail=(
                     f"Approver's spending limit (AED {principal.approval_limit_aed}) "
-                    f"is below document total (AED {subject_total})"
+                    f"is below required limit (AED {required_limit})"
                 ),
             )
+
+    # Tier-2 steps: only by a Manager of the subject's department
+    is_tier_2 = (step.tier == 2) or (
+        tier_1_max < subject_total <= tier_2_max and step.sequence == 1
+    )
+    if is_tier_2:
+        if not has_manager:
+            raise ProblemException(
+                status_code=403,
+                code="FORBIDDEN",
+                title="Forbidden",
+                detail="Tier-2 steps must be approved by a Manager",
+            )
+        if subject_dept_id and principal.department_id != subject_dept_id:
+            raise ProblemException(
+                status_code=403,
+                code="DEPARTMENT_MISMATCH",
+                title="Forbidden",
+                detail="Tier-2 steps may only be decided by a Manager of the subject's department",
+            )
+
+    # If assigned_to is set, only that user may decide
+    if step.assigned_to is not None and step.assigned_to != principal.id:
+        raise ProblemException(
+            status_code=403,
+            code="NOT_ASSIGNED",
+            title="Not Assigned",
+            detail=f"Approval step is assigned to a different user ({step.assigned_to})",
+        )
 
     clean_decision = decision.strip().lower()
     if clean_decision not in ("approve", "reject"):

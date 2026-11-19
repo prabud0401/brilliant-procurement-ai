@@ -11,10 +11,50 @@ TIER_1_MAX = Decimal("5000.00")
 TIER_2_MAX = Decimal("50000.00")
 
 
-def determine_tier(total_aed: Decimal) -> int:
-    if total_aed <= TIER_1_MAX:
+def extract_tier_limits(source: dict[str, Any] | None) -> tuple[Decimal, Decimal]:
+    tier_1_max = Decimal("5000.00")
+    tier_2_max = Decimal("50000.00")
+    if not source:
+        return tier_1_max, tier_2_max
+
+    if "tier_1_max" in source and source["tier_1_max"] is not None:
+        try:
+            tier_1_max = Decimal(str(source["tier_1_max"]))
+        except Exception:
+            pass
+    if "tier_2_max" in source and source["tier_2_max"] is not None:
+        try:
+            tier_2_max = Decimal(str(source["tier_2_max"]))
+        except Exception:
+            pass
+
+    tiers = source.get("tier_thresholds") or source.get("value") or source.get("tiers")
+    if isinstance(tiers, list):
+        for t in tiers:
+            if isinstance(t, dict):
+                tier_num = t.get("tier")
+                max_amt = t.get("max_amount_aed")
+                if tier_num == 1 and max_amt is not None:
+                    try:
+                        tier_1_max = Decimal(str(max_amt))
+                    except Exception:
+                        pass
+                elif tier_num == 2 and max_amt is not None:
+                    try:
+                        tier_2_max = Decimal(str(max_amt))
+                    except Exception:
+                        pass
+    return tier_1_max, tier_2_max
+
+
+def determine_tier(
+    total_aed: Decimal,
+    tier_1_max: Decimal = Decimal("5000.00"),
+    tier_2_max: Decimal = Decimal("50000.00"),
+) -> int:
+    if total_aed <= tier_1_max:
         return 1
-    if total_aed <= TIER_2_MAX:
+    if total_aed <= tier_2_max:
         return 2
     return 3
 
@@ -36,10 +76,10 @@ def find_eligible_buyer(
     )
     if not buyers:
         return None
-    if preferred_dept_id:
-        for b in buyers:
-            if b.department_id == preferred_dept_id:
-                return b
+    try:
+        buyers.sort(key=lambda u: getattr(u, "email", ""))
+    except Exception:
+        pass
     return buyers[0]
 
 
@@ -88,19 +128,24 @@ def build_approval_steps(
     creator_id: uuid.UUID,
 ) -> tuple[list[ApprovalStep], dict[str, Any]]:
     tier_setting = get_setting(db, "thresholds")
+    tier_1_max, tier_2_max = extract_tier_limits(tier_setting)
+    tier = determine_tier(total_aed, tier_1_max=tier_1_max, tier_2_max=tier_2_max)
+
     rule_snapshot: dict[str, Any] = {
         "tier_setting_version": tier_setting.get("version", 1),
+        "tier_thresholds": tier_setting.get("value"),
+        "tier_1_max": str(tier_1_max),
+        "tier_2_max": str(tier_2_max),
         "total_aed": str(total_aed),
-        "tier": determine_tier(total_aed),
+        "tier": tier,
         "steps_created": [],
     }
 
-    tier = determine_tier(total_aed)
     steps: list[ApprovalStep] = []
 
     if tier == 1:
         # Tier 1: 1 Buyer (not creator) or 1 Manager
-        buyer = find_eligible_buyer(db, creator_id=creator_id, preferred_dept_id=department_id)
+        buyer = find_eligible_buyer(db, creator_id=creator_id)
         assigned_user = buyer
         if not assigned_user:
             assigned_user = find_eligible_manager(

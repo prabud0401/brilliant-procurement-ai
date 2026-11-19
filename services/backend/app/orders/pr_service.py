@@ -9,7 +9,7 @@ from app.approvals.routing import build_approval_steps
 from app.audit.service import record as record_audit
 from app.core.errors import ProblemException
 from app.core.models import ApprovalStep, PRLine, PurchaseRequest, User
-from app.core.policy import Principal, ScopeRule, get_effective_scope
+from app.core.policy import Principal
 from app.orders.schemas import PRCreateRequest, PRResponse, PRUpdateRequest
 
 
@@ -100,28 +100,21 @@ def list_prs(
     principal: Principal,
     status_filter: str | None = None,
 ) -> list[PRResponse]:
-    scope = get_effective_scope(principal, "pr.create_edit")
-
-    # If principal has view permissions
     query = db.query(PurchaseRequest)
 
-    if scope == ScopeRule.ALL:
+    if "buyer" in principal.roles:
         pass
-    elif scope == ScopeRule.DEPT:
-        if not principal.department_id:
-            query = query.filter(PurchaseRequest.requester_id == principal.id)
-        else:
+    elif "manager" in principal.roles:
+        if principal.department_id:
             query = query.filter(PurchaseRequest.department_id == principal.department_id)
-    elif scope == ScopeRule.OWN:
+        else:
+            query = query.filter(PurchaseRequest.requester_id == principal.id)
+    elif "requester" in principal.roles:
         query = query.filter(PurchaseRequest.requester_id == principal.id)
     else:
-        # Check if buyer/manager
-        if "buyer" in principal.roles:
-            pass
-        elif "manager" in principal.roles:
-            query = query.filter(PurchaseRequest.department_id == principal.department_id)
-        else:
-            query = query.filter(PurchaseRequest.requester_id == principal.id)
+        from sqlalchemy import false
+
+        query = query.filter(false())
 
     if status_filter:
         query = query.filter(PurchaseRequest.status == status_filter.strip().lower())
