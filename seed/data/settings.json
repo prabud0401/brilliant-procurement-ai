@@ -1,0 +1,68 @@
+{
+  "approval_tiers": {
+    "version": 1,
+    "value": [
+      {
+        "tier": 1,
+        "max_amount_aed": "5000.00",
+        "required_role": "buyer",
+        "approver_count": 1,
+        "description": "Up to AED 5,000: 1 Buyer"
+      },
+      {
+        "tier": 2,
+        "max_amount_aed": "50000.00",
+        "required_role": "manager",
+        "approver_count": 1,
+        "description": "AED 5,000 to AED 50,000: 1 Manager"
+      },
+      {
+        "tier": 3,
+        "max_amount_aed": null,
+        "required_role": "manager",
+        "approver_count": 2,
+        "description": "Above AED 50,000: 2 Managers"
+      }
+    ]
+  },
+  "three_way_match_tolerances": {
+    "version": 1,
+    "value": {
+      "invoiced_vs_received_qty_max_units": 0,
+      "received_vs_ordered_qty_max_pct": 0.0,
+      "unit_price_variance_pct": 2.0,
+      "unit_price_variance_max_aed": "50.00",
+      "total_pro_rata_variance_pct": 1.0,
+      "vat_max_difference_aed": "1.00",
+      "vendor_po_match_required": true
+    }
+  },
+  "buyer_exception_policy": {
+    "version": 1,
+    "value": {
+      "max_amount_aed": "500.00",
+      "allow_over_billed_qty": false
+    }
+  },
+  "low_confidence_threshold": {
+    "version": 1,
+    "value": 0.80
+  },
+  "retention_period_days": {
+    "version": 1,
+    "value": 365
+  },
+  "ai_daily_budget_aed": {
+    "version": 1,
+    "value": "50.00"
+  },
+  "integrations": {
+    "version": 1,
+    "value": {
+      "odoo": "mock",
+      "sharepoint": "mock",
+      "power_automate": "mock",
+      "identity": "mock"
+    }
+  }
+}

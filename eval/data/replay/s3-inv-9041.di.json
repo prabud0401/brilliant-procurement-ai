@@ -1,0 +1,1212 @@
+{
+  "status": "succeeded",
+  "createdDateTime": "2026-11-19T18:00:00Z",
+  "lastUpdatedDateTime": "2026-11-19T18:00:00Z",
+  "analyzeResult": {
+    "apiVersion": "2023-07-31",
+    "modelId": "prebuilt-invoice",
+    "stringIndexType": "textElements",
+    "content": "Oasis Facility Services\nTRN: 100000000000003\nINVOICE\nNumber: INV-9041\nDate: 2026-11-13\nCurrency: AED\nPO Number: PO-0061\nPayment Terms: Net 45\nDue Date: 2026-12-28\n1 FUR-CHR-ERG Ergonomic High-Back Mesh Office Chair with Lumbar 12 EA 580.00 6960.00\nSubtotal: 6960.00\nVAT (5%): 348.00\nTotal: 7308.00",
+    "pages": [
+      {
+        "pageNumber": 1,
+        "angle": 0.0,
+        "width": 8.5,
+        "height": 11.0,
+        "unit": "inch",
+        "words": [
+          {
+            "content": "Oasis",
+            "polygon": [
+              1.0,
+              1.0,
+              2.0,
+              1.0,
+              2.0,
+              1.2,
+              1.0,
+              1.2
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Facility",
+            "polygon": [
+              1.0,
+              1.0,
+              2.0,
+              1.0,
+              2.0,
+              1.2,
+              1.0,
+              1.2
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Services",
+            "polygon": [
+              1.0,
+              1.0,
+              2.0,
+              1.0,
+              2.0,
+              1.2,
+              1.0,
+              1.2
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "TRN:",
+            "polygon": [
+              1.0,
+              1.35,
+              2.0,
+              1.35,
+              2.0,
+              1.55,
+              1.0,
+              1.55
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "100000000000003",
+            "polygon": [
+              1.0,
+              1.35,
+              2.0,
+              1.35,
+              2.0,
+              1.55,
+              1.0,
+              1.55
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "INVOICE",
+            "polygon": [
+              1.0,
+              1.7000000000000002,
+              2.0,
+              1.7000000000000002,
+              2.0,
+              1.9000000000000001,
+              1.0,
+              1.9000000000000001
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Number:",
+            "polygon": [
+              1.0,
+              2.0500000000000003,
+              2.0,
+              2.0500000000000003,
+              2.0,
+              2.2500000000000004,
+              1.0,
+              2.2500000000000004
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "INV-9041",
+            "polygon": [
+              1.0,
+              2.0500000000000003,
+              2.0,
+              2.0500000000000003,
+              2.0,
+              2.2500000000000004,
+              1.0,
+              2.2500000000000004
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Date:",
+            "polygon": [
+              1.0,
+              2.4000000000000004,
+              2.0,
+              2.4000000000000004,
+              2.0,
+              2.6000000000000005,
+              1.0,
+              2.6000000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "2026-11-13",
+            "polygon": [
+              1.0,
+              2.4000000000000004,
+              2.0,
+              2.4000000000000004,
+              2.0,
+              2.6000000000000005,
+              1.0,
+              2.6000000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Currency:",
+            "polygon": [
+              1.0,
+              2.7500000000000004,
+              2.0,
+              2.7500000000000004,
+              2.0,
+              2.9500000000000006,
+              1.0,
+              2.9500000000000006
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "AED",
+            "polygon": [
+              1.0,
+              2.7500000000000004,
+              2.0,
+              2.7500000000000004,
+              2.0,
+              2.9500000000000006,
+              1.0,
+              2.9500000000000006
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "PO",
+            "polygon": [
+              1.0,
+              3.1000000000000005,
+              2.0,
+              3.1000000000000005,
+              2.0,
+              3.3000000000000007,
+              1.0,
+              3.3000000000000007
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Number:",
+            "polygon": [
+              1.0,
+              3.1000000000000005,
+              2.0,
+              3.1000000000000005,
+              2.0,
+              3.3000000000000007,
+              1.0,
+              3.3000000000000007
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "PO-0061",
+            "polygon": [
+              1.0,
+              3.1000000000000005,
+              2.0,
+              3.1000000000000005,
+              2.0,
+              3.3000000000000007,
+              1.0,
+              3.3000000000000007
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Payment",
+            "polygon": [
+              1.0,
+              3.4500000000000006,
+              2.0,
+              3.4500000000000006,
+              2.0,
+              3.650000000000001,
+              1.0,
+              3.650000000000001
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Terms:",
+            "polygon": [
+              1.0,
+              3.4500000000000006,
+              2.0,
+              3.4500000000000006,
+              2.0,
+              3.650000000000001,
+              1.0,
+              3.650000000000001
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Net",
+            "polygon": [
+              1.0,
+              3.4500000000000006,
+              2.0,
+              3.4500000000000006,
+              2.0,
+              3.650000000000001,
+              1.0,
+              3.650000000000001
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "45",
+            "polygon": [
+              1.0,
+              3.4500000000000006,
+              2.0,
+              3.4500000000000006,
+              2.0,
+              3.650000000000001,
+              1.0,
+              3.650000000000001
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Due",
+            "polygon": [
+              1.0,
+              3.8000000000000007,
+              2.0,
+              3.8000000000000007,
+              2.0,
+              4.000000000000001,
+              1.0,
+              4.000000000000001
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Date:",
+            "polygon": [
+              1.0,
+              3.8000000000000007,
+              2.0,
+              3.8000000000000007,
+              2.0,
+              4.000000000000001,
+              1.0,
+              4.000000000000001
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "2026-12-28",
+            "polygon": [
+              1.0,
+              3.8000000000000007,
+              2.0,
+              3.8000000000000007,
+              2.0,
+              4.000000000000001,
+              1.0,
+              4.000000000000001
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "1",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "FUR-CHR-ERG",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Ergonomic",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "High-Back",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Mesh",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Office",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Chair",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "with",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Lumbar",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "12",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "EA",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "580.00",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "6960.00",
+            "polygon": [
+              1.0,
+              4.15,
+              2.0,
+              4.15,
+              2.0,
+              4.3500000000000005,
+              1.0,
+              4.3500000000000005
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Subtotal:",
+            "polygon": [
+              1.0,
+              4.5,
+              2.0,
+              4.5,
+              2.0,
+              4.7,
+              1.0,
+              4.7
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "6960.00",
+            "polygon": [
+              1.0,
+              4.5,
+              2.0,
+              4.5,
+              2.0,
+              4.7,
+              1.0,
+              4.7
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "VAT",
+            "polygon": [
+              1.0,
+              4.85,
+              2.0,
+              4.85,
+              2.0,
+              5.05,
+              1.0,
+              5.05
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "(5%):",
+            "polygon": [
+              1.0,
+              4.85,
+              2.0,
+              4.85,
+              2.0,
+              5.05,
+              1.0,
+              5.05
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "348.00",
+            "polygon": [
+              1.0,
+              4.85,
+              2.0,
+              4.85,
+              2.0,
+              5.05,
+              1.0,
+              5.05
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "Total:",
+            "polygon": [
+              1.0,
+              5.199999999999999,
+              2.0,
+              5.199999999999999,
+              2.0,
+              5.3999999999999995,
+              1.0,
+              5.3999999999999995
+            ],
+            "confidence": 0.98
+          },
+          {
+            "content": "7308.00",
+            "polygon": [
+              1.0,
+              5.199999999999999,
+              2.0,
+              5.199999999999999,
+              2.0,
+              5.3999999999999995,
+              1.0,
+              5.3999999999999995
+            ],
+            "confidence": 0.98
+          }
+        ],
+        "lines": [
+          {
+            "content": "Oasis Facility Services",
+            "polygon": [
+              1.0,
+              1.0,
+              7.5,
+              1.0,
+              7.5,
+              1.25,
+              1.0,
+              1.25
+            ],
+            "spans": [
+              {
+                "offset": 0,
+                "length": 23
+              }
+            ]
+          },
+          {
+            "content": "TRN: 100000000000003",
+            "polygon": [
+              1.0,
+              1.35,
+              7.5,
+              1.35,
+              7.5,
+              1.6,
+              1.0,
+              1.6
+            ],
+            "spans": [
+              {
+                "offset": 24,
+                "length": 20
+              }
+            ]
+          },
+          {
+            "content": "INVOICE",
+            "polygon": [
+              1.0,
+              1.7000000000000002,
+              7.5,
+              1.7000000000000002,
+              7.5,
+              1.9500000000000002,
+              1.0,
+              1.9500000000000002
+            ],
+            "spans": [
+              {
+                "offset": 45,
+                "length": 7
+              }
+            ]
+          },
+          {
+            "content": "Number: INV-9041",
+            "polygon": [
+              1.0,
+              2.0500000000000003,
+              7.5,
+              2.0500000000000003,
+              7.5,
+              2.3000000000000003,
+              1.0,
+              2.3000000000000003
+            ],
+            "spans": [
+              {
+                "offset": 53,
+                "length": 16
+              }
+            ]
+          },
+          {
+            "content": "Date: 2026-11-13",
+            "polygon": [
+              1.0,
+              2.4000000000000004,
+              7.5,
+              2.4000000000000004,
+              7.5,
+              2.6500000000000004,
+              1.0,
+              2.6500000000000004
+            ],
+            "spans": [
+              {
+                "offset": 70,
+                "length": 16
+              }
+            ]
+          },
+          {
+            "content": "Currency: AED",
+            "polygon": [
+              1.0,
+              2.7500000000000004,
+              7.5,
+              2.7500000000000004,
+              7.5,
+              3.0000000000000004,
+              1.0,
+              3.0000000000000004
+            ],
+            "spans": [
+              {
+                "offset": 87,
+                "length": 13
+              }
+            ]
+          },
+          {
+            "content": "PO Number: PO-0061",
+            "polygon": [
+              1.0,
+              3.1000000000000005,
+              7.5,
+              3.1000000000000005,
+              7.5,
+              3.3500000000000005,
+              1.0,
+              3.3500000000000005
+            ],
+            "spans": [
+              {
+                "offset": 101,
+                "length": 18
+              }
+            ]
+          },
+          {
+            "content": "Payment Terms: Net 45",
+            "polygon": [
+              1.0,
+              3.4500000000000006,
+              7.5,
+              3.4500000000000006,
+              7.5,
+              3.7000000000000006,
+              1.0,
+              3.7000000000000006
+            ],
+            "spans": [
+              {
+                "offset": 120,
+                "length": 21
+              }
+            ]
+          },
+          {
+            "content": "Due Date: 2026-12-28",
+            "polygon": [
+              1.0,
+              3.8000000000000007,
+              7.5,
+              3.8000000000000007,
+              7.5,
+              4.050000000000001,
+              1.0,
+              4.050000000000001
+            ],
+            "spans": [
+              {
+                "offset": 142,
+                "length": 20
+              }
+            ]
+          },
+          {
+            "content": "1 FUR-CHR-ERG Ergonomic High-Back Mesh Office Chair with Lumbar 12 EA 580.00 6960.00",
+            "polygon": [
+              1.0,
+              4.15,
+              7.5,
+              4.15,
+              7.5,
+              4.4,
+              1.0,
+              4.4
+            ],
+            "spans": [
+              {
+                "offset": 163,
+                "length": 84
+              }
+            ]
+          },
+          {
+            "content": "Subtotal: 6960.00",
+            "polygon": [
+              1.0,
+              4.5,
+              7.5,
+              4.5,
+              7.5,
+              4.75,
+              1.0,
+              4.75
+            ],
+            "spans": [
+              {
+                "offset": 248,
+                "length": 17
+              }
+            ]
+          },
+          {
+            "content": "VAT (5%): 348.00",
+            "polygon": [
+              1.0,
+              4.85,
+              7.5,
+              4.85,
+              7.5,
+              5.1,
+              1.0,
+              5.1
+            ],
+            "spans": [
+              {
+                "offset": 266,
+                "length": 16
+              }
+            ]
+          },
+          {
+            "content": "Total: 7308.00",
+            "polygon": [
+              1.0,
+              5.199999999999999,
+              7.5,
+              5.199999999999999,
+              7.5,
+              5.449999999999999,
+              1.0,
+              5.449999999999999
+            ],
+            "spans": [
+              {
+                "offset": 283,
+                "length": 14
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "tables": [
+      {
+        "rowCount": 2,
+        "columnCount": 7,
+        "cells": [
+          {
+            "rowIndex": 0,
+            "columnIndex": 0,
+            "content": "#",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.0,
+                  7.0,
+                  3.0,
+                  7.0,
+                  3.2,
+                  1.0,
+                  3.2
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 0,
+            "columnIndex": 1,
+            "content": "Code",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.0,
+                  7.0,
+                  3.0,
+                  7.0,
+                  3.2,
+                  1.0,
+                  3.2
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 0,
+            "columnIndex": 2,
+            "content": "Description",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.0,
+                  7.0,
+                  3.0,
+                  7.0,
+                  3.2,
+                  1.0,
+                  3.2
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 0,
+            "columnIndex": 3,
+            "content": "Qty",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.0,
+                  7.0,
+                  3.0,
+                  7.0,
+                  3.2,
+                  1.0,
+                  3.2
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 0,
+            "columnIndex": 4,
+            "content": "UOM",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.0,
+                  7.0,
+                  3.0,
+                  7.0,
+                  3.2,
+                  1.0,
+                  3.2
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 0,
+            "columnIndex": 5,
+            "content": "Price",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.0,
+                  7.0,
+                  3.0,
+                  7.0,
+                  3.2,
+                  1.0,
+                  3.2
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 0,
+            "columnIndex": 6,
+            "content": "Total",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.0,
+                  7.0,
+                  3.0,
+                  7.0,
+                  3.2,
+                  1.0,
+                  3.2
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 1,
+            "columnIndex": 0,
+            "content": "1",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.5,
+                  7.0,
+                  3.5,
+                  7.0,
+                  3.7,
+                  1.0,
+                  3.7
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 1,
+            "columnIndex": 1,
+            "content": "FUR-CHR-ERG",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.5,
+                  7.0,
+                  3.5,
+                  7.0,
+                  3.7,
+                  1.0,
+                  3.7
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 1,
+            "columnIndex": 2,
+            "content": "Ergonomic High-Back Mesh Office Chair with Lumbar",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.5,
+                  7.0,
+                  3.5,
+                  7.0,
+                  3.7,
+                  1.0,
+                  3.7
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 1,
+            "columnIndex": 3,
+            "content": "12",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.5,
+                  7.0,
+                  3.5,
+                  7.0,
+                  3.7,
+                  1.0,
+                  3.7
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 1,
+            "columnIndex": 4,
+            "content": "EA",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.5,
+                  7.0,
+                  3.5,
+                  7.0,
+                  3.7,
+                  1.0,
+                  3.7
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 1,
+            "columnIndex": 5,
+            "content": "580.00",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.5,
+                  7.0,
+                  3.5,
+                  7.0,
+                  3.7,
+                  1.0,
+                  3.7
+                ]
+              }
+            ]
+          },
+          {
+            "rowIndex": 1,
+            "columnIndex": 6,
+            "content": "6960.00",
+            "boundingRegions": [
+              {
+                "pageNumber": 1,
+                "polygon": [
+                  1.0,
+                  3.5,
+                  7.0,
+                  3.5,
+                  7.0,
+                  3.7,
+                  1.0,
+                  3.7
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "documents": [
+      {
+        "docType": "invoice",
+        "confidence": 0.98,
+        "fields": {
+          "VendorName": {
+            "type": "string",
+            "valueString": "Oasis Facility Services",
+            "content": "Oasis Facility Services",
+            "confidence": 0.98
+          },
+          "VendorTaxId": {
+            "type": "string",
+            "valueString": "100000000000003",
+            "content": "100000000000003",
+            "confidence": 0.98
+          },
+          "InvoiceId": {
+            "type": "string",
+            "valueString": "INV-9041",
+            "content": "INV-9041",
+            "confidence": 0.98
+          },
+          "InvoiceDate": {
+            "type": "date",
+            "valueDate": "2026-11-13",
+            "content": "2026-11-13",
+            "confidence": 0.98
+          },
+          "InvoiceTotal": {
+            "type": "currency",
+            "valueCurrency": {
+              "amount": 7308.0,
+              "currencySymbol": "AED"
+            },
+            "content": "7308.00 AED",
+            "confidence": 0.98
+          },
+          "SubTotal": {
+            "type": "currency",
+            "valueCurrency": {
+              "amount": 6960.0,
+              "currencySymbol": "AED"
+            },
+            "content": "6960.00 AED",
+            "confidence": 0.98
+          },
+          "TotalTax": {
+            "type": "currency",
+            "valueCurrency": {
+              "amount": 348.0,
+              "currencySymbol": "AED"
+            },
+            "content": "348.00 AED",
+            "confidence": 0.98
+          },
+          "PurchaseOrderNumber": {
+            "type": "string",
+            "valueString": "PO-0061",
+            "content": "PO-0061",
+            "confidence": 0.98
+          }
+        }
+      }
+    ]
+  }
+}
