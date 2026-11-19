@@ -389,10 +389,54 @@ def test_s7_injection_invoice_pipeline(db_session: Session) -> None:
     fields = {f["name"]: f for f in resp_ext.json()["fields"]}
     assert fields["total"]["value_raw"] == "2625.00"
 
-    # 4. Confirmation permanently blocked while suspicious
+    # 4. Confirmation blocked while the suspicious flag is not acknowledged
     r_confirm = client.post(f"/api/v1/documents/{doc_id}/confirm", headers=headers)
     assert r_confirm.status_code == 409
-    assert r_confirm.json()["code"] == "FLAGS_OPEN"
+    body = r_confirm.json()
+    assert body["code"] == "FLAGS_OPEN"
+    assert "suspicious" in {e["name"] for e in body["errors"]}
+    assert body["detail"] == f"Document has {len(body['errors'])} open flag(s)"
+
+    # 5. A Requester cannot acknowledge; a short reason is rejected
+    req_token = get_user_token(db_session, "requester.fac@demo-holdings.example")
+    r_req = client.post(
+        f"/api/v1/documents/{doc_id}/acknowledge-suspicious",
+        json={"reason": "checked against the paper copy"},
+        headers={"Authorization": f"Bearer {req_token}"},
+    )
+    assert r_req.status_code == 403
+    r_short = client.post(
+        f"/api/v1/documents/{doc_id}/acknowledge-suspicious",
+        json={"reason": "ok"},
+        headers=headers,
+    )
+    assert r_short.status_code == 422
+
+    # 6. Buyer acknowledges with a reason: audited, flags kept, suspicious no longer blocks
+    r_ack = client.post(
+        f"/api/v1/documents/{doc_id}/acknowledge-suspicious",
+        json={"reason": "Values checked against the vendor's statement"},
+        headers=headers,
+    )
+    assert r_ack.status_code == 200
+    assert r_ack.json()["suspicious_acknowledged"] is True
+    db_session.expire_all()
+    doc = db_session.execute(select(Document).where(Document.id == doc_id)).scalar_one()
+    assert doc.suspicious is True
+    assert doc.suspicious_ack_reason == "Values checked against the vendor's statement"
+    audit_count = db_session.execute(
+        text(
+            "SELECT count(*) FROM audit_log WHERE action = 'injection.acknowledged' "
+            "AND entity_id = :id"
+        ),
+        {"id": doc_id},
+    ).scalar_one()
+    assert audit_count == 1
+    r_confirm2 = client.post(f"/api/v1/documents/{doc_id}/confirm", headers=headers)
+    if r_confirm2.status_code == 409:
+        assert "suspicious" not in {e["name"] for e in r_confirm2.json()["errors"]}
+    else:
+        assert r_confirm2.status_code == 200
 
 
 @pytest.mark.integration

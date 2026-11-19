@@ -423,10 +423,17 @@ def confirm_document(
                     }
                 )
 
-    if open_fields or doc.suspicious or (doc.duplicate_of and not doc.duplicate_cleared_reason):
+    suspicious_open = doc.suspicious and not doc.suspicious_ack_reason
+    duplicate_open = bool(doc.duplicate_of and not doc.duplicate_cleared_reason)
+    if open_fields or suspicious_open or duplicate_open:
         extra_errors: list[dict[str, Any]] = list(open_fields)
-        if doc.suspicious:
-            extra_errors.append({"name": "suspicious", "message": "Document flagged as suspicious"})
+        if suspicious_open:
+            extra_errors.append(
+                {
+                    "name": "suspicious",
+                    "message": "Document flagged as suspicious; acknowledge it before confirming",
+                }
+            )
         if doc.duplicate_of and not doc.duplicate_cleared_reason:
             extra_errors.append(
                 {"name": "duplicate_of", "message": f"Possible duplicate of {doc.duplicate_of}"}
@@ -435,7 +442,7 @@ def confirm_document(
             status_code=status.HTTP_409_CONFLICT,
             code="FLAGS_OPEN",
             title="Cannot Confirm Document",
-            detail=f"Document has {len(open_fields)} open flag(s)",
+            detail=f"Document has {len(extra_errors)} open flag(s)",
             errors=extra_errors,
         )
 
@@ -554,3 +561,57 @@ def clear_duplicate_flag(
     db.commit()
 
     return {"document_id": doc.id, "duplicate_cleared": True, "reason": clean_reason}
+
+
+@router.post("/{id}/acknowledge-suspicious")
+def acknowledge_suspicious(
+    id: uuid.UUID,
+    req: NotDuplicateRequest,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require("document.review")),
+) -> dict[str, Any]:
+    """Buyer acknowledges a "Suspicious content" flag with a recorded reason.
+
+    The injection flags stay on record; the acknowledgement only lifts the confirm block
+    after a person has checked the extracted values against the document (design 7.5).
+    """
+    doc = db.execute(select(Document).where(Document.id == id)).scalar_one_or_none()
+    if not doc:
+        raise ProblemException(
+            status_code=404,
+            code="DOCUMENT_NOT_FOUND",
+            title="Document Not Found",
+            detail=f"Document {id} not found",
+        )
+    if not doc.suspicious:
+        raise ProblemException(
+            status_code=409,
+            code="NOT_SUSPICIOUS",
+            title="Document Not Flagged",
+            detail="Document is not flagged as suspicious",
+        )
+
+    clean_reason = req.reason.strip()
+    if len(clean_reason) < 10:
+        raise ProblemException(
+            status_code=422,
+            code="REASON_TOO_SHORT",
+            title="Reason Too Short",
+            detail="Acknowledgement reason must be at least 10 characters",
+        )
+
+    before_val = doc.suspicious_ack_reason
+    doc.suspicious_ack_reason = clean_reason
+    record_audit(
+        session=db,
+        actor=principal,
+        action="injection.acknowledged",
+        entity_type="document",
+        entity_id=doc.id,
+        reason=clean_reason,
+        before={"suspicious_ack_reason": before_val},
+        after={"suspicious_ack_reason": clean_reason},
+    )
+    db.commit()
+
+    return {"document_id": doc.id, "suspicious_acknowledged": True, "reason": clean_reason}

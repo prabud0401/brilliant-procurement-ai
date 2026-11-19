@@ -8,6 +8,12 @@ from typing import Protocol, runtime_checkable
 
 from app.core.config import settings
 
+# Fixed account key of the local Azurite storage emulator. Microsoft publishes it in the
+# Azurite docs; it only works against the emulator and is not a secret.
+_AZURITE_DEV_KEY = (
+    "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
+)
+
 logger = logging.getLogger("documents.storage")
 
 
@@ -71,16 +77,8 @@ class AzureBlobStorage:
             m = re.search(r"DevelopmentStorageProxyUri=([^;]+)", connection_string)
             if m:
                 proxy = m.group(1).rstrip("/")
-                import base64
-
-                dev_key = base64.b64encode(
-                    bytes.fromhex(
-                        "11bcbcbdd334db134e72a165a94c093cb96612d9420d7275394cc54f9d2e4916"
-                        "7a205b2e16ad94544ac2cf823ab6afcad526453d33adaff2811c17a4b2818c1b"
-                    )
-                ).decode("ascii")
                 connection_string = (
-                    f"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey={dev_key};"
+                    f"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey={_AZURITE_DEV_KEY};"
                     f"BlobEndpoint={proxy}/devstoreaccount1;"
                 )
 

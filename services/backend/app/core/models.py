@@ -314,6 +314,7 @@ class Document(Base):
     )
     duplicate_cleared_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     suspicious: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    suspicious_ack_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     retain_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     created_by: Mapped[uuid.UUID | None] = mapped_column(nullable=True)

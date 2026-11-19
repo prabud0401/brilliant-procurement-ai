@@ -231,3 +231,17 @@ content-type: application/problem+json
 ```bash
 docker compose down -v
 ```
+
+### Suspicious documents
+
+A document flagged "Suspicious content" cannot be confirmed until a Buyer has checked the
+extracted values and acknowledged the flag with a reason (at least 10 characters):
+
+```bash
+curl -s -X POST localhost:8000/api/v1/documents/$DOC_ID/acknowledge-suspicious \
+  -H "Authorization: Bearer $TOKEN" -H 'content-type: application/json' \
+  -d '{"reason":"Values checked against the vendor statement"}'
+```
+
+The injection flags stay on record, the acknowledgement is written to the audit log
+(`injection.acknowledged`), and Requesters get 403.

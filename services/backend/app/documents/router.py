@@ -51,6 +51,7 @@ class DocumentResponse(BaseModel):
     duplicate_of: uuid.UUID | None
     duplicate_cleared_reason: str | None
     suspicious: bool
+    suspicious_ack_reason: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -274,6 +275,7 @@ def get_document(
         duplicate_of=doc.duplicate_of,
         duplicate_cleared_reason=doc.duplicate_cleared_reason,
         suspicious=doc.suspicious,
+        suspicious_ack_reason=doc.suspicious_ack_reason,
         created_at=doc.created_at,
         updated_at=doc.updated_at,
     )
