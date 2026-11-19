@@ -10,8 +10,10 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.approvals.router import router as approvals_router
 from app.audit.router import router as audit_router
 from app.audit.service import record as record_audit
+from app.comparison.router import router as comparisons_router
 from app.core.config import settings
 from app.core.database import engine, get_db
 from app.core.errors import (
@@ -27,6 +29,9 @@ from app.core.policy import Principal, get_current_principal
 from app.core.security import create_access_token, verify_password
 from app.documents.router import router as documents_router
 from app.extraction.router import router as extraction_router
+from app.matching.router import exceptions_router, matches_router
+from app.orders.router import po_router, pr_router
+from app.settings_api.router import router as settings_router
 
 # Simple in-memory IP rate limiter for login
 LOGIN_ATTEMPTS: dict[str, list[float]] = defaultdict(list)
@@ -188,6 +193,13 @@ api_v1.include_router(auth_router)
 api_v1.include_router(audit_router)
 api_v1.include_router(documents_router)
 api_v1.include_router(extraction_router)
+api_v1.include_router(pr_router)
+api_v1.include_router(po_router)
+api_v1.include_router(approvals_router)
+api_v1.include_router(comparisons_router)
+api_v1.include_router(matches_router)
+api_v1.include_router(exceptions_router)
+api_v1.include_router(settings_router)
 
 
 @api_v1.get("/me", response_model=MeResponse, tags=["auth"])
