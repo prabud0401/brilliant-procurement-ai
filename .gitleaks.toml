@@ -1,0 +1,13 @@
+# Extends the default gitleaks rules. The allowlist covers test-only dummy literals
+# (no real credentials), so a full-history scan stays clean.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Test-only dummy values in unit/integration tests"
+regexTarget = "match"
+regexes = [
+  '''valid-secret-with-at-least-32-chars-long''',
+  '''idem-key-\d+''',
+]
+paths = ['''services/backend/tests/.*''']
