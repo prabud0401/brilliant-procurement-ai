@@ -16,6 +16,10 @@ dependencies = [
     "pyjwt[crypto]>=2.9.0",
     "argon2-cffi>=23.1.0",
     "python-multipart>=0.0.9",
+    "azure-storage-blob>=12.31.1",
+    "pypdf>=7.1.1",
+    "openai>=3.55.1",
+    "azure-ai-documentintelligence>=1.0.2",
 ]
 
 [dependency-groups]

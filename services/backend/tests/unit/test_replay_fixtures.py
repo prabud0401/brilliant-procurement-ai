@@ -7,8 +7,18 @@ from pathlib import Path
 
 import pytest
 
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-_EVAL_DATA_DIR = Path("eval/data") if Path("eval/data").exists() else _REPO_ROOT / "eval" / "data"
+
+def _get_eval_data_dir() -> Path:
+    if Path("eval/data").is_dir():
+        return Path("eval/data")
+    for parent in Path(__file__).resolve().parents:
+        cand = parent / "eval" / "data"
+        if cand.is_dir():
+            return cand
+    return Path("eval/data")
+
+
+_EVAL_DATA_DIR = _get_eval_data_dir()
 
 
 @pytest.mark.unit
@@ -97,3 +107,26 @@ def test_openai_fixture_structure_and_extraction_schema() -> None:
         assert "document_date" in header and "value" in header["document_date"]
         assert "total" in header and "value" in header["total"]
         assert "lines" in parsed and isinstance(parsed["lines"], list)
+
+
+@pytest.mark.unit
+def test_replay_provider_lazy_resolution_and_missing_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Replay provider resolves directory lazily and raises clear error when missing."""
+    from app.ai.providers.replay import ReplayDocumentAnalyzer, ReplayLlmClient
+    from app.core.config import settings
+
+    # 1. Lazy: instantiating analyzer/client does not check or fail
+    analyzer = ReplayDocumentAnalyzer()
+    client = ReplayLlmClient()
+
+    # 2. When directory exists, replay_dir resolves
+    assert analyzer.replay_dir.exists()
+    assert client.replay_dir.exists()
+
+    # 3. When REPLAY_FIXTURES_DIR points to missing directory, raises clear FileNotFoundError
+    monkeypatch.setattr(settings, "REPLAY_FIXTURES_DIR", "/nonexistent/replay/fixtures/dir")
+    with pytest.raises(FileNotFoundError, match="Configured REPLAY_FIXTURES_DIR does not exist"):
+        _ = analyzer.replay_dir
+
+    with pytest.raises(FileNotFoundError, match="Configured REPLAY_FIXTURES_DIR does not exist"):
+        _ = client.replay_dir

@@ -126,4 +126,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build backend Docker image
-        run: docker build -t pda-backend:ci services/backend
+        run: docker build -t pda-backend:ci -f services/backend/Dockerfile .
