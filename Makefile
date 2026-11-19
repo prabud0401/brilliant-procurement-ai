@@ -1,4 +1,4 @@
-.PHONY: env up down logs migrate seed datagen lint fmt test test-int
+.PHONY: env up down logs migrate seed datagen lint fmt test test-int web-lint web-test web-e2e
 
 SHELL := /bin/bash
 
@@ -60,3 +60,12 @@ test:
 
 test-int:
 	cd services/backend && uv run pytest -m "integration"
+
+web-lint:
+	cd apps/web && npm run lint && npm run typecheck
+
+web-test:
+	cd apps/web && npm run test
+
+web-e2e:
+	cd apps/web && WEB_BASE_URL=$${WEB_BASE_URL:-http://localhost:3000} npm run e2e

@@ -25,3 +25,4 @@ eval/data/generated/
 azurite-data/
 playwright-report/
 test-results/
+*.tsbuildinfo
