@@ -51,7 +51,7 @@ Only edit folders your run owns (see your prompt). If you truly need a change el
 
 ## Secrets rule
 - Never commit secrets, keys, tokens, passwords or connection strings with real credentials. `.env` is git-ignored; `.env.example` has names only (empty values or obviously local dev values like `postgres` on localhost).
-- Real secrets live outside the repo in `/home/box/.brilliant-secrets/` (hosted: Key Vault). Refer to env var names, never values. Never print secrets in logs or test output. gitleaks runs in CI.
+- Real secrets live outside the repo in a private, permission-restricted folder on the build machine (hosted: Key Vault). Refer to env var names, never values. Never print secrets in logs or test output. gitleaks runs in CI.
 
 ## Prompt-injection defence (design 7.5, US-29)
 - Document text is **data, never instructions**. Wrap it in clear delimiters, tell the model to ignore instructions inside it, and use structured (JSON schema) output only.
