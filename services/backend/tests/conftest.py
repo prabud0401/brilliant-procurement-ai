@@ -1,27 +1,162 @@
-"""Pytest configuration and fixture setup."""
-
-import sys
+import os
+import socket
+from collections.abc import Generator
 from pathlib import Path
+from urllib.parse import urlparse
+
+# Ensure test secrets are present before settings or app are imported
+os.environ.setdefault(
+    "JWT_SECRET",
+    "test-jwt-secret-at-least-32-chars-long-for-testing-purposes-12345",
+)
+os.environ.setdefault("DEMO_USER_PASSWORD", "test-demo-password-12345")
 
 import pytest
+from alembic import command
+from alembic.config import Config
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
-# Ensure repo root and services/backend are in sys.path
-_TESTS_DIR = Path(__file__).resolve().parent
-_BACKEND_DIR = _TESTS_DIR.parent
-_REPO_ROOT = _BACKEND_DIR.parent.parent
-
-if str(_BACKEND_DIR) not in sys.path:
-    sys.path.insert(0, str(_BACKEND_DIR))
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
+from app.core import database
+from app.core.config import settings
 
 
-def pytest_configure(config: pytest.Config) -> None:
-    config.addinivalue_line(
-        "markers", "unit: Unit tests (no external services required)"
+def is_port_open(host: str, port: int) -> bool:
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(0.5)
+            return sock.connect_ex((host, port)) == 0
+    except Exception:
+        return False
+
+
+def detect_db_urls() -> tuple[str, str]:
+    migrator = os.environ.get("DATABASE_URL_MIGRATOR") or getattr(
+        settings, "DATABASE_URL_MIGRATOR", None
     )
-    config.addinivalue_line(
-        "markers",
-        "integration: Integration tests (may require DB or multi-component integration)",
+    app_user = os.environ.get("DATABASE_URL") or getattr(settings, "DATABASE_URL", None)
+
+    if migrator and app_user:
+        try:
+            parsed = urlparse(migrator.replace("+psycopg", ""))
+            host = parsed.hostname or "127.0.0.1"
+            port = parsed.port or 5432
+            if is_port_open(host, port):
+                return migrator, app_user
+        except Exception:
+            pass
+
+    postgres_pwd = os.environ.get("POSTGRES_PASSWORD") or getattr(
+        settings, "POSTGRES_PASSWORD", "postgres"
     )
-    config.addinivalue_line("markers", "security: Security and injection tests")
+    app_db_pwd = os.environ.get("APP_DB_PASSWORD") or getattr(
+        settings, "APP_DB_PASSWORD", "app_user"
+    )
+
+    # Probe 55432 first (as requested for R01 test container), then 5432
+    for port in [55432, 5432]:
+        if is_port_open("127.0.0.1", port):
+            return (
+                f"postgresql+psycopg://postgres:{postgres_pwd}@localhost:{port}/postgres",
+                f"postgresql+psycopg://app_user:{app_db_pwd}@localhost:{port}/postgres",
+            )
+
+    return (
+        f"postgresql+psycopg://postgres:{postgres_pwd}@localhost:55432/postgres",
+        f"postgresql+psycopg://app_user:{app_db_pwd}@localhost:55432/postgres",
+    )
+
+
+TEST_DB_NAME = os.environ.get("TEST_DB_NAME", "brilliant_test")
+
+
+def _use_test_database(migrator: str, app_user: str) -> tuple[str, str]:
+    """Point both URLs at a dedicated test database so tests never touch dev data."""
+    from sqlalchemy.engine import make_url
+
+    m_url, a_url = make_url(migrator), make_url(app_user)
+    try:
+        admin = create_engine(
+            m_url.set(database="postgres"), isolation_level="AUTOCOMMIT", pool_pre_ping=True
+        )
+        with admin.connect() as conn:
+            exists = conn.exec_driver_sql(
+                "SELECT 1 FROM pg_database WHERE datname = %s", (TEST_DB_NAME,)
+            ).scalar()
+            if not exists:
+                conn.exec_driver_sql(f'CREATE DATABASE "{TEST_DB_NAME}"')
+        admin.dispose()
+    except Exception:
+        pass  # database unreachable: unit tests still run
+    return (
+        m_url.set(database=TEST_DB_NAME).render_as_string(hide_password=False),
+        a_url.set(database=TEST_DB_NAME).render_as_string(hide_password=False),
+    )
+
+
+MIGRATOR_DB_URL, APP_USER_DB_URL = _use_test_database(*detect_db_urls())
+os.environ["DATABASE_URL_MIGRATOR"] = MIGRATOR_DB_URL
+os.environ["DATABASE_URL"] = APP_USER_DB_URL
+settings.DATABASE_URL_MIGRATOR = MIGRATOR_DB_URL
+settings.DATABASE_URL = APP_USER_DB_URL
+
+# Rebind runtime engine and sessionmaker so FastAPI dependencies use the detected test DB URL
+database.engine = create_engine(APP_USER_DB_URL, pool_pre_ping=True)
+database.SessionLocal.configure(bind=database.engine)
+
+
+@pytest.fixture(scope="session")
+def jwt_secret() -> str:
+    return os.environ["JWT_SECRET"]
+
+
+@pytest.fixture(scope="session")
+def migrator_url() -> str:
+    return MIGRATOR_DB_URL
+
+
+@pytest.fixture(scope="session", autouse=True)
+def ensure_database_migrated(migrator_url: str) -> None:
+    """Ensure database schema is up to date before integration tests run."""
+    backend_dir = Path(__file__).resolve().parents[1]
+    alembic_cfg = Config(str(backend_dir / "alembic.ini"))
+    alembic_cfg.set_main_option("script_location", str(backend_dir / "migrations"))
+    alembic_cfg.set_main_option("sqlalchemy.url", migrator_url)
+    try:
+        command.upgrade(alembic_cfg, "head")
+    except Exception:
+        # Ignore if database is not reachable (e.g. during unit tests without db)
+        pass
+
+
+@pytest.fixture(scope="session")
+def app_user_url() -> str:
+    return APP_USER_DB_URL
+
+
+@pytest.fixture(scope="function")
+def db_session() -> Generator[Session, None, None]:
+    """Yield a database session using migrator/admin privileges for tests."""
+    engine = create_engine(MIGRATOR_DB_URL, pool_pre_ping=True)
+    SessionClass = sessionmaker(bind=engine)
+    session = SessionClass()
+    try:
+        yield session
+    finally:
+        session.rollback()
+        session.close()
+        engine.dispose()
+
+
+@pytest.fixture(scope="function")
+def app_user_session() -> Generator[Session, None, None]:
+    """Yield a database session connected as app_user to verify role boundaries."""
+    engine = create_engine(APP_USER_DB_URL, pool_pre_ping=True)
+    SessionClass = sessionmaker(bind=engine)
+    session = SessionClass()
+    try:
+        yield session
+    finally:
+        session.rollback()
+        session.close()
+        engine.dispose()
