@@ -1,0 +1,86 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    restart: unless-stopped
+    command: azurite-blob --blobHost 0.0.0.0
+    ports:
+      - "${AZURITE_PORT:-10000}:10000"
+
+  api:
+    build:
+      context: ./services/backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DB_PASSWORD=${APP_DB_PASSWORD:-app_user}
+      - DATABASE_URL=${CONTAINER_DATABASE_URL:-postgresql+psycopg://app_user:${APP_DB_PASSWORD:-app_user}@db:5432/${POSTGRES_DB:-postgres}}
+      - DATABASE_URL_MIGRATOR=${CONTAINER_DATABASE_URL_MIGRATOR:-postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-postgres}}
+      - JWT_SECRET=${JWT_SECRET:?run make env}
+      - JWT_ISSUER=${JWT_ISSUER:-brilliant-procurement-ai}
+      - JWT_TTL_MINUTES=${JWT_TTL_MINUTES:-60}
+      - DEMO_USER_PASSWORD=${DEMO_USER_PASSWORD:?run make env}
+      - BLOB_CONNECTION_STRING=${CONTAINER_BLOB_CONNECTION_STRING:-UseDevelopmentStorage=true;DevelopmentStorageProxyUri=http://azurite:10000}
+      - BLOB_CONTAINER=${BLOB_CONTAINER:-documents}
+      - AI_PROVIDER=${AI_PROVIDER:-mock}
+      - INTEGRATIONS_MODE=${INTEGRATIONS_MODE:-mock}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      azurite:
+        condition: service_started
+    command: sh -c "DATABASE_URL=$$DATABASE_URL_MIGRATOR alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  worker:
+    build:
+      context: ./services/backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DB_PASSWORD=${APP_DB_PASSWORD:-app_user}
+      - DATABASE_URL=${CONTAINER_DATABASE_URL:-postgresql+psycopg://app_user:${APP_DB_PASSWORD:-app_user}@db:5432/${POSTGRES_DB:-postgres}}
+      - DATABASE_URL_MIGRATOR=${CONTAINER_DATABASE_URL_MIGRATOR:-postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-postgres}}
+      - JWT_SECRET=${JWT_SECRET:?run make env}
+      - JWT_ISSUER=${JWT_ISSUER:-brilliant-procurement-ai}
+      - JWT_TTL_MINUTES=${JWT_TTL_MINUTES:-60}
+      - DEMO_USER_PASSWORD=${DEMO_USER_PASSWORD:?run make env}
+      - BLOB_CONNECTION_STRING=${CONTAINER_BLOB_CONNECTION_STRING:-UseDevelopmentStorage=true;DevelopmentStorageProxyUri=http://azurite:10000}
+      - BLOB_CONTAINER=${BLOB_CONTAINER:-documents}
+      - AI_PROVIDER=${AI_PROVIDER:-mock}
+      - INTEGRATIONS_MODE=${INTEGRATIONS_MODE:-mock}
+    depends_on:
+      db:
+        condition: service_healthy
+      api:
+        condition: service_started
+    command: python -m app.worker_main
+
+  web:
+    profiles: ["web"]
+    build:
+      context: ./apps/web
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
