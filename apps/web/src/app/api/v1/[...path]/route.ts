@@ -17,7 +17,20 @@ async function handleProxy(
   context: RouteContext
 ): Promise<NextResponse> {
   const { path } = await context.params;
-  const pathStr = path.join("/");
+  // Refuse dot segments or encoded slashes so the proxy can only reach /api/v1/* on the API.
+  if (path.some((seg) => seg === "." || seg === ".." || seg.includes("/") || seg.includes("\\"))) {
+    return NextResponse.json(
+      {
+        type: "https://pda.example/errors/not-found",
+        title: "Not Found",
+        status: 404,
+        code: "NOT_FOUND",
+        detail: "Unknown API path.",
+      },
+      { status: 404, headers: { "Content-Type": "application/problem+json" } }
+    );
+  }
+  const pathStr = path.map((seg) => encodeURIComponent(seg)).join("/");
 
   // 1. Intercept auth/login to ensure access token is set in httpOnly cookie and never returned in JSON
   if (pathStr === "auth/login" && method === "POST") {
@@ -150,10 +163,11 @@ async function handleProxy(
   }
 
   // 7. Extract body if method allows
-  let body: BodyInit | undefined = undefined;
+  // Binary-safe: multipart uploads (PDF/images) must pass through byte for byte.
+  let body: ArrayBuffer | undefined = undefined;
   if (!["GET", "HEAD"].includes(method.toUpperCase())) {
     try {
-      body = await request.text();
+      body = await request.arrayBuffer();
     } catch {
       body = undefined;
     }
@@ -174,8 +188,13 @@ async function handleProxy(
     if (respContentType) {
       respHeaders["Content-Type"] = respContentType;
     }
+    for (const h of ["content-disposition", "cache-control", "retry-after", "etag"]) {
+      const v = apiResponse.headers.get(h);
+      if (v) respHeaders[h] = v;
+    }
 
-    const responseBody = await apiResponse.text();
+    // Binary-safe: document files (PDF pages) are returned unchanged.
+    const responseBody = await apiResponse.arrayBuffer();
 
     return new NextResponse(responseBody, {
       status: apiResponse.status,
@@ -187,7 +206,7 @@ async function handleProxy(
       title: "API Unreachable",
       status: 503,
       code: "API_UNAVAILABLE",
-      detail: `Backend procurement API is currently unreachable at ${apiBaseUrl}. Please ensure the service is running.`,
+      detail: "The procurement API is currently unreachable. Please try again shortly.",
       request_id: requestId,
     };
 

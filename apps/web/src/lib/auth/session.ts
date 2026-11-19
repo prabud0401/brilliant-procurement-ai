@@ -12,15 +12,13 @@ export function getSessionCookieOptions(hostHeader?: string | null): {
   maxAge: number;
 } {
   const isProd = process.env.NODE_ENV === "production";
-  const isLocalhost =
-    !hostHeader ||
-    hostHeader.startsWith("localhost") ||
-    hostHeader.startsWith("127.0.0.1") ||
-    hostHeader.includes(":3000") ||
-    hostHeader.includes(":3015");
+  const hostname = (hostHeader || "").split(":")[0].toLowerCase();
+  const isLocalhost = !hostname || hostname === "localhost" || hostname === "127.0.0.1";
 
-  // In production outside localhost dev, ensure secure flag is set
-  const secure = isProd && !isLocalhost;
+  // COOKIE_SECURE=true|false overrides; otherwise Secure in production except on localhost.
+  const override = process.env.COOKIE_SECURE;
+  const secure =
+    override === "true" ? true : override === "false" ? false : isProd && !isLocalhost;
 
   return {
     httpOnly: true,

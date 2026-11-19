@@ -4,6 +4,10 @@
 useDefault = true
 
 [[allowlists]]
+description = "Ignore local uncommitted env file"
+paths = ['''\.env$''', '''^\.env$''']
+
+[[allowlists]]
 description = "Test-only dummy values in unit/integration tests"
 regexTarget = "match"
 regexes = [
@@ -15,3 +19,8 @@ paths = ['''services/backend/tests/.*''']
 [[allowlists]]
 description = "Next.js local build output"
 paths = ['''apps/web/\.next/.*''']
+
+[[allowlists]]
+description = "Public, documented Azurite storage emulator key (works only against the local emulator)"
+regexTarget = "match"
+regexes = ['''Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==''']

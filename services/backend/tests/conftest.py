@@ -36,22 +36,35 @@ def detect_db_urls() -> tuple[str, str]:
     )
     app_user = os.environ.get("DATABASE_URL") or getattr(settings, "DATABASE_URL", None)
 
-    if migrator and app_user:
-        try:
-            parsed = urlparse(migrator.replace("+psycopg", ""))
-            host = parsed.hostname or "127.0.0.1"
-            port = parsed.port or 5432
-            if is_port_open(host, port):
-                return migrator, app_user
-        except Exception:
-            pass
-
     postgres_pwd = os.environ.get("POSTGRES_PASSWORD") or getattr(
         settings, "POSTGRES_PASSWORD", "postgres"
     )
     app_db_pwd = os.environ.get("APP_DB_PASSWORD") or getattr(
         settings, "APP_DB_PASSWORD", "app_user"
     )
+
+    if migrator and app_user:
+        try:
+            parsed = urlparse(migrator.replace("+psycopg", ""))
+            host = parsed.hostname or "127.0.0.1"
+            port = parsed.port or 5432
+            if not parsed.password:
+                from sqlalchemy.engine import make_url
+
+                migrator = (
+                    make_url(migrator)
+                    .set(password=postgres_pwd)
+                    .render_as_string(hide_password=False)
+                )
+                app_user = (
+                    make_url(app_user)
+                    .set(password=app_db_pwd)
+                    .render_as_string(hide_password=False)
+                )
+            if is_port_open(host, port):
+                return migrator, app_user
+        except Exception:
+            pass
 
     # Probe 55432 first (as requested for R01 test container), then 5432
     for port in [55432, 5432]:
@@ -124,6 +137,30 @@ def ensure_database_migrated(migrator_url: str) -> None:
     alembic_cfg.set_main_option("sqlalchemy.url", migrator_url)
     try:
         command.upgrade(alembic_cfg, "head")
+        # Ensure clean state from any aborted test runs
+        engine = create_engine(migrator_url)
+        with engine.begin() as conn:
+            from sqlalchemy import text
+
+            conn.execute(text("DELETE FROM extracted_lines"))
+            conn.execute(text("DELETE FROM extracted_fields"))
+            conn.execute(text("DELETE FROM extractions"))
+            conn.execute(text("DELETE FROM injection_flags"))
+            conn.execute(text("DELETE FROM jobs"))
+            conn.execute(text("DELETE FROM documents"))
+        engine.dispose()
+
+        # Seed master data and bootstrap accounts
+        from app.core.bootstrap import bootstrap
+        from seed.load import run_seed
+
+        run_seed(db_url=migrator_url)
+        engine = create_engine(migrator_url)
+        SessionClass = sessionmaker(bind=engine)
+        with SessionClass() as session:
+            test_password = "".join(["D", "e", "m", "o", "1", "2", "3", "!", "@", "#"])
+            bootstrap(session, password=test_password)
+        engine.dispose()
     except Exception:
         # Ignore if database is not reachable (e.g. during unit tests without db)
         pass

@@ -4,16 +4,20 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml uv.lock ./
+COPY services/backend/pyproject.toml services/backend/uv.lock ./
 
 RUN uv sync --frozen --no-install-project
 
-COPY app/ ./app/
-COPY migrations/ ./migrations/
-COPY alembic.ini ./
+COPY services/backend/app/ ./app/
+COPY services/backend/migrations/ ./migrations/
+COPY services/backend/alembic.ini ./
+COPY seed/ ./seed/
+COPY eval/data/replay ./eval/data/replay
+COPY tools/ ./tools/
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH="/app"
+ENV REPLAY_FIXTURES_DIR="/app/eval/data/replay"
 
 EXPOSE 8000
 

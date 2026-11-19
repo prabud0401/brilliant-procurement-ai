@@ -26,6 +26,7 @@ describe("Session & Cookie Security Helpers", () => {
         expect(opts127.secure).toBe(false);
 
         const opts3015 = getSessionCookieOptions("localhost:3015");
+        expect(getSessionCookieOptions("demo.example.com:3000").secure).toBe(true);
         expect(opts3015.secure).toBe(false);
       } finally {
         (process.env as Record<string, string | undefined>).NODE_ENV = originalEnv;

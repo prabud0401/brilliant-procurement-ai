@@ -62,6 +62,10 @@ def process_single_job(session: Session) -> bool:
             logger.info("Executing ping job %s: payload=%s", job.id, job.payload)
             job.status = "completed"
             job.last_error = None
+        elif job.type == "extract":
+            from app.worker.job_runner import handle_extract_job
+
+            handle_extract_job(session, job)
         else:
             logger.warning("Unknown job type %s for job %s", job.type, job.id)
             job.status = "failed"
