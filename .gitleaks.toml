@@ -11,3 +11,7 @@ regexes = [
   '''idem-key-\d+''',
 ]
 paths = ['''services/backend/tests/.*''']
+
+[[allowlists]]
+description = "Next.js local build output"
+paths = ['''apps/web/\.next/.*''']
