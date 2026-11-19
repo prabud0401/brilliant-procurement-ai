@@ -6,6 +6,7 @@ Create Date: 2026-11-19 22:30:00.000000
 
 """
 
+import os
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -679,12 +680,35 @@ def upgrade() -> None:
     )
 
     # 4. Roles and permissions
+    app_env = os.environ.get("APP_ENV", "local").lower()
+    app_db_password = os.environ.get("APP_DB_PASSWORD")
+    if not app_db_password:
+        try:
+            from app.core.config import settings
+
+            app_db_password = settings.APP_DB_PASSWORD
+        except Exception:
+            pass
+
+    if not app_db_password:
+        if app_env in ("local", "test"):
+            app_db_password = "app_user"
+        else:
+            raise ValueError(
+                "APP_DB_PASSWORD environment variable must be set for migrations "
+                f"in '{app_env}' environment."
+            )
+
+    escaped_password = app_db_password.replace("'", "''")
+
     op.execute(
-        """
+        f"""
         DO $$
         BEGIN
             IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'app_user') THEN
-                CREATE ROLE app_user WITH LOGIN PASSWORD 'app_user';
+                CREATE ROLE app_user WITH LOGIN PASSWORD '{escaped_password}';
+            ELSE
+                ALTER ROLE app_user WITH PASSWORD '{escaped_password}';
             END IF;
         END
         $$;

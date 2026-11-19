@@ -81,10 +81,3 @@ def test_bootstrap_idempotent_and_roles_login(db_session: Session) -> None:
         assert me_data["department_name"] == expected_dept
         assert me_data["is_demo"] is True
         assert me_data["active"] is True
-
-        # Demo login check
-        demo_resp = client.post(
-            "/api/v1/auth/demo-login",
-            json={"username": email},
-        )
-        assert demo_resp.status_code == 200

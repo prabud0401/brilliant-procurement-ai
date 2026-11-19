@@ -19,7 +19,7 @@ Status: Phase 4 (Build) in progress. All data in this repository is synthetic.
 - Docker and Docker Compose
 
 ### Quick start
-1. Generate local environment secrets:
+1. Generate local environment secrets (writes random `JWT_SECRET`, `DEMO_USER_PASSWORD`, and database passwords to `.env`):
    ```bash
    make env
    ```
@@ -27,17 +27,27 @@ Status: Phase 4 (Build) in progress. All data in this repository is synthetic.
    ```bash
    make up
    ```
-3. Run database migrations:
+   The `api` container automatically applies Alembic migrations on startup.
+
+3. Verify health and database readiness:
    ```bash
-   make migrate
+   curl -fsS localhost:8000/readyz
    ```
-4. Seed demo data (departments and role accounts):
+
+4. Seed demo data (departments and role accounts, idempotent):
    ```bash
    make seed
    ```
-5. Verify health:
+
+5. Log in with a demo account and inspect the authenticated user:
    ```bash
-   curl http://localhost:8000/readyz
+   DEMO_PASSWORD=$(grep "^DEMO_USER_PASSWORD=" .env | cut -d= -f2-)
+   TOKEN=$(curl -fsS -X POST http://localhost:8000/api/v1/auth/login \
+     -H "Content-Type: application/json" \
+     -d "{\"email\":\"buyer1@demo-holdings.example\",\"password\":\"$DEMO_PASSWORD\"}" | \
+     python3 -c "import sys, json; print(json.load(sys.stdin)['access_token'])")
+
+   curl -fsS http://localhost:8000/api/v1/me -H "Authorization: Bearer $TOKEN"
    ```
 
 ### Development & Testing
@@ -45,4 +55,4 @@ Status: Phase 4 (Build) in progress. All data in this repository is synthetic.
 - Formatting: `make fmt`
 - Unit and security tests: `make test`
 - Integration tests (requires running Postgres): `make test-int`
-- Stop containers: `make down`
+- Stop containers and clean volumes: `docker compose down -v`

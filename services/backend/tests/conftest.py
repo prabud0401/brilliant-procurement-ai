@@ -1,11 +1,24 @@
 import os
 import socket
 from collections.abc import Generator
+from pathlib import Path
 from urllib.parse import urlparse
 
+# Ensure test secrets are present before settings or app are imported
+os.environ.setdefault(
+    "JWT_SECRET",
+    "test-jwt-secret-at-least-32-chars-long-for-testing-purposes-12345",
+)
+os.environ.setdefault("DEMO_USER_PASSWORD", "test-demo-password-12345")
+
 import pytest
+from alembic import command
+from alembic.config import Config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
+
+from app.core import database
+from app.core.config import settings
 
 
 def is_port_open(host: str, port: int) -> bool:
@@ -18,8 +31,10 @@ def is_port_open(host: str, port: int) -> bool:
 
 
 def detect_db_urls() -> tuple[str, str]:
-    migrator = os.environ.get("DATABASE_URL_MIGRATOR")
-    app_user = os.environ.get("DATABASE_URL")
+    migrator = os.environ.get("DATABASE_URL_MIGRATOR") or getattr(
+        settings, "DATABASE_URL_MIGRATOR", None
+    )
+    app_user = os.environ.get("DATABASE_URL") or getattr(settings, "DATABASE_URL", None)
 
     if migrator and app_user:
         try:
@@ -31,28 +46,60 @@ def detect_db_urls() -> tuple[str, str]:
         except Exception:
             pass
 
+    postgres_pwd = os.environ.get("POSTGRES_PASSWORD") or getattr(
+        settings, "POSTGRES_PASSWORD", "postgres"
+    )
+    app_db_pwd = os.environ.get("APP_DB_PASSWORD") or getattr(
+        settings, "APP_DB_PASSWORD", "app_user"
+    )
+
     # Probe 55432 first (as requested for R01 test container), then 5432
     for port in [55432, 5432]:
         if is_port_open("127.0.0.1", port):
             return (
-                f"postgresql+psycopg://postgres:postgres@localhost:{port}/postgres",
-                f"postgresql+psycopg://app_user:app_user@localhost:{port}/postgres",
+                f"postgresql+psycopg://postgres:{postgres_pwd}@localhost:{port}/postgres",
+                f"postgresql+psycopg://app_user:{app_db_pwd}@localhost:{port}/postgres",
             )
 
     return (
-        "postgresql+psycopg://postgres:postgres@localhost:55432/postgres",
-        "postgresql+psycopg://app_user:app_user@localhost:55432/postgres",
+        f"postgresql+psycopg://postgres:{postgres_pwd}@localhost:55432/postgres",
+        f"postgresql+psycopg://app_user:{app_db_pwd}@localhost:55432/postgres",
     )
 
 
 MIGRATOR_DB_URL, APP_USER_DB_URL = detect_db_urls()
 os.environ["DATABASE_URL_MIGRATOR"] = MIGRATOR_DB_URL
 os.environ["DATABASE_URL"] = APP_USER_DB_URL
+settings.DATABASE_URL_MIGRATOR = MIGRATOR_DB_URL
+settings.DATABASE_URL = APP_USER_DB_URL
+
+# Rebind runtime engine and sessionmaker so FastAPI dependencies use the detected test DB URL
+database.engine = create_engine(APP_USER_DB_URL, pool_pre_ping=True)
+database.SessionLocal.configure(bind=database.engine)
+
+
+@pytest.fixture(scope="session")
+def jwt_secret() -> str:
+    return os.environ["JWT_SECRET"]
 
 
 @pytest.fixture(scope="session")
 def migrator_url() -> str:
     return MIGRATOR_DB_URL
+
+
+@pytest.fixture(scope="session", autouse=True)
+def ensure_database_migrated(migrator_url: str) -> None:
+    """Ensure database schema is up to date before integration tests run."""
+    backend_dir = Path(__file__).resolve().parents[1]
+    alembic_cfg = Config(str(backend_dir / "alembic.ini"))
+    alembic_cfg.set_main_option("script_location", str(backend_dir / "migrations"))
+    alembic_cfg.set_main_option("sqlalchemy.url", migrator_url)
+    try:
+        command.upgrade(alembic_cfg, "head")
+    except Exception:
+        # Ignore if database is not reachable (e.g. during unit tests without db)
+        pass
 
 
 @pytest.fixture(scope="session")

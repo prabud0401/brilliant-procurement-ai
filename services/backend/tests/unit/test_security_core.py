@@ -3,7 +3,9 @@ from datetime import timedelta
 from decimal import Decimal
 
 import pytest
+from pydantic_core import ValidationError
 
+from app.core.config import Settings
 from app.core.security import (
     create_access_token,
     decode_access_token,
@@ -46,3 +48,15 @@ def test_jwt_creation_and_payload_claims() -> None:
     assert payload["dept"] == str(dept_id)
     assert payload["approval_limit_aed"] == "150000.00"
     assert payload["iss"] == "brilliant-procurement-ai"
+
+
+@pytest.mark.unit
+def test_jwt_secret_requires_minimum_32_characters() -> None:
+    # Less than 32 chars should fail validation
+    with pytest.raises(ValidationError) as exc:
+        Settings(JWT_SECRET="too-short-secret")
+    assert "at least 32 characters" in str(exc.value)
+
+    # 32 or more chars should succeed
+    valid_settings = Settings(JWT_SECRET="valid-secret-with-at-least-32-chars-long")
+    assert valid_settings.JWT_SECRET == "valid-secret-with-at-least-32-chars-long"

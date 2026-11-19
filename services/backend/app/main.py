@@ -102,10 +102,6 @@ class LoginRequest(BaseModel):
     password: str
 
 
-class DemoLoginRequest(BaseModel):
-    username: str
-
-
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -178,67 +174,6 @@ def login(
         entity_type="user",
         entity_id=user.id,
         reason="Password login successful",
-    )
-    db.commit()
-
-    return TokenResponse(access_token=token, expires_in=expires_in)
-
-
-@auth_router.post("/demo-login", response_model=TokenResponse)
-def demo_login(
-    req: DemoLoginRequest,
-    request: Request,
-    db: Session = Depends(get_db),
-) -> TokenResponse:
-    if settings.APP_ENV not in ("local", "dev"):
-        raise ProblemException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            code="NOT_FOUND",
-            title="Not Found",
-            detail="Demo login is disabled in production.",
-        )
-
-    client_ip = request.client.host if request.client else "127.0.0.1"
-    check_login_rate_limit(client_ip)
-
-    uname = req.username.lower().strip()
-    user = (
-        db.query(User)
-        .filter(User.is_demo.is_(True), (User.email == uname) | (User.email.startswith(uname)))
-        .first()
-    )
-
-    if not user:
-        # Check by role name
-        for r_user in db.query(User).filter(User.is_demo.is_(True)).all():
-            if any(r.role == uname for r in r_user.roles):
-                user = r_user
-                break
-
-    if not user or not user.active:
-        raise ProblemException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            code="USER_NOT_FOUND",
-            title="Not Found",
-            detail=f"No demo user found for username '{req.username}'.",
-        )
-
-    roles = [r.role for r in user.roles]
-    token, expires_in = create_access_token(
-        user_id=user.id,
-        email=user.email,
-        roles=roles,
-        department_id=user.department_id,
-        approval_limit_aed=user.approval_limit_aed,
-    )
-
-    record_audit(
-        session=db,
-        actor=user,
-        action="auth.demo_login_success",
-        entity_type="user",
-        entity_id=user.id,
-        reason=f"Demo login successful as {req.username}",
     )
     db.commit()
 

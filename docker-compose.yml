@@ -30,13 +30,14 @@ services:
     restart: unless-stopped
     environment:
       - APP_ENV=${APP_ENV:-local}
-      - DATABASE_URL=${DATABASE_URL:-postgresql+psycopg://app_user:app_user@db:5432/postgres}
-      - DATABASE_URL_MIGRATOR=${DATABASE_URL_MIGRATOR:-postgresql+psycopg://postgres:postgres@db:5432/postgres}
-      - JWT_SECRET=${JWT_SECRET:-dev-insecure-secret-change-in-production-32chars}
+      - APP_DB_PASSWORD=${APP_DB_PASSWORD:-app_user}
+      - DATABASE_URL=${CONTAINER_DATABASE_URL:-postgresql+psycopg://app_user:${APP_DB_PASSWORD:-app_user}@db:5432/${POSTGRES_DB:-postgres}}
+      - DATABASE_URL_MIGRATOR=${CONTAINER_DATABASE_URL_MIGRATOR:-postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-postgres}}
+      - JWT_SECRET=${JWT_SECRET:?run make env}
       - JWT_ISSUER=${JWT_ISSUER:-brilliant-procurement-ai}
       - JWT_TTL_MINUTES=${JWT_TTL_MINUTES:-60}
-      - DEMO_USER_PASSWORD=${DEMO_USER_PASSWORD:-demo123456}
-      - BLOB_CONNECTION_STRING=${BLOB_CONNECTION_STRING:-UseDevelopmentStorage=true;DevelopmentStorageProxyUri=http://azurite:10000}
+      - DEMO_USER_PASSWORD=${DEMO_USER_PASSWORD:?run make env}
+      - BLOB_CONNECTION_STRING=${CONTAINER_BLOB_CONNECTION_STRING:-UseDevelopmentStorage=true;DevelopmentStorageProxyUri=http://azurite:10000}
       - BLOB_CONTAINER=${BLOB_CONTAINER:-documents}
       - AI_PROVIDER=${AI_PROVIDER:-mock}
       - INTEGRATIONS_MODE=${INTEGRATIONS_MODE:-mock}
@@ -56,13 +57,14 @@ services:
     restart: unless-stopped
     environment:
       - APP_ENV=${APP_ENV:-local}
-      - DATABASE_URL=${DATABASE_URL:-postgresql+psycopg://app_user:app_user@db:5432/postgres}
-      - DATABASE_URL_MIGRATOR=${DATABASE_URL_MIGRATOR:-postgresql+psycopg://postgres:postgres@db:5432/postgres}
-      - JWT_SECRET=${JWT_SECRET:-dev-insecure-secret-change-in-production-32chars}
+      - APP_DB_PASSWORD=${APP_DB_PASSWORD:-app_user}
+      - DATABASE_URL=${CONTAINER_DATABASE_URL:-postgresql+psycopg://app_user:${APP_DB_PASSWORD:-app_user}@db:5432/${POSTGRES_DB:-postgres}}
+      - DATABASE_URL_MIGRATOR=${CONTAINER_DATABASE_URL_MIGRATOR:-postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-postgres}}
+      - JWT_SECRET=${JWT_SECRET:?run make env}
       - JWT_ISSUER=${JWT_ISSUER:-brilliant-procurement-ai}
       - JWT_TTL_MINUTES=${JWT_TTL_MINUTES:-60}
-      - DEMO_USER_PASSWORD=${DEMO_USER_PASSWORD:-demo123456}
-      - BLOB_CONNECTION_STRING=${BLOB_CONNECTION_STRING:-UseDevelopmentStorage=true;DevelopmentStorageProxyUri=http://azurite:10000}
+      - DEMO_USER_PASSWORD=${DEMO_USER_PASSWORD:?run make env}
+      - BLOB_CONNECTION_STRING=${CONTAINER_BLOB_CONNECTION_STRING:-UseDevelopmentStorage=true;DevelopmentStorageProxyUri=http://azurite:10000}
       - BLOB_CONTAINER=${BLOB_CONTAINER:-documents}
       - AI_PROVIDER=${AI_PROVIDER:-mock}
       - INTEGRATIONS_MODE=${INTEGRATIONS_MODE:-mock}
