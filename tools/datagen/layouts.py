@@ -84,15 +84,15 @@ def render_pdf_to_bytes(spec: ScenarioDocSpec) -> bytes:
     if spec.is_scanned:
         line_dicts = [
             {
-                "line_no": str(l.line_no),
-                "item_code": l.item_code,
-                "description": l.description,
-                "qty": str(l.qty),
-                "uom": l.uom,
-                "unit_price": f"{l.unit_price:.2f}",
-                "line_total": f"{l.line_total:.2f}",
+                "line_no": str(line_item.line_no),
+                "item_code": line_item.item_code,
+                "description": line_item.description,
+                "qty": str(line_item.qty),
+                "uom": line_item.uom,
+                "unit_price": f"{line_item.unit_price:.2f}",
+                "line_total": f"{line_item.line_total:.2f}",
             }
-            for l in spec.lines
+            for line_item in spec.lines
         ]
         totals_dict = {
             "Subtotal": f"{spec.subtotal:.2f}",
@@ -252,8 +252,12 @@ def render_pdf_to_bytes(spec: ScenarioDocSpec) -> bytes:
     story.append(Spacer(1, 14))
 
     # Line Items Table
-    th_style = ParagraphStyle("TH", fontName="Helvetica-Bold", fontSize=9, leading=11, textColor=colors.white)
-    td_style = ParagraphStyle("TD", fontName="Helvetica", fontSize=8.5, leading=11, textColor=colors.black)
+    th_style = ParagraphStyle(
+        "TH", fontName="Helvetica-Bold", fontSize=9, leading=11, textColor=colors.white
+    )
+    td_style = ParagraphStyle(
+        "TD", fontName="Helvetica", fontSize=8.5, leading=11, textColor=colors.black
+    )
     td_num_style = ParagraphStyle(
         "TDNum", fontName="Helvetica", fontSize=8.5, leading=11, alignment=2, textColor=colors.black
     )
@@ -327,10 +331,17 @@ def render_pdf_to_bytes(spec: ScenarioDocSpec) -> bytes:
     story.append(Spacer(1, 14))
 
     # Summary Totals Block
-    tot_label = ParagraphStyle("TotLbl", fontName="Helvetica-Bold", fontSize=9, leading=12, alignment=2)
+    tot_label = ParagraphStyle(
+        "TotLbl", fontName="Helvetica-Bold", fontSize=9, leading=12, alignment=2
+    )
     tot_val = ParagraphStyle("TotVal", fontName="Helvetica", fontSize=9, leading=12, alignment=2)
     tot_grand = ParagraphStyle(
-        "TotGrd", fontName="Helvetica-Bold", fontSize=10, leading=13, alignment=2, textColor=primary_color
+        "TotGrd",
+        fontName="Helvetica-Bold",
+        fontSize=10,
+        leading=13,
+        alignment=2,
+        textColor=primary_color,
     )
 
     summary_data = [
@@ -371,7 +382,11 @@ def render_pdf_to_bytes(spec: ScenarioDocSpec) -> bytes:
             Paragraph(
                 f"<b>Notes:</b> {spec.notes}",
                 ParagraphStyle(
-                    "Notes", fontName="Helvetica", fontSize=8, leading=10, textColor=colors.HexColor("#64748B")
+                    "Notes",
+                    fontName="Helvetica",
+                    fontSize=8,
+                    leading=10,
+                    textColor=colors.HexColor("#64748B"),
                 ),
             )
         )

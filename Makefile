@@ -1,4 +1,4 @@
-.PHONY: env up down logs migrate seed lint fmt test test-int
+.PHONY: env up down logs migrate seed datagen lint fmt test test-int
 
 SHELL := /bin/bash
 
@@ -46,11 +46,14 @@ seed:
 		cd services/backend && uv run python -m seed.load; \
 	fi
 
+datagen:
+	cd services/backend && uv run python -m tools.datagen --replay --check
+
 lint:
-	cd services/backend && uv run ruff check . && uv run ruff format --check . && uv run mypy app
+	cd services/backend && uv run ruff check . seed tools/datagen && uv run ruff format --check . seed tools/datagen && uv run mypy app seed tools/datagen
 
 fmt:
-	cd services/backend && uv run ruff format . && uv run ruff check --fix .
+	cd services/backend && uv run ruff format . seed tools/datagen && uv run ruff check --fix . seed tools/datagen
 
 test:
 	cd services/backend && uv run pytest -m "unit or security"

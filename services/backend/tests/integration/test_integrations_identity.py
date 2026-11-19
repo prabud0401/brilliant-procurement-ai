@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+
 from app.integrations.base import NotConfiguredError
 from app.integrations.identity import (
     IdentityAdapter,

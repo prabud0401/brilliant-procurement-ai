@@ -77,9 +77,8 @@ class ScenarioDocSpec(BaseModel):
     subtotal: Decimal
     vat: Decimal
     total: Decimal
-    layout_name: str = (
-        "modern_tech"  # modern_tech, classic_corporate, minimalist_slate, landscape_industrial, rugged_border
-    )
+    # Layout choices: modern_tech, classic_corporate, minimalist_slate, landscape_industrial
+    layout_name: str = "modern_tech"
     is_scanned: bool = False
     injection_expected: bool = False
     injection_snippet: str | None = None

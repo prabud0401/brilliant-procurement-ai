@@ -85,7 +85,12 @@ def create_scanned_image(
         if len(desc) > 36:
             desc = desc[:33] + "..."
         draw.text((450, y), desc, fill=(40, 40, 40), font=font_small)
-        draw.text((1050, y), f"{item.get('qty', '')} {item.get('uom', '')}", fill=(40, 40, 40), font=font_small)
+        draw.text(
+            (1050, y),
+            f"{item.get('qty', '')} {item.get('uom', '')}",
+            fill=(40, 40, 40),
+            font=font_small,
+        )
         draw.text((1180, y), str(item.get("unit_price", "")), fill=(40, 40, 40), font=font_small)
         draw.text((1380, y), str(item.get("line_total", "")), fill=(40, 40, 40), font=font_small)
         y += 40
@@ -103,7 +108,9 @@ def create_scanned_image(
     draw.line([(120, height - 120), (width - 120, height - 120)], fill=(120, 120, 120), width=1)
     footer_bbox = draw.textbbox((0, 0), footer_text, font=font_footer)
     footer_w = footer_bbox[2] - footer_bbox[0]
-    draw.text(((width - footer_w) // 2, height - 90), footer_text, fill=(100, 100, 100), font=font_footer)
+    draw.text(
+        ((width - footer_w) // 2, height - 90), footer_text, fill=(100, 100, 100), font=font_footer
+    )
 
     # 7. Apply scanner artifacts: Skew (rotation)
     angle = rng.uniform(0.6, 1.2)  # slight skew ~0.8 degrees

@@ -26,18 +26,14 @@ def test_footer_present_on_all_pages_vector_pdfs() -> None:
 
         for idx, page in enumerate(reader.pages):
             text = page.extract_text() or ""
-            assert MANDATORY_FOOTER in text, (
-                f"Footer missing on page {idx + 1} of {spec.doc_id}"
-            )
+            assert MANDATORY_FOOTER in text, f"Footer missing on page {idx + 1} of {spec.doc_id}"
 
 
 @pytest.mark.unit
 def test_footer_present_in_scanned_layout() -> None:
     """Scanned images must also be generated with the mandatory synthetic footer."""
     scanned_scenarios = [s for s in get_all_scenarios() if s.is_scanned]
-    assert len(scanned_scenarios) >= 2, (
-        "Must have at least 2 scanned document scenarios"
-    )
+    assert len(scanned_scenarios) >= 2, "Must have at least 2 scanned document scenarios"
 
     for spec in scanned_scenarios:
         pdf_bytes = render_pdf_to_bytes(spec)

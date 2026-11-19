@@ -5,6 +5,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 import pytest
+
 from app.integrations.base import NotConfiguredError
 from app.integrations.power_automate import (
     NotificationEvent,

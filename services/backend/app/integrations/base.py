@@ -12,6 +12,8 @@ class NotConfiguredError(IntegrationError):
 
     def __init__(
         self,
-        message: str = "Real adapter is not configured. Set INTEGRATIONS_MODE=mock for local/test runs.",
+        message: str = (
+            "Real adapter is not configured. Set INTEGRATIONS_MODE=mock for local/test runs."
+        ),
     ) -> None:
         super().__init__(message)

@@ -40,7 +40,7 @@ class SharePointAdapter(Protocol):
 
 
 class SharePointMockAdapter:
-    """Mock SharePoint adapter backed by a local folder of synthetic documents or in-memory registry."""
+    """Mock SharePoint adapter backed by local folder or in-memory registry."""
 
     def __init__(self, storage_dir: str | Path | None = None) -> None:
         self.storage_dir = Path(storage_dir) if storage_dir else None
@@ -69,9 +69,7 @@ class SharePointMockAdapter:
         return meta
 
     def list_files(self, folder: str = "") -> list[SharePointFile]:
-        files: list[SharePointFile] = [
-            meta for meta, _ in self._in_memory_files.values()
-        ]
+        files: list[SharePointFile] = [meta for meta, _ in self._in_memory_files.values()]
 
         # If a storage dir exists on disk, list PDFs/PNGs there too
         if self.storage_dir and self.storage_dir.exists():
@@ -86,11 +84,7 @@ class SharePointMockAdapter:
                     }:
                         item_id = f"sp-disk-{p.stem}"
                         if item_id not in self._in_memory_files:
-                            mime = (
-                                "application/pdf"
-                                if p.suffix.lower() == ".pdf"
-                                else "image/png"
-                            )
+                            mime = "application/pdf" if p.suffix.lower() == ".pdf" else "image/png"
                             files.append(
                                 SharePointFile(
                                     item_id=item_id,
@@ -106,11 +100,7 @@ class SharePointMockAdapter:
         if item_id in self._in_memory_files:
             return self._in_memory_files[item_id][1]
 
-        if (
-            item_id.startswith("sp-disk-")
-            and self.storage_dir
-            and self.storage_dir.exists()
-        ):
+        if item_id.startswith("sp-disk-") and self.storage_dir and self.storage_dir.exists():
             stem = item_id[len("sp-disk-") :]
             for p in self.storage_dir.iterdir():
                 if p.stem == stem and p.is_file():

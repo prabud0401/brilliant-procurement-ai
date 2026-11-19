@@ -81,15 +81,15 @@ def generate_documents(
         if spec.is_scanned and write_png_for_scans:
             line_dicts = [
                 {
-                    "line_no": str(l.line_no),
-                    "item_code": l.item_code,
-                    "description": l.description,
-                    "qty": str(l.qty),
-                    "uom": l.uom,
-                    "unit_price": f"{l.unit_price:.2f}",
-                    "line_total": f"{l.line_total:.2f}",
+                    "line_no": str(line_item.line_no),
+                    "item_code": line_item.item_code,
+                    "description": line_item.description,
+                    "qty": str(line_item.qty),
+                    "uom": line_item.uom,
+                    "unit_price": f"{line_item.unit_price:.2f}",
+                    "line_total": f"{line_item.line_total:.2f}",
                 }
-                for l in spec.lines
+                for line_item in spec.lines
             ]
             totals_dict = {
                 "Subtotal": f"{spec.subtotal:.2f}",
@@ -173,28 +173,35 @@ def check_determinism_and_correctness() -> bool:
             if not spec.is_scanned and "SAMPLE – SYNTHETIC DATA" not in text:
                 raise AssertionError(f"Footer missing on page {page_idx + 1} of {spec.doc_id}")
 
-        # 3. Arithmetic validation (unless delivery note where totals are 0, or deliberate wrong VAT in s6-inv-6001-vat)
+        # 3. Arithmetic validation (skip delivery notes or wrong VAT test case)
         if spec.doc_type != "delivery_note" and spec.doc_id != "s6-inv-6001-vat":
             expected_total = spec.subtotal + spec.vat
             if spec.total != expected_total:
-                raise AssertionError(
-                    f"Arithmetic mismatch on {spec.doc_id}: {spec.subtotal} + {spec.vat} != {spec.total}"
+                msg = (
+                    f"Arithmetic mismatch on {spec.doc_id}: "
+                    f"{spec.subtotal} + {spec.vat} != {spec.total}"
                 )
+                raise AssertionError(msg)
 
         # 4. Denylist checks
         for entity in denylist:
             pattern = rf"\b{re.escape(entity)}\b"
             if re.search(pattern, spec.vendor_name, re.IGNORECASE):
-                raise AssertionError(f"Denylist violation in {spec.doc_id}: real entity '{entity}' detected")
+                raise AssertionError(
+                    f"Denylist violation in {spec.doc_id}: real entity '{entity}' detected"
+                )
 
         # 5. Fake TRN check (15 digits, starts with 100000000)
         if spec.vendor_trn:
             if len(spec.vendor_trn) != 15:
                 raise AssertionError(f"TRN length != 15 in {spec.doc_id}: '{spec.vendor_trn}'")
             if not spec.vendor_trn.startswith("100000000"):
-                raise AssertionError(f"TRN not in fake test range 100000000... in {spec.doc_id}: '{spec.vendor_trn}'")
+                raise AssertionError(
+                    f"TRN not in fake test range 100000000... in {spec.doc_id}: '{spec.vendor_trn}'"
+                )
 
     logger.info(
-        "All %d scenario documents passed determinism, footer, arithmetic, and denylist checks!", len(scenarios)
+        "All %d scenario documents passed determinism, footer, arithmetic, and denylist checks!",
+        len(scenarios),
     )
     return True

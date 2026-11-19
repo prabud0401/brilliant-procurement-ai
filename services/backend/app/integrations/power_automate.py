@@ -15,9 +15,7 @@ class NotificationEvent(BaseModel):
     """Notification payload sent to Power Automate webhook."""
 
     event_id: str = Field(default_factory=lambda: f"evt-{uuid.uuid4().hex[:8]}")
-    event_type: str = (
-        "approval_requested"  # approval_requested, match_exception, po_dispatched
-    )
+    event_type: str = "approval_requested"  # approval_requested, match_exception, po_dispatched
     title: str
     vendor_name: str
     amount_aed: Decimal

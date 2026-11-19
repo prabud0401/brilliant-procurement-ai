@@ -1,4 +1,4 @@
-"""Unit tests verifying that ground truth JSON strictly matches generated PDF content and arithmetic."""
+"""Unit tests verifying ground truth JSON matches generated PDF content and arithmetic."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from tools.datagen.scenarios import get_all_scenarios
 
 @pytest.mark.unit
 def test_ground_truth_matches_pdf_text() -> None:
-    """PDF text extracted via pypdf must contain ground truth document number, vendor name and totals."""
+    """Extracted PDF text must contain ground truth document number, vendor name and totals."""
     scenarios = [s for s in get_all_scenarios() if not s.is_scanned]
 
     for spec in scenarios:
@@ -77,9 +77,7 @@ def test_vat_arithmetic_precision() -> None:
         )
 
         # 5% UAE standard rate check (with standard 1 AED tolerance for rounding)
-        expected_vat_calc = (truth.subtotal * Decimal(5) / Decimal(100)).quantize(
-            Decimal("0.01")
-        )
+        expected_vat_calc = (truth.subtotal * Decimal(5) / Decimal(100)).quantize(Decimal("0.01"))
         assert abs(truth.vat - expected_vat_calc) <= Decimal("1.00"), (
             f"VAT not 5% on {truth.doc_id}: {truth.vat} vs {expected_vat_calc}"
         )

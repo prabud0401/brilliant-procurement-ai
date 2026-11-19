@@ -38,7 +38,8 @@ def generate_di_fixture(truth: GroundTruth) -> dict[str, Any]:
 
     for line in truth.lines:
         text_lines.append(
-            f"{line.line_no} {line.item_code} {line.description} {line.qty} {line.uom} {line.unit_price:.2f} {line.line_total:.2f}"
+            f"{line.line_no} {line.item_code} {line.description} "
+            f"{line.qty} {line.uom} {line.unit_price:.2f} {line.line_total:.2f}"
         )
 
     text_lines.append(f"Subtotal: {truth.subtotal:.2f}")
@@ -100,7 +101,9 @@ def generate_di_fixture(truth: GroundTruth) -> dict[str, Any]:
                 "rowIndex": 0,
                 "columnIndex": col_idx,
                 "content": h,
-                "boundingRegions": [{"pageNumber": 1, "polygon": [1.0, 3.0, 7.0, 3.0, 7.0, 3.2, 1.0, 3.2]}],
+                "boundingRegions": [
+                    {"pageNumber": 1, "polygon": [1.0, 3.0, 7.0, 3.0, 7.0, 3.2, 1.0, 3.2]}
+                ],
             }
         )
 
@@ -120,7 +123,9 @@ def generate_di_fixture(truth: GroundTruth) -> dict[str, Any]:
                     "rowIndex": row_idx,
                     "columnIndex": col_idx,
                     "content": val,
-                    "boundingRegions": [{"pageNumber": 1, "polygon": [1.0, 3.5, 7.0, 3.5, 7.0, 3.7, 1.0, 3.7]}],
+                    "boundingRegions": [
+                        {"pageNumber": 1, "polygon": [1.0, 3.5, 7.0, 3.5, 7.0, 3.7, 1.0, 3.7]}
+                    ],
                 }
             )
 
@@ -304,7 +309,10 @@ def generate_openai_fixture(truth: GroundTruth) -> dict[str, Any]:
                 "vat_rate": f"{item.vat_rate:.0f}",
                 "line_total": f"{item.line_total:.2f}",
                 "page": 1,
-                "source_text": f"{item.line_no} {item.item_code} {item.description} {item.qty} {item.uom} {item.unit_price:.2f} {item.line_total:.2f}",
+                "source_text": (
+                    f"{item.line_no} {item.item_code} {item.description} "
+                    f"{item.qty} {item.uom} {item.unit_price:.2f} {item.line_total:.2f}"
+                ),
             }
         )
 
@@ -339,7 +347,11 @@ def generate_openai_fixture(truth: GroundTruth) -> dict[str, Any]:
     }
 
 
-def generate_all_replay_fixtures(out_dir: str | Path = "eval/data/replay") -> int:
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_REPLAY_DIR = _REPO_ROOT / "eval" / "data" / "replay"
+
+
+def generate_all_replay_fixtures(out_dir: str | Path = DEFAULT_REPLAY_DIR) -> int:
     """Generate .di.json and .openai.json replay fixtures for all evaluation scenarios."""
     target_dir = Path(out_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -373,13 +385,22 @@ def generate_all_replay_fixtures(out_dir: str | Path = "eval/data/replay") -> in
 
         count += 1
 
-    logger.info("Generated %d replay fixture pairs (.di.json and .openai.json) into %s", count, target_dir)
+    logger.info(
+        "Generated %d replay fixture pairs (.di.json and .openai.json) into %s", count, target_dir
+    )
     return count
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate Document Intelligence and OpenAI replay fixtures.")
-    parser.add_argument("--out", type=str, default="eval/data/replay", help="Output directory for replay fixtures")
+    parser = argparse.ArgumentParser(
+        description="Generate Document Intelligence and OpenAI replay fixtures."
+    )
+    parser.add_argument(
+        "--out",
+        type=str,
+        default=str(DEFAULT_REPLAY_DIR),
+        help=f"Output directory for replay fixtures (default: {DEFAULT_REPLAY_DIR})",
+    )
     args = parser.parse_args()
 
     count = generate_all_replay_fixtures(args.out)

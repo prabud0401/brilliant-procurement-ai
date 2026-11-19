@@ -6,6 +6,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+
 from app.integrations.base import NotConfiguredError
 from app.integrations.sharepoint import (
     SharePointAdapter,

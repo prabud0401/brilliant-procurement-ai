@@ -27,14 +27,9 @@ if str(_BACKEND_DIR) not in sys.path:
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-try:
-    from app.integrations.odoo import get_odoo_mock_store  # type: ignore[import-not-found]
-except ImportError:
-    from services.backend.app.integrations.odoo import get_odoo_mock_store
+from app.integrations.odoo import get_odoo_mock_store  # noqa: E402
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("seed.load")
 
 
@@ -62,9 +57,7 @@ def load_master_data() -> dict[str, Any]:
     }
 
 
-def seed_odoo_mock(
-    vendors: list[dict[str, Any]], products: list[dict[str, Any]]
-) -> int:
+def seed_odoo_mock(vendors: list[dict[str, Any]], products: list[dict[str, Any]]) -> int:
     """Seed the Odoo in-memory store."""
     store = get_odoo_mock_store()
     store.seed_master_data(vendors, products)
@@ -107,9 +100,7 @@ def seed_database(database_url: str, data: dict[str, Any]) -> dict[str, int]:
                 if "trn" in table.c:
                     row_data["trn"] = str(v["trn"])
                 if "payment_terms_days" in table.c:
-                    row_data["payment_terms_days"] = int(
-                        v.get("payment_terms_days", 30)
-                    )
+                    row_data["payment_terms_days"] = int(v.get("payment_terms_days", 30))
                 if "synced_at" in table.c:
                     row_data["synced_at"] = now_utc
                 if "created_at" in table.c:
@@ -128,9 +119,7 @@ def seed_database(database_url: str, data: dict[str, Any]) -> dict[str, int]:
                 if existing:
                     # Exclude id and created_at on update
                     update_vals = {
-                        k: val
-                        for k, val in row_data.items()
-                        if k not in ("id", "created_at")
+                        k: val for k, val in row_data.items() if k not in ("id", "created_at")
                     }
                     if update_vals:
                         if "odoo_id" in table.c:
@@ -141,9 +130,7 @@ def seed_database(database_url: str, data: dict[str, Any]) -> dict[str, int]:
                             )
                         else:
                             conn.execute(
-                                update(table)
-                                .where(table.c.id == vendor_id)
-                                .values(**update_vals)
+                                update(table).where(table.c.id == vendor_id).values(**update_vals)
                             )
                 else:
                     conn.execute(insert(table).values(**row_data))
@@ -186,9 +173,7 @@ def seed_database(database_url: str, data: dict[str, Any]) -> dict[str, int]:
                 existing = conn.execute(query).first()
                 if existing:
                     update_vals = {
-                        k: val
-                        for k, val in row_data.items()
-                        if k not in ("id", "created_at")
+                        k: val for k, val in row_data.items() if k not in ("id", "created_at")
                     }
                     if update_vals:
                         if "code" in table.c:
@@ -199,9 +184,7 @@ def seed_database(database_url: str, data: dict[str, Any]) -> dict[str, int]:
                             )
                         else:
                             conn.execute(
-                                update(table)
-                                .where(table.c.id == product_id)
-                                .values(**update_vals)
+                                update(table).where(table.c.id == product_id).values(**update_vals)
                             )
                 else:
                     conn.execute(insert(table).values(**row_data))
@@ -233,9 +216,7 @@ def seed_database(database_url: str, data: dict[str, Any]) -> dict[str, int]:
                 existing = conn.execute(query).first()
                 if existing:
                     update_vals = {k: val for k, val in row_data.items() if k != "key"}
-                    conn.execute(
-                        update(table).where(table.c.key == key).values(**update_vals)
-                    )
+                    conn.execute(update(table).where(table.c.key == key).values(**update_vals))
                 else:
                     conn.execute(insert(table).values(**row_data))
                 counts["settings"] += 1
@@ -263,9 +244,7 @@ def run_seed(db_url: str | None = None) -> dict[str, Any]:
         )
         db_counts = seed_database(target_db, data)
     else:
-        logger.info(
-            "No DATABASE_URL set. Master data loaded into in-memory mock store only."
-        )
+        logger.info("No DATABASE_URL set. Master data loaded into in-memory mock store only.")
 
     return {
         "status": "success",
@@ -277,9 +256,7 @@ def run_seed(db_url: str | None = None) -> dict[str, Any]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Seed master data for Demo Holdings LLC"
-    )
+    parser = argparse.ArgumentParser(description="Seed master data for Demo Holdings LLC")
     parser.add_argument(
         "--db-url",
         type=str,

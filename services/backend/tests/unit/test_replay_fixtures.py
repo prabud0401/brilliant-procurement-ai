@@ -7,11 +7,14 @@ from pathlib import Path
 
 import pytest
 
+_REPO_ROOT = Path(__file__).resolve().parents[4]
+_EVAL_DATA_DIR = Path("eval/data") if Path("eval/data").exists() else _REPO_ROOT / "eval" / "data"
+
 
 @pytest.mark.unit
 def test_manifest_documents_have_replay_fixtures() -> None:
-    """Every document listed in manifest.json must have corresponding DI and OpenAI replay fixtures."""
-    manifest_file = Path("eval/data/manifest.json")
+    """Every document in manifest.json must have corresponding DI and OpenAI replay fixtures."""
+    manifest_file = _EVAL_DATA_DIR / "manifest.json"
     assert manifest_file.exists(), "eval/data/manifest.json missing"
 
     with open(manifest_file, "r", encoding="utf-8") as f:
@@ -20,7 +23,7 @@ def test_manifest_documents_have_replay_fixtures() -> None:
     docs = manifest.get("documents", [])
     assert len(docs) == 20, f"Expected 20 evaluation documents, found {len(docs)}"
 
-    replay_dir = Path("eval/data/replay")
+    replay_dir = _EVAL_DATA_DIR / "replay"
     assert replay_dir.exists(), "eval/data/replay directory missing"
 
     for d in docs:
@@ -35,7 +38,7 @@ def test_manifest_documents_have_replay_fixtures() -> None:
 @pytest.mark.unit
 def test_di_fixture_structure() -> None:
     """Document Intelligence analyzeResult structure must match Azure API specifications."""
-    replay_dir = Path("eval/data/replay")
+    replay_dir = _EVAL_DATA_DIR / "replay"
     di_files = list(replay_dir.glob("*.di.json"))
     assert len(di_files) >= 20
 
@@ -69,7 +72,7 @@ def test_di_fixture_structure() -> None:
 @pytest.mark.unit
 def test_openai_fixture_structure_and_extraction_schema() -> None:
     """OpenAI completions fixture must contain strict extraction JSON per design 6.2."""
-    replay_dir = Path("eval/data/replay")
+    replay_dir = _EVAL_DATA_DIR / "replay"
     openai_files = list(replay_dir.glob("*.openai.json"))
     assert len(openai_files) >= 20
 

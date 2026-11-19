@@ -53,7 +53,8 @@ def test_all_trns_are_in_fake_test_range() -> None:
                 f"TRN length is not 15 in {spec.doc_id}: '{spec.vendor_trn}'"
             )
             assert spec.vendor_trn.startswith("100000000"), (
-                f"TRN in {spec.doc_id} ('{spec.vendor_trn}') does not start with synthetic prefix 100000000"
+                f"TRN in {spec.doc_id} ('{spec.vendor_trn}') "
+                "does not start with synthetic prefix 100000000"
             )
 
 
