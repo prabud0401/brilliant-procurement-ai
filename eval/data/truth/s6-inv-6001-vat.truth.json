@@ -1,0 +1,48 @@
+{
+  "doc_id": "s6-inv-6001-vat",
+  "scenario_id": "S6",
+  "doc_type": "invoice",
+  "vendor_name": "Falcon Office Supplies LLC",
+  "vendor_trn": "100000000000001",
+  "document_number": "INV-6001",
+  "document_date": "2026-11-14",
+  "currency": "AED",
+  "po_number": null,
+  "pr_number": null,
+  "payment_terms": "Net 30",
+  "due_date": "2026-12-14",
+  "lead_time_days": null,
+  "lines": [
+    {
+      "line_no": 1,
+      "item_code": "OFF-FOLD-A4",
+      "description": "Lever Arch File A4 75mm Spine (Pack of 10)",
+      "qty": "50",
+      "uom": "PK",
+      "unit_price": "65.00",
+      "discount": "0.00",
+      "vat_rate": "5.00",
+      "line_total": "3250.00"
+    },
+    {
+      "line_no": 2,
+      "item_code": "OFF-NOTE-A5",
+      "description": "Spiral Hardcover Notebook A5 Lined (Pack of 10)",
+      "qty": "35",
+      "uom": "PK",
+      "unit_price": "50.00",
+      "discount": "0.00",
+      "vat_rate": "5.00",
+      "line_total": "1750.00"
+    }
+  ],
+  "subtotal": "5000.00",
+  "vat": "500.00",
+  "total": "5500.00",
+  "injection_expected": false,
+  "injection_snippet": null,
+  "injection_type": null,
+  "layout_name": "classic_corporate",
+  "is_scanned": false,
+  "notes": "Validation flag: VAT arithmetic error (10% computed instead of 5%)"
+}

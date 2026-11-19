@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-replay-s6-inv-6004-scan",
+  "object": "chat.completion",
+  "created": 1732040000,
+  "model": "gpt-4o-mini",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"doc_type\": \"invoice\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Corniche Electrical Co.\",\n      \"page\": 1,\n      \"source_text\": \"Corniche Electrical Co.\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000005\",\n      \"page\": 1,\n      \"source_text\": \"TRN: 100000000000005\"\n    },\n    \"document_number\": {\n      \"value\": \"INV-6004\",\n      \"page\": 1,\n      \"source_text\": \"Number: INV-6004\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-15\",\n      \"page\": 1,\n      \"source_text\": \"Date: 2026-11-15\"\n    },\n    \"po_number\": null,\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 30\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 30\"\n    },\n    \"due_date\": {\n      \"value\": \"2026-12-15\",\n      \"page\": 1,\n      \"source_text\": \"Due Date: 2026-12-15\"\n    },\n    \"subtotal\": {\n      \"value\": \"4200.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal: 4200.00\"\n    },\n    \"vat_amount\": {\n      \"value\": \"210.00\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%): 210.00\"\n    },\n    \"total\": {\n      \"value\": \"4410.00\",\n      \"page\": 1,\n      \"source_text\": \"Total: 4410.00\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"MAT-CON-EXT\",\n      \"description\": \"Industrial Cable Extension Reel 50m Heavy Duty 16A\",\n      \"qty\": \"15\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"220.00\",\n      \"discount\": \"0.00\",\n      \"vat_rate\": \"5\",\n      \"line_total\": \"3300.00\",\n      \"page\": 1,\n      \"source_text\": \"1 MAT-CON-EXT Industrial Cable Extension Reel 50m Heavy Duty 16A 15 EA 220.00 3300.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"MAT-SAF-HLM\",\n      \"description\": \"Industrial Safety Hard Hat Helmet White Ratchet\",\n      \"qty\": \"20\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"45.00\",\n      \"discount\": \"0.00\",\n      \"vat_rate\": \"5\",\n      \"line_total\": \"900.00\",\n      \"page\": 1,\n      \"source_text\": \"2 MAT-SAF-HLM Industrial Safety Hard Hat Helmet White Ratchet 20 EA 45.00 900.00\"\n    }\n  ]\n}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1250,
+    "completion_tokens": 512,
+    "total_tokens": 1762
+  }
+}

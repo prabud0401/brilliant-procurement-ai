@@ -1,0 +1,13 @@
+{
+  "name": "Demo Holdings LLC",
+  "legal_name": "Demo Holdings LLC (Fictional Demo Entity)",
+  "jurisdiction": "Abu Dhabi, United Arab Emirates",
+  "address": "Level 14, Al Khatem Tower, ADGM Square, Al Maryah Island, Abu Dhabi, UAE (Fictional)",
+  "phone": "+971 2 000 0000",
+  "email": "procurement@demo-holdings.fake",
+  "currency": "AED",
+  "country_code": "AE",
+  "tax_registration_number": "100000000000000",
+  "is_fictional": true,
+  "description": "Synthetic company used solely for automated testing and demonstrations"
+}

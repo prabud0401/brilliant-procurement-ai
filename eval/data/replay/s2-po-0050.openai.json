@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-replay-s2-po-0050",
+  "object": "chat.completion",
+  "created": 1732040000,
+  "model": "gpt-4o-mini",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"doc_type\": \"purchase_order\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Desert Build Materials\",\n      \"page\": 1,\n      \"source_text\": \"Desert Build Materials\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000004\",\n      \"page\": 1,\n      \"source_text\": \"TRN: 100000000000004\"\n    },\n    \"document_number\": {\n      \"value\": \"PO-0050\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0050\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-05\",\n      \"page\": 1,\n      \"source_text\": \"Date: 2026-11-05\"\n    },\n    \"po_number\": null,\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 60\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 60\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"32000.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal: 32000.00\"\n    },\n    \"vat_amount\": {\n      \"value\": \"1600.00\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%): 1600.00\"\n    },\n    \"total\": {\n      \"value\": \"33600.00\",\n      \"page\": 1,\n      \"source_text\": \"Total: 33600.00\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"MAT-CBL-CAT6\",\n      \"description\": \"Cat6 UTP Solid Bulk Ethernet Cable Roll 305m CMR\",\n      \"qty\": \"100\",\n      \"uom\": \"ROLL\",\n      \"unit_price\": \"320.00\",\n      \"discount\": \"0.00\",\n      \"vat_rate\": \"5\",\n      \"line_total\": \"32000.00\",\n      \"page\": 1,\n      \"source_text\": \"1 MAT-CBL-CAT6 Cat6 UTP Solid Bulk Ethernet Cable Roll 305m CMR 100 ROLL 320.00 32000.00\"\n    }\n  ]\n}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1250,
+    "completion_tokens": 391,
+    "total_tokens": 1641
+  }
+}

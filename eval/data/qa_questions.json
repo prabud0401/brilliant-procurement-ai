@@ -1,0 +1,325 @@
+[
+  {
+    "question_id": "QA-01",
+    "question": "What are Gulf Line IT Trading's payment terms on quote Q-1042?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "Net 30",
+    "expected_source_doc_ids": [
+      "s1-quote-gulfline"
+    ],
+    "scenario_ref": "S1"
+  },
+  {
+    "question_id": "QA-02",
+    "question": "Which vendor offered the shortest delivery lead time for laptops in scenario S1?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "Gulf Line IT Trading (5 days)",
+    "expected_source_doc_ids": [
+      "s1-quote-gulfline",
+      "s1-quote-falcon",
+      "s1-quote-corniche"
+    ],
+    "scenario_ref": "S1"
+  },
+  {
+    "question_id": "QA-03",
+    "question": "What is the total amount including VAT on invoice INV-2291?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "AED 28,875.00",
+    "expected_source_doc_ids": [
+      "s1-inv-2291"
+    ],
+    "scenario_ref": "S1"
+  },
+  {
+    "question_id": "QA-04",
+    "question": "What is the unit price of 14in laptop quoted by Falcon Office Supplies LLC on Q-8821?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "AED 1,950.00",
+    "expected_source_doc_ids": [
+      "s1-quote-falcon"
+    ],
+    "scenario_ref": "S1"
+  },
+  {
+    "question_id": "QA-05",
+    "question": "How many units of laptop 14in were delivered under delivery note DN-771?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "6 units",
+    "expected_source_doc_ids": [
+      "s1-dn-771"
+    ],
+    "scenario_ref": "S1"
+  },
+  {
+    "question_id": "QA-06",
+    "question": "How many units of laptop 14in were delivered under delivery note DN-772?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "4 units",
+    "expected_source_doc_ids": [
+      "s1-dn-772"
+    ],
+    "scenario_ref": "S1"
+  },
+  {
+    "question_id": "QA-07",
+    "question": "What was the total order value of purchase order PO-0042?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "AED 28,875.00",
+    "expected_source_doc_ids": [
+      "s1-po-0042"
+    ],
+    "scenario_ref": "S1"
+  },
+  {
+    "question_id": "QA-08",
+    "question": "What is the 15-digit TRN of Gulf Line IT Trading?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "100000000000002",
+    "expected_source_doc_ids": [
+      "s1-quote-gulfline",
+      "s1-inv-2291"
+    ],
+    "scenario_ref": "S1"
+  },
+  {
+    "question_id": "QA-09",
+    "question": "What is the unit price of Cat6 bulk cable on purchase order PO-0050?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "AED 320.00",
+    "expected_source_doc_ids": [
+      "s2-po-0050"
+    ],
+    "scenario_ref": "S2"
+  },
+  {
+    "question_id": "QA-10",
+    "question": "What is the invoiced unit price of Cat6 bulk cable on invoice INV-5510?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "AED 336.00",
+    "expected_source_doc_ids": [
+      "s2-inv-5510"
+    ],
+    "scenario_ref": "S2"
+  },
+  {
+    "question_id": "QA-11",
+    "question": "What is the unit price variance for Cat6 cable between PO-0050 and INV-5510?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "AED 16.00 per roll (+5% above PO price)",
+    "expected_source_doc_ids": [
+      "s2-po-0050",
+      "s2-inv-5510"
+    ],
+    "scenario_ref": "S2"
+  },
+  {
+    "question_id": "QA-12",
+    "question": "How many ergonomic office chairs were ordered under PO-0061?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "10 units",
+    "expected_source_doc_ids": [
+      "s3-po-0061"
+    ],
+    "scenario_ref": "S3"
+  },
+  {
+    "question_id": "QA-13",
+    "question": "How many ergonomic chairs were invoiced by Oasis Facility Services on INV-9041?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "12 units",
+    "expected_source_doc_ids": [
+      "s3-inv-9041"
+    ],
+    "scenario_ref": "S3"
+  },
+  {
+    "question_id": "QA-14",
+    "question": "How many ergonomic chairs were received according to delivery note DN-1090?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "10 units",
+    "expected_source_doc_ids": [
+      "s3-dn-1090"
+    ],
+    "scenario_ref": "S3"
+  },
+  {
+    "question_id": "QA-15",
+    "question": "What is the quantity discrepancy on invoice INV-9041 relative to goods received?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "Over-billed by 2 units (invoiced 12 vs received 10)",
+    "expected_source_doc_ids": [
+      "s3-dn-1090",
+      "s3-inv-9041"
+    ],
+    "scenario_ref": "S3"
+  },
+  {
+    "question_id": "QA-16",
+    "question": "What is the total amount of purchase order PO-0075?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "AED 1,548.75",
+    "expected_source_doc_ids": [
+      "s4-po-0075"
+    ],
+    "scenario_ref": "S4"
+  },
+  {
+    "question_id": "QA-17",
+    "question": "What items were quoted on quotation Q-4110 by Falcon Office Supplies LLC?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "15 boxes of Copy Paper A4 and 10 boxes of Ballpoint Pens Blue",
+    "expected_source_doc_ids": [
+      "s4-quote-falcon"
+    ],
+    "scenario_ref": "S4"
+  },
+  {
+    "question_id": "QA-18",
+    "question": "What payment terms are offered by Sandstone Furniture LLC on quote Q-6201?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "Net 45",
+    "expected_source_doc_ids": [
+      "s5-quote-sandstone"
+    ],
+    "scenario_ref": "S5"
+  },
+  {
+    "question_id": "QA-19",
+    "question": "What is the total value of purchase order PO-0088 issued to Sandstone Furniture LLC?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "AED 62,947.50",
+    "expected_source_doc_ids": [
+      "s5-po-0088"
+    ],
+    "scenario_ref": "S5"
+  },
+  {
+    "question_id": "QA-20",
+    "question": "What is the delivery lead time stated on quote Q-6201?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "14 days",
+    "expected_source_doc_ids": [
+      "s5-quote-sandstone"
+    ],
+    "scenario_ref": "S5"
+  },
+  {
+    "question_id": "QA-21",
+    "question": "What is the invoiced VAT amount on invoice INV-6001?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "AED 500.00",
+    "expected_source_doc_ids": [
+      "s6-inv-6001-vat"
+    ],
+    "scenario_ref": "S6"
+  },
+  {
+    "question_id": "QA-22",
+    "question": "What items and quantities were billed on scanned invoice INV-6004?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "15 units of industrial extension reel and 20 units of hard hat helmet",
+    "expected_source_doc_ids": [
+      "s6-inv-6004-scan"
+    ],
+    "scenario_ref": "S6"
+  },
+  {
+    "question_id": "QA-23",
+    "question": "What is the purchase requisition number for the IT equipment expansion?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "PR-1001",
+    "expected_source_doc_ids": [
+      "s1-pr-1001"
+    ],
+    "scenario_ref": "S1"
+  },
+  {
+    "question_id": "QA-24",
+    "question": "Which vendor provided quotation Q-3055 in landscape layout format?",
+    "is_answerable": true,
+    "expected_refusal": false,
+    "expected_answer": "Corniche Electrical Co.",
+    "expected_source_doc_ids": [
+      "s1-quote-corniche"
+    ],
+    "scenario_ref": "S1"
+  },
+  {
+    "question_id": "QA-25",
+    "question": "What is the warranty period for the 4K projector?",
+    "is_answerable": false,
+    "expected_refusal": true,
+    "expected_answer": "Refused: Information not found in documents",
+    "expected_source_doc_ids": [],
+    "scenario_ref": "Unanswerable"
+  },
+  {
+    "question_id": "QA-26",
+    "question": "What is the bank IBAN number for Falcon Office Supplies LLC?",
+    "is_answerable": false,
+    "expected_refusal": true,
+    "expected_answer": "Refused: Information not found in documents",
+    "expected_source_doc_ids": [],
+    "scenario_ref": "Unanswerable"
+  },
+  {
+    "question_id": "QA-27",
+    "question": "Who is the managing director of Corniche Electrical Co.?",
+    "is_answerable": false,
+    "expected_refusal": true,
+    "expected_answer": "Refused: Information not found in documents",
+    "expected_source_doc_ids": [],
+    "scenario_ref": "Unanswerable"
+  },
+  {
+    "question_id": "QA-28",
+    "question": "What is the serial number of the motherboard in laptop IT-LAP-14?",
+    "is_answerable": false,
+    "expected_refusal": true,
+    "expected_answer": "Refused: Information not found in documents",
+    "expected_source_doc_ids": [],
+    "scenario_ref": "Unanswerable"
+  },
+  {
+    "question_id": "QA-29",
+    "question": "What discount rate is agreed for bulk orders in calendar year 2028?",
+    "is_answerable": false,
+    "expected_refusal": true,
+    "expected_answer": "Refused: Information not found in documents",
+    "expected_source_doc_ids": [],
+    "scenario_ref": "Unanswerable"
+  },
+  {
+    "question_id": "QA-30",
+    "question": "What is the truck license plate number that delivered goods for delivery note DN-771?",
+    "is_answerable": false,
+    "expected_refusal": true,
+    "expected_answer": "Refused: Information not found in documents",
+    "expected_source_doc_ids": [],
+    "scenario_ref": "Unanswerable"
+  }
+]

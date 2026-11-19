@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-replay-s1-quote-gulfline",
+  "object": "chat.completion",
+  "created": 1732040000,
+  "model": "gpt-4o-mini",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"doc_type\": \"quotation\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Gulf Line IT Trading\",\n      \"page\": 1,\n      \"source_text\": \"Gulf Line IT Trading\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000002\",\n      \"page\": 1,\n      \"source_text\": \"TRN: 100000000000002\"\n    },\n    \"document_number\": {\n      \"value\": \"Q-1042\",\n      \"page\": 1,\n      \"source_text\": \"Number: Q-1042\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-03\",\n      \"page\": 1,\n      \"source_text\": \"Date: 2026-11-03\"\n    },\n    \"po_number\": null,\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 30\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 30\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"27500.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal: 27500.00\"\n    },\n    \"vat_amount\": {\n      \"value\": \"1375.00\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%): 1375.00\"\n    },\n    \"total\": {\n      \"value\": \"28875.00\",\n      \"page\": 1,\n      \"source_text\": \"Total: 28875.00\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"IT-LAP-14\",\n      \"description\": \"Laptop 14in Intel Core i7 16GB RAM 512GB SSD\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"1900.00\",\n      \"discount\": \"0.00\",\n      \"vat_rate\": \"5\",\n      \"line_total\": \"19000.00\",\n      \"page\": 1,\n      \"source_text\": \"1 IT-LAP-14 Laptop 14in Intel Core i7 16GB RAM 512GB SSD 10 EA 1900.00 19000.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"IT-MON-27\",\n      \"description\": \"Monitor 27in QHD IPS USB-C 75Hz\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"850.00\",\n      \"discount\": \"0.00\",\n      \"vat_rate\": \"5\",\n      \"line_total\": \"8500.00\",\n      \"page\": 1,\n      \"source_text\": \"2 IT-MON-27 Monitor 27in QHD IPS USB-C 75Hz 10 EA 850.00 8500.00\"\n    }\n  ]\n}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1250,
+    "completion_tokens": 477,
+    "total_tokens": 1727
+  }
+}

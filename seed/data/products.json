@@ -1,0 +1,242 @@
+[
+  {
+    "odoo_id": 101,
+    "code": "OFF-A4P",
+    "name": "Copy Paper A4 80gsm (Box of 5 reams)",
+    "category": "Office Supplies",
+    "uom": "BOX",
+    "reference_price_aed": "75.00"
+  },
+  {
+    "odoo_id": 102,
+    "code": "OFF-PEN-BLU",
+    "name": "Ballpoint Pens Medium Blue (Box of 50)",
+    "category": "Office Supplies",
+    "uom": "BOX",
+    "reference_price_aed": "35.00"
+  },
+  {
+    "odoo_id": 103,
+    "code": "OFF-PEN-BLK",
+    "name": "Ballpoint Pens Medium Black (Box of 50)",
+    "category": "Office Supplies",
+    "uom": "BOX",
+    "reference_price_aed": "35.00"
+  },
+  {
+    "odoo_id": 104,
+    "code": "OFF-HL-SET",
+    "name": "Highlighter Assorted Fluorescent Colors (Set of 6)",
+    "category": "Office Supplies",
+    "uom": "SET",
+    "reference_price_aed": "22.00"
+  },
+  {
+    "odoo_id": 105,
+    "code": "OFF-STAP-HVY",
+    "name": "Heavy Duty Desktop Stapler 100 Sheets",
+    "category": "Office Supplies",
+    "uom": "EA",
+    "reference_price_aed": "85.00"
+  },
+  {
+    "odoo_id": 106,
+    "code": "OFF-STAP-PIN",
+    "name": "Heavy Duty 23/13 Staple Pins (Box of 1000)",
+    "category": "Office Supplies",
+    "uom": "BOX",
+    "reference_price_aed": "15.00"
+  },
+  {
+    "odoo_id": 107,
+    "code": "OFF-NOTE-A5",
+    "name": "Spiral Hardcover Notebook A5 Lined (Pack of 10)",
+    "category": "Office Supplies",
+    "uom": "PK",
+    "reference_price_aed": "45.00"
+  },
+  {
+    "odoo_id": 108,
+    "code": "OFF-FOLD-A4",
+    "name": "Lever Arch File A4 75mm Spine (Pack of 10)",
+    "category": "Office Supplies",
+    "uom": "PK",
+    "reference_price_aed": "65.00"
+  },
+  {
+    "odoo_id": 109,
+    "code": "IT-LAP-14",
+    "name": "Laptop 14in Intel Core i7 16GB RAM 512GB SSD",
+    "category": "IT Equipment",
+    "uom": "EA",
+    "reference_price_aed": "1900.00"
+  },
+  {
+    "odoo_id": 110,
+    "code": "IT-LAP-16",
+    "name": "Laptop 16in Intel Core i7 32GB RAM 1TB SSD",
+    "category": "IT Equipment",
+    "uom": "EA",
+    "reference_price_aed": "3200.00"
+  },
+  {
+    "odoo_id": 111,
+    "code": "IT-MON-27",
+    "name": "Monitor 27in QHD IPS USB-C 75Hz",
+    "category": "IT Equipment",
+    "uom": "EA",
+    "reference_price_aed": "850.00"
+  },
+  {
+    "odoo_id": 112,
+    "code": "IT-MON-24",
+    "name": "Monitor 24in FHD IPS HDMI DisplayPort",
+    "category": "IT Equipment",
+    "uom": "EA",
+    "reference_price_aed": "450.00"
+  },
+  {
+    "odoo_id": 113,
+    "code": "IT-DOCK-TB",
+    "name": "Universal Thunderbolt 4 Docking Station 100W",
+    "category": "IT Equipment",
+    "uom": "EA",
+    "reference_price_aed": "650.00"
+  },
+  {
+    "odoo_id": 114,
+    "code": "IT-KEY-WL",
+    "name": "Wireless Keyboard and Optical Mouse Combo",
+    "category": "IT Equipment",
+    "uom": "SET",
+    "reference_price_aed": "120.00"
+  },
+  {
+    "odoo_id": 115,
+    "code": "IT-PRN-MFP",
+    "name": "Enterprise Multifunction Network Laser Printer A4",
+    "category": "IT Equipment",
+    "uom": "EA",
+    "reference_price_aed": "2400.00"
+  },
+  {
+    "odoo_id": 116,
+    "code": "IT-TON-BLK",
+    "name": "Enterprise High-Yield Black Toner Cartridge",
+    "category": "IT Equipment",
+    "uom": "EA",
+    "reference_price_aed": "280.00"
+  },
+  {
+    "odoo_id": 117,
+    "code": "IT-HEAD-NC",
+    "name": "Active Noise Cancelling Wireless Headset with Mic",
+    "category": "IT Equipment",
+    "uom": "EA",
+    "reference_price_aed": "350.00"
+  },
+  {
+    "odoo_id": 118,
+    "code": "IT-UPS-1500",
+    "name": "Line-Interactive UPS 1500VA LCD Display 230V",
+    "category": "IT Equipment",
+    "uom": "EA",
+    "reference_price_aed": "750.00"
+  },
+  {
+    "odoo_id": 119,
+    "code": "FUR-CHR-ERG",
+    "name": "Ergonomic High-Back Mesh Office Chair with Lumbar",
+    "category": "Furniture",
+    "uom": "EA",
+    "reference_price_aed": "580.00"
+  },
+  {
+    "odoo_id": 120,
+    "code": "FUR-CHR-VST",
+    "name": "Cantilever Visitor Armchair Black Leatherette",
+    "category": "Furniture",
+    "uom": "EA",
+    "reference_price_aed": "240.00"
+  },
+  {
+    "odoo_id": 121,
+    "code": "FUR-DSK-ADJ",
+    "name": "Motorized Height Adjustable Desk 160x80cm Oak",
+    "category": "Furniture",
+    "uom": "EA",
+    "reference_price_aed": "1250.00"
+  },
+  {
+    "odoo_id": 122,
+    "code": "FUR-DSK-STD",
+    "name": "Standard Office Workstation Desk 140x70cm Walnut",
+    "category": "Furniture",
+    "uom": "EA",
+    "reference_price_aed": "520.00"
+  },
+  {
+    "odoo_id": 123,
+    "code": "FUR-PED-3DR",
+    "name": "Underdesk Mobile 3-Drawer Steel Pedestal White",
+    "category": "Furniture",
+    "uom": "EA",
+    "reference_price_aed": "290.00"
+  },
+  {
+    "odoo_id": 124,
+    "code": "FUR-CAB-MTL",
+    "name": "Full Height 2-Door Metal Tambour Cabinet 180cm",
+    "category": "Furniture",
+    "uom": "EA",
+    "reference_price_aed": "680.00"
+  },
+  {
+    "odoo_id": 125,
+    "code": "FUR-TBL-MTG",
+    "name": "Executive Conference Meeting Table 8-Person 240x120cm",
+    "category": "Furniture",
+    "uom": "EA",
+    "reference_price_aed": "1600.00"
+  },
+  {
+    "odoo_id": 126,
+    "code": "MAT-CBL-CAT6",
+    "name": "Cat6 UTP Solid Bulk Ethernet Cable Roll 305m CMR",
+    "category": "Site Materials",
+    "uom": "ROLL",
+    "reference_price_aed": "320.00"
+  },
+  {
+    "odoo_id": 127,
+    "code": "MAT-SAF-HLM",
+    "name": "Industrial Safety Hard Hat Helmet White Ratchet",
+    "category": "Site Materials",
+    "uom": "EA",
+    "reference_price_aed": "45.00"
+  },
+  {
+    "odoo_id": 128,
+    "code": "MAT-SAF-VST",
+    "name": "High-Visibility Reflective Safety Vest Class 2 Yellow",
+    "category": "Site Materials",
+    "uom": "EA",
+    "reference_price_aed": "20.00"
+  },
+  {
+    "odoo_id": 129,
+    "code": "MAT-SAF-GLV",
+    "name": "Heavy-Duty Nitrile Foam Work Gloves (Pack of 12)",
+    "category": "Site Materials",
+    "uom": "PK",
+    "reference_price_aed": "60.00"
+  },
+  {
+    "odoo_id": 130,
+    "code": "MAT-CON-EXT",
+    "name": "Industrial Cable Extension Reel 50m Heavy Duty 16A",
+    "category": "Site Materials",
+    "uom": "EA",
+    "reference_price_aed": "220.00"
+  }
+]

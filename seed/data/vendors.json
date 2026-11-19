@@ -1,0 +1,74 @@
+[
+  {
+    "odoo_id": 1,
+    "name": "Falcon Office Supplies LLC",
+    "trn": "100000000000001",
+    "payment_terms_days": 30,
+    "lead_time_days": 3,
+    "address": "Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE (Fictional)",
+    "contact_email": "orders@falcon-supplies.fake",
+    "contact_phone": "+971 2 555 0101",
+    "category": "Office Supplies",
+    "notes": "Synthetic vendor for testing and evaluation. TRN is in reserved fake test range 100000000xxxxxx."
+  },
+  {
+    "odoo_id": 2,
+    "name": "Gulf Line IT Trading",
+    "trn": "100000000000002",
+    "payment_terms_days": 30,
+    "lead_time_days": 5,
+    "address": "Office 402, Tamouh Tower, Al Reem Island, Abu Dhabi, UAE (Fictional)",
+    "contact_email": "sales@gulfline-it.fake",
+    "contact_phone": "+971 2 555 0102",
+    "category": "IT Equipment",
+    "notes": "Synthetic vendor for testing and evaluation. TRN is in reserved fake test range 100000000xxxxxx."
+  },
+  {
+    "odoo_id": 3,
+    "name": "Oasis Facility Services",
+    "trn": "100000000000003",
+    "payment_terms_days": 45,
+    "lead_time_days": 7,
+    "address": "Building 7, ICAD 1, Musaffah South, Abu Dhabi, UAE (Fictional)",
+    "contact_email": "contracts@oasis-facilities.fake",
+    "contact_phone": "+971 2 555 0103",
+    "category": "Facility Services",
+    "notes": "Synthetic vendor for testing and evaluation. TRN is in reserved fake test range 100000000xxxxxx."
+  },
+  {
+    "odoo_id": 4,
+    "name": "Desert Build Materials",
+    "trn": "100000000000004",
+    "payment_terms_days": 60,
+    "lead_time_days": 10,
+    "address": "Plot 88, Mina Zayed Port Commercial District, Abu Dhabi, UAE (Fictional)",
+    "contact_email": "sales@desertbuild.fake",
+    "contact_phone": "+971 2 555 0104",
+    "category": "Site Materials",
+    "notes": "Synthetic vendor for testing and evaluation. TRN is in reserved fake test range 100000000xxxxxx."
+  },
+  {
+    "odoo_id": 5,
+    "name": "Corniche Electrical Co.",
+    "trn": "100000000000005",
+    "payment_terms_days": 30,
+    "lead_time_days": 4,
+    "address": "Ground Floor, Corniche Towers, Al Danah, Abu Dhabi, UAE (Fictional)",
+    "contact_email": "info@corniche-electrical.fake",
+    "contact_phone": "+971 2 555 0105",
+    "category": "Electrical & IT Supplies",
+    "notes": "Synthetic vendor for testing and evaluation. TRN is in reserved fake test range 100000000xxxxxx."
+  },
+  {
+    "odoo_id": 6,
+    "name": "Sandstone Furniture LLC",
+    "trn": "100000000000006",
+    "payment_terms_days": 45,
+    "lead_time_days": 14,
+    "address": "Showroom 3, Airport Road, Al Rawdah, Abu Dhabi, UAE (Fictional)",
+    "contact_email": "orders@sandstone-furniture.fake",
+    "contact_phone": "+971 2 555 0106",
+    "category": "Office Furniture",
+    "notes": "Synthetic vendor for testing and evaluation. TRN is in reserved fake test range 100000000xxxxxx."
+  }
+]
