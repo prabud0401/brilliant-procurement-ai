@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        working-directory: services/backend
+        run: uv sync --frozen
+
+      - name: Lint and format check
+        working-directory: services/backend
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy app
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        working-directory: services/backend
+        run: uv sync --frozen
+
+      - name: Run unit and security tests
+        working-directory: services/backend
+        run: uv run pytest -m "unit or security"
+
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL_MIGRATOR: postgresql+psycopg://postgres:postgres@localhost:5432/postgres
+      DATABASE_URL: postgresql+psycopg://app_user:app_user@localhost:5432/postgres
+      APP_ENV: local
+      JWT_SECRET: dev-secret-for-ci-testing-purposes-only-32c
+      JWT_ISSUER: brilliant-procurement-ai
+      DEMO_USER_PASSWORD: demo_ci_password_123
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        working-directory: services/backend
+        run: uv sync --frozen
+
+      - name: Run Alembic migrations cycle (up -> down -> up)
+        working-directory: services/backend
+        run: |
+          uv run alembic upgrade head
+          uv run alembic downgrade base
+          uv run alembic upgrade head
+
+      - name: Run integration tests
+        working-directory: services/backend
+        run: uv run pytest -m "integration"
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Gitleaks secret detection
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/repo" zricethezav/gitleaks:latest detect --source /repo --no-git -v
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build backend Docker image
+        run: docker build -t pda-backend:ci services/backend
