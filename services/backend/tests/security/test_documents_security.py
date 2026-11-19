@@ -150,6 +150,62 @@ def test_requester_and_manager_cannot_confirm_403(test_principals: dict[str, Pri
 
 
 @pytest.mark.security
+def test_requester_blocked_from_all_review_actions_403(
+    test_principals: dict[str, Principal],
+) -> None:
+    """Only Buyers may PATCH fields/lines, confirm, set vendor, and clear duplicates (design 7.2).
+
+    Requesters must be rejected with 403 FORBIDDEN for all of these review actions.
+    """
+    doc_id = uuid.uuid4()
+    field_id = uuid.uuid4()
+    line_id = uuid.uuid4()
+    vendor_id = uuid.uuid4()
+    client = TestClient(app)
+
+    app.dependency_overrides[get_current_principal] = lambda: test_principals["requester_1"]
+    try:
+        # 1. PATCH fields
+        r_field = client.patch(
+            f"/api/v1/documents/{doc_id}/fields/{field_id}",
+            json={"value": "New Value", "confirm": True},
+        )
+        assert r_field.status_code == 403
+        assert r_field.json()["code"] == "FORBIDDEN"
+
+        # 2. PATCH lines
+        r_line = client.patch(
+            f"/api/v1/documents/{doc_id}/lines/{line_id}",
+            json={"description": "Updated Item", "confirm": True},
+        )
+        assert r_line.status_code == 403
+        assert r_line.json()["code"] == "FORBIDDEN"
+
+        # 3. POST confirm
+        r_confirm = client.post(f"/api/v1/documents/{doc_id}/confirm")
+        assert r_confirm.status_code == 403
+        assert r_confirm.json()["code"] == "FORBIDDEN"
+
+        # 4. POST vendor
+        r_vendor = client.post(
+            f"/api/v1/documents/{doc_id}/vendor",
+            json={"vendor_id": str(vendor_id)},
+        )
+        assert r_vendor.status_code == 403
+        assert r_vendor.json()["code"] == "FORBIDDEN"
+
+        # 5. POST not-duplicate
+        r_dup = client.post(
+            f"/api/v1/documents/{doc_id}/not-duplicate",
+            json={"reason": "Valid separate purchase order for different branch"},
+        )
+        assert r_dup.status_code == 403
+        assert r_dup.json()["code"] == "FORBIDDEN"
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.security
 def test_cannot_confirm_when_flags_open_409(test_principals: dict[str, Principal]) -> None:
     """Document confirmation is blocked with 409 while open flags or review statuses exist."""
     doc_id = uuid.uuid4()

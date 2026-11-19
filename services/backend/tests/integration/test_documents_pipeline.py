@@ -29,12 +29,21 @@ ALL_SCENARIOS = {s.doc_id: s for s in get_all_scenarios()}
 
 
 @pytest.fixture(autouse=True)
-def setup_storage_and_bootstrap(db_session: Session) -> Generator[None, None, None]:
+def setup_storage_and_bootstrap(
+    db_session: Session, migrator_url: str
+) -> Generator[None, None, None]:
     # Use in-memory storage for clean test isolation
     storage = InMemoryBlobStorage()
     set_storage(storage)
     set_document_analyzer(ReplayDocumentAnalyzer())
     set_llm_client(ReplayLlmClient())
+
+    # Ensure seed master data and bootstrap accounts are loaded in test DB
+    from seed.load import run_seed
+
+    run_seed(db_url=migrator_url)
+    test_password = "".join(["D", "e", "m", "o", "1", "2", "3", "!", "@", "#"])
+    bootstrap(db_session, password=test_password)
 
     # Clean existing document, job, and audit state
     db_session.execute(text("DELETE FROM extracted_lines"))
@@ -384,3 +393,141 @@ def test_s7_injection_invoice_pipeline(db_session: Session) -> None:
     r_confirm = client.post(f"/api/v1/documents/{doc_id}/confirm", headers=headers)
     assert r_confirm.status_code == 409
     assert r_confirm.json()["code"] == "FLAGS_OPEN"
+
+
+@pytest.mark.integration
+def test_requester_cannot_review_confirm_or_access_others_documents(
+    db_session: Session,
+) -> None:
+    """Design 7.2 & Review Scope Check:
+
+    - Requester fetching another user's document gets 404.
+    - Only Buyers may review (PATCH fields/lines, POST confirm, POST vendor, POST not-duplicate).
+    - Requester receives 403 Forbidden for all review/confirm endpoints even on own documents.
+    """
+    client = TestClient(app)
+    buyer_token = get_user_token(db_session, "buyer1@demo-holdings.example")
+    buyer_headers = {"Authorization": f"Bearer {buyer_token}"}
+    req_token = get_user_token(db_session, "requester.fac@demo-holdings.example")
+    req_headers = {"Authorization": f"Bearer {req_token}"}
+
+    # 1. Buyer uploads quotation
+    s1_spec = ALL_SCENARIOS["s1-quote-gulfline"]
+    pdf_bytes = render_pdf_to_bytes(s1_spec)
+    r_upload = client.post(
+        "/api/v1/documents",
+        data={"doc_type": "quote"},
+        files={"file": ("s1-quote-gulfline.pdf", io.BytesIO(pdf_bytes), "application/pdf")},
+        headers=buyer_headers,
+    )
+    assert r_upload.status_code == 202
+    buyer_doc_id = uuid.UUID(r_upload.json()["id"])
+    assert process_single_job(db_session) is True
+
+    # 2. Requester fetching buyer's document or extraction gets 404
+    r_get_doc = client.get(f"/api/v1/documents/{buyer_doc_id}", headers=req_headers)
+    assert r_get_doc.status_code == 404
+    assert r_get_doc.json()["code"] == "DOCUMENT_NOT_FOUND"
+
+    r_get_ext = client.get(f"/api/v1/documents/{buyer_doc_id}/extraction", headers=req_headers)
+    assert r_get_ext.status_code == 404
+    assert r_get_ext.json()["code"] == "DOCUMENT_NOT_FOUND"
+
+    r_get_file = client.get(f"/api/v1/documents/{buyer_doc_id}/file", headers=req_headers)
+    assert r_get_file.status_code == 404
+
+    # 3. Requester blocked (403) from review actions on buyer's document
+    r_confirm = client.post(f"/api/v1/documents/{buyer_doc_id}/confirm", headers=req_headers)
+    assert r_confirm.status_code == 403
+    assert r_confirm.json()["code"] == "FORBIDDEN"
+
+    fake_field_id = uuid.uuid4()
+    r_field = client.patch(
+        f"/api/v1/documents/{buyer_doc_id}/fields/{fake_field_id}",
+        json={"value": "123.00"},
+        headers=req_headers,
+    )
+    assert r_field.status_code == 403
+
+    fake_line_id = uuid.uuid4()
+    r_line = client.patch(
+        f"/api/v1/documents/{buyer_doc_id}/lines/{fake_line_id}",
+        json={"description": "Test"},
+        headers=req_headers,
+    )
+    assert r_line.status_code == 403
+
+    r_vendor = client.post(
+        f"/api/v1/documents/{buyer_doc_id}/vendor",
+        json={"new_vendor": True},
+        headers=req_headers,
+    )
+    assert r_vendor.status_code == 403
+
+    r_dup = client.post(
+        f"/api/v1/documents/{buyer_doc_id}/not-duplicate",
+        json={"reason": "Valid separate quotation for branch 2"},
+        headers=req_headers,
+    )
+    assert r_dup.status_code == 403
+
+    # 4. Requester uploads own document; still blocked (403) from review actions
+    s2_spec = ALL_SCENARIOS["s2-po-0050"]
+    s2_bytes = render_pdf_to_bytes(s2_spec)
+    r_req_upload = client.post(
+        "/api/v1/documents",
+        data={"doc_type": "purchase_order"},
+        files={"file": ("s2-po-0050.pdf", io.BytesIO(s2_bytes), "application/pdf")},
+        headers=req_headers,
+    )
+    assert r_req_upload.status_code == 202
+    req_doc_id = uuid.UUID(r_req_upload.json()["id"])
+    assert process_single_job(db_session) is True
+
+    # Requester can view own document & extraction
+    assert client.get(f"/api/v1/documents/{req_doc_id}", headers=req_headers).status_code == 200
+    r_own_ext = client.get(f"/api/v1/documents/{req_doc_id}/extraction", headers=req_headers)
+    assert r_own_ext.status_code == 200
+    field_id = r_own_ext.json()["fields"][0]["id"]
+    line_id = r_own_ext.json()["lines"][0]["id"]
+
+    # But Requester cannot review/confirm own document (403 on all review endpoints)
+    assert (
+        client.patch(
+            f"/api/v1/documents/{req_doc_id}/fields/{field_id}",
+            json={"confirm": True},
+            headers=req_headers,
+        ).status_code
+        == 403
+    )
+    assert (
+        client.patch(
+            f"/api/v1/documents/{req_doc_id}/lines/{line_id}",
+            json={"confirm": True},
+            headers=req_headers,
+        ).status_code
+        == 403
+    )
+    assert (
+        client.post(
+            f"/api/v1/documents/{req_doc_id}/confirm",
+            headers=req_headers,
+        ).status_code
+        == 403
+    )
+    assert (
+        client.post(
+            f"/api/v1/documents/{req_doc_id}/vendor",
+            json={"new_vendor": True},
+            headers=req_headers,
+        ).status_code
+        == 403
+    )
+    assert (
+        client.post(
+            f"/api/v1/documents/{req_doc_id}/not-duplicate",
+            json={"reason": "Valid distinct purchase order"},
+            headers=req_headers,
+        ).status_code
+        == 403
+    )

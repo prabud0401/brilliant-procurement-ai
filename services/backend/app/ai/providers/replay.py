@@ -16,13 +16,15 @@ from app.ai.schemas import (
     OCRResult,
     OCRWord,
 )
+from app.core.config import settings
 
 logger = logging.getLogger("ai.providers.replay")
 
-_REPO_ROOT = Path(__file__).resolve().parents[5]
-_REPLAY_DIR = _REPO_ROOT / "eval" / "data" / "replay"
-if not _REPLAY_DIR.exists():
-    _REPLAY_DIR = Path("eval/data/replay")
+
+def get_replay_dir() -> Path:
+    """Return the resolved replay fixtures directory or raise clear error."""
+    return settings.get_replay_fixtures_dir()
+
 
 # Map of document numbers to doc_id
 _DOC_NUMBER_MAP: dict[str, str] = {
@@ -72,9 +74,11 @@ def resolve_doc_id(
     file_sha256: str | None = None,
     file_bytes: bytes | None = None,
     text_content: str | None = None,
+    replay_dir: Path | None = None,
 ) -> str:
     """Resolve which replay fixture doc_id to use."""
-    if doc_id and (_REPLAY_DIR / f"{doc_id}.di.json").exists():
+    r_dir = replay_dir or get_replay_dir()
+    if doc_id and (r_dir / f"{doc_id}.di.json").exists():
         return doc_id
 
     _init_sha256_map()
@@ -125,8 +129,18 @@ def resolve_doc_id(
 class ReplayDocumentAnalyzer:
     """DocumentAnalyzer serving saved Document Intelligence fixtures."""
 
-    def __init__(self, replay_dir: Path = _REPLAY_DIR) -> None:
-        self.replay_dir = replay_dir
+    def __init__(self, replay_dir: Path | str | None = None) -> None:
+        self._replay_dir = Path(replay_dir) if replay_dir is not None else None
+
+    @property
+    def replay_dir(self) -> Path:
+        if self._replay_dir is not None:
+            if not self._replay_dir.is_dir():
+                raise FileNotFoundError(
+                    f"Configured replay directory does not exist: {self._replay_dir}"
+                )
+            return self._replay_dir
+        return get_replay_dir()
 
     def analyze(
         self,
@@ -136,7 +150,12 @@ class ReplayDocumentAnalyzer:
         doc_id: str | None = None,
         file_sha256: str | None = None,
     ) -> OCRResult:
-        resolved_id = resolve_doc_id(doc_id=doc_id, file_sha256=file_sha256, file_bytes=file_bytes)
+        resolved_id = resolve_doc_id(
+            doc_id=doc_id,
+            file_sha256=file_sha256,
+            file_bytes=file_bytes,
+            replay_dir=self.replay_dir,
+        )
         di_path = self.replay_dir / f"{resolved_id}.di.json"
         if not di_path.exists():
             # Fallback to default
@@ -187,8 +206,18 @@ class ReplayDocumentAnalyzer:
 class ReplayLlmClient:
     """LlmClient serving saved OpenAI extraction fixtures."""
 
-    def __init__(self, replay_dir: Path = _REPLAY_DIR) -> None:
-        self.replay_dir = replay_dir
+    def __init__(self, replay_dir: Path | str | None = None) -> None:
+        self._replay_dir = Path(replay_dir) if replay_dir is not None else None
+
+    @property
+    def replay_dir(self) -> Path:
+        if self._replay_dir is not None:
+            if not self._replay_dir.is_dir():
+                raise FileNotFoundError(
+                    f"Configured replay directory does not exist: {self._replay_dir}"
+                )
+            return self._replay_dir
+        return get_replay_dir()
 
     def classify(self, first_page_text: str) -> str:
         text_lower = first_page_text.lower()
@@ -210,7 +239,10 @@ class ReplayLlmClient:
         file_sha256: str | None = None,
     ) -> tuple[ExtractionResult, dict[str, Any]]:
         resolved_id = resolve_doc_id(
-            doc_id=doc_id, file_sha256=file_sha256, text_content=ocr_result.content
+            doc_id=doc_id,
+            file_sha256=file_sha256,
+            text_content=ocr_result.content,
+            replay_dir=self.replay_dir,
         )
         openai_path = self.replay_dir / f"{resolved_id}.openai.json"
         if not openai_path.exists():

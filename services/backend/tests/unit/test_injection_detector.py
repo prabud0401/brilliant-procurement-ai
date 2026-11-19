@@ -9,10 +9,18 @@ import pytest
 
 from app.extraction.injection_detector import scan_text_for_injection
 
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-_INJ_CASES_FILE = _REPO_ROOT / "eval" / "data" / "injection_cases.json"
-if not _INJ_CASES_FILE.exists():
-    _INJ_CASES_FILE = Path("eval/data/injection_cases.json")
+
+def _get_inj_cases_file() -> Path:
+    if Path("eval/data/injection_cases.json").is_file():
+        return Path("eval/data/injection_cases.json")
+    for parent in Path(__file__).resolve().parents:
+        cand = parent / "eval" / "data" / "injection_cases.json"
+        if cand.is_file():
+            return cand
+    return Path("eval/data/injection_cases.json")
+
+
+_INJ_CASES_FILE = _get_inj_cases_file()
 
 
 @pytest.mark.unit

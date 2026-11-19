@@ -4,6 +4,10 @@
 useDefault = true
 
 [[allowlists]]
+description = "Ignore local uncommitted env file"
+paths = ['''\.env$''', '''^\.env$''']
+
+[[allowlists]]
 description = "Test-only dummy values in unit/integration tests"
 regexTarget = "match"
 regexes = [

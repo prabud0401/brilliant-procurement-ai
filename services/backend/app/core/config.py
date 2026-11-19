@@ -43,8 +43,41 @@ class Settings(BaseSettings):
 
     CORS_ORIGINS: list[str] = []
 
+    REPLAY_FIXTURES_DIR: str | None = None
+
+    def get_replay_fixtures_dir(self) -> Path:
+        """Resolve replay fixtures directory lazily.
+
+        Raises FileNotFoundError if missing when accessed.
+        """
+        if self.REPLAY_FIXTURES_DIR:
+            p = Path(self.REPLAY_FIXTURES_DIR)
+            if p.is_dir():
+                return p
+            raise FileNotFoundError(
+                f"Configured REPLAY_FIXTURES_DIR does not exist or is not a directory: {p}"
+            )
+
+        # Discovered relative to the repo when running from source
+        candidates: list[Path] = [Path.cwd() / "eval" / "data" / "replay"]
+        for parent in Path(__file__).resolve().parents:
+            candidates.append(parent / "eval" / "data" / "replay")
+
+        for candidate in candidates:
+            if candidate.is_dir():
+                return candidate
+
+        raise FileNotFoundError(
+            "Replay fixtures directory not found. Please set the REPLAY_FIXTURES_DIR environment "
+            "variable or ensure 'eval/data/replay' exists relative to the repository root."
+        )
+
     model_config = SettingsConfigDict(
-        env_file=(".env", "../../.env", Path(__file__).resolve().parents[3] / ".env"),
+        env_file=(
+            ".env",
+            "../../.env",
+            *([p / ".env" for p in Path(__file__).resolve().parents if (p / ".env").is_file()][:1]),
+        ),
         env_file_encoding="utf-8",
         extra="ignore",
     )

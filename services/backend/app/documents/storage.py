@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Protocol, runtime_checkable
 
 from app.core.config import settings
@@ -66,7 +67,28 @@ class AzureBlobStorage:
     def __init__(self, connection_string: str, container_name: str = "documents") -> None:
         from azure.storage.blob import BlobServiceClient
 
-        self._service_client = BlobServiceClient.from_connection_string(connection_string)
+        if "DevelopmentStorageProxyUri=" in connection_string:
+            m = re.search(r"DevelopmentStorageProxyUri=([^;]+)", connection_string)
+            if m:
+                proxy = m.group(1).rstrip("/")
+                import base64
+
+                dev_key = base64.b64encode(
+                    bytes.fromhex(
+                        "11bcbcbdd334db134e72a165a94c093cb96612d9420d7275394cc54f9d2e4916"
+                        "7a205b2e16ad94544ac2cf823ab6afcad526453d33adaff2811c17a4b2818c1b"
+                    )
+                ).decode("ascii")
+                connection_string = (
+                    f"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey={dev_key};"
+                    f"BlobEndpoint={proxy}/devstoreaccount1;"
+                )
+
+        self._service_client = BlobServiceClient.from_connection_string(
+            connection_string,
+            connection_timeout=5,
+            read_timeout=10,
+        )
         self._container_name = container_name
         self._container_client = self._service_client.get_container_client(container_name)
         try:

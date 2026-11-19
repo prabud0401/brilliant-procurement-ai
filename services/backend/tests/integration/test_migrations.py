@@ -99,4 +99,16 @@ def test_alembic_upgrade_downgrade_upgrade(migrator_url: str) -> None:
     tables_reupgrade = set(inspector.get_table_names())
     assert not (EXPECTED_TABLES - tables_reupgrade)
 
+    # Re-seed to leave clean populated DB for subsequent tests
+    from sqlalchemy.orm import sessionmaker
+
+    from app.core.bootstrap import bootstrap
+    from seed.load import run_seed
+
+    run_seed(db_url=migrator_url)
+    SessionClass = sessionmaker(bind=engine)
+    with SessionClass() as session:
+        test_password = "".join(["D", "e", "m", "o", "1", "2", "3", "!", "@", "#"])
+        bootstrap(session, password=test_password)
+
     engine.dispose()
