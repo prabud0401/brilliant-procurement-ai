@@ -1,6 +1,0 @@
-# Test-only dummy values (not secrets), reviewed
-/repo/services/backend/tests/unit/test_security_core.py:generic-api-key:61
-/repo/services/backend/tests/unit/test_security_core.py:generic-api-key:62
-/repo/services/backend/tests/integration/test_integrations_odoo.py:generic-api-key:85
-/repo/services/backend/tests/integration/test_integrations_odoo.py:generic-api-key:87
-/repo/services/backend/tests/integration/test_integrations_odoo.py:generic-api-key:91
