@@ -139,8 +139,8 @@ Brilliant receives a working application. These rules apply to everything in sec
 
 All code is written by the agy coding agent, one prompt per run. I write the prompt, review the result and decide whether it is merged.
 
-- **Prompts and logs** live in `/workspace/brilliant-runs/` (one `Rxx.prompt`, launcher, log and status line per run). Long-lived rules live in the repository (`AGENTS.md`, `prompts/AGENT_RULES.md`), so prompts stay short.
-- **Parallel runs** use separate git worktrees (`/workspace/brilliant-runs/wt-Rxx`), each on its own branch, and each run owns its own folders (section 7 lists them). At most two runs at once, so agent quota and review stay under control.
+- **Prompts and logs** live in a working folder outside the repository (one prompt, launcher, log and status line per run). Long-lived rules live in the repository (`AGENTS.md`, `prompts/AGENT_RULES.md`), so prompts stay short.
+- **Parallel runs** use separate git worktrees, each on its own branch, and each run owns its own folders (section 7 lists them). At most two runs at once, so agent quota and review stay under control.
 - **Every run ends with a self-check**: lint, type checks, the tests it added and the existing suite, then a pushed branch and a short report.
 - **Review** reads the diff, CI and acceptance list. Small fixes go back to the same agent conversation. A run that fails review twice is split, and the part that is not ready is cut from scope rather than rushed.
 - **No secrets** in code, prompts, logs or fixtures. CI and deployment use GitHub secrets and OpenID Connect federated credentials.
@@ -374,10 +374,10 @@ flowchart LR
 
 | ID | Risk | Chance | Impact | What we do about it |
 |---|---|---|---|---|
-| R-01 | Agent quota runs out (shared with another project on the same account) | Medium | Delay | Runs budgeted per day; other agent work on the same account kept light until Monday (to be agreed); fix-ups take priority; scope is cut rather than the deadline moved |
+| R-01 | Coding-agent quota runs out | Medium | Delay | Runs budgeted per day; fix-ups take priority; scope is cut rather than the deadline moved |
 | R-02 | A big run comes back incomplete or breaks earlier work | Medium | Delay | Narrow owned folders, the full suite runs on every pull request, one follow-up then split; the unfinished part is cut |
 | R-03 | Parallel runs conflict on shared files | Medium | Rework | Whole schema in R01; each run owns its folders; rebase before merge |
-| R-04 | gpt-4o-mini cannot be deployed in UAE North on pd-sub-01, or quota is zero | Medium | Gate G1 slips | Checked before G1 on Saturday morning; fallback is another small model or another region recorded as a residency exception, with the cost re-checked |
+| R-04 | gpt-4o-mini cannot be deployed in UAE North on the demo subscription, or quota is zero | Medium | Gate G1 slips | Checked before G1 on Saturday morning; fallback is another small model or another region recorded as a residency exception, with the cost re-checked |
 | R-05 | Gate approvals come late | Low | Delay | Gates are fixed times with a short ready-to-approve message; the build continues on replay while waiting |
 | R-06 | Container Apps or Postgres provisioning fails in UAE North | Low | Hosting slips | Infrastructure tested with what-if on Friday; fallback region chosen in advance; the video and local run as backup |
 | R-07 | Replay fixtures differ from live model output | Medium | Late bugs | Live run on Saturday evening leaves Sunday for fixes |
