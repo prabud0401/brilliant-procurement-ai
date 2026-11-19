@@ -23,21 +23,21 @@ def test_bootstrap_idempotent_and_roles_login(db_session: Session) -> None:
     # Run 1: First bootstrap
     res1 = bootstrap(db_session, password=test_password)
     assert res1["departments_created"] == 3
-    assert res1["users_created"] == 7
+    assert res1["users_created"] == 8
 
     # Verify counts in DB
     assert db_session.query(Department).count() == 3
-    assert db_session.query(User).count() == 7
+    assert db_session.query(User).count() == 8
 
     # Run 2: Second bootstrap (idempotency check)
     res2 = bootstrap(db_session, password=test_password)
     assert res2["departments_created"] == 0
     assert res2["users_created"] == 0
-    assert res2["users_updated"] == 7
+    assert res2["users_updated"] == 8
 
     # Counts must remain unchanged
     assert db_session.query(Department).count() == 3
-    assert db_session.query(User).count() == 7
+    assert db_session.query(User).count() == 8
 
     client = TestClient(app)
 

@@ -36,7 +36,7 @@ def test_api_auth_and_audit_lifecycle(db_session: Session) -> None:
 
     # 2. Bootstrap demo accounts
     boot_res = bootstrap(db_session, password=test_password)
-    assert boot_res["users_created"] == 7
+    assert boot_res["users_created"] == 8
     assert boot_res["departments_created"] == 3
 
     user_req_fac = (

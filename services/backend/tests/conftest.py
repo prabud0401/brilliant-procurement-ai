@@ -67,7 +67,34 @@ def detect_db_urls() -> tuple[str, str]:
     )
 
 
-MIGRATOR_DB_URL, APP_USER_DB_URL = detect_db_urls()
+TEST_DB_NAME = os.environ.get("TEST_DB_NAME", "brilliant_test")
+
+
+def _use_test_database(migrator: str, app_user: str) -> tuple[str, str]:
+    """Point both URLs at a dedicated test database so tests never touch dev data."""
+    from sqlalchemy.engine import make_url
+
+    m_url, a_url = make_url(migrator), make_url(app_user)
+    try:
+        admin = create_engine(
+            m_url.set(database="postgres"), isolation_level="AUTOCOMMIT", pool_pre_ping=True
+        )
+        with admin.connect() as conn:
+            exists = conn.exec_driver_sql(
+                "SELECT 1 FROM pg_database WHERE datname = %s", (TEST_DB_NAME,)
+            ).scalar()
+            if not exists:
+                conn.exec_driver_sql(f'CREATE DATABASE "{TEST_DB_NAME}"')
+        admin.dispose()
+    except Exception:
+        pass  # database unreachable: unit tests still run
+    return (
+        m_url.set(database=TEST_DB_NAME).render_as_string(hide_password=False),
+        a_url.set(database=TEST_DB_NAME).render_as_string(hide_password=False),
+    )
+
+
+MIGRATOR_DB_URL, APP_USER_DB_URL = _use_test_database(*detect_db_urls())
 os.environ["DATABASE_URL_MIGRATOR"] = MIGRATOR_DB_URL
 os.environ["DATABASE_URL"] = APP_USER_DB_URL
 settings.DATABASE_URL_MIGRATOR = MIGRATOR_DB_URL
