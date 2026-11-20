@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     AI_DAILY_BUDGET_AED: float = 50.0
     AI_LOW_CONFIDENCE_THRESHOLD: float = 0.80
 
+    APPLICATIONINSIGHTS_CONNECTION_STRING: str | None = None
+    OTEL_DEBUG: bool | str = False
+
     CORS_ORIGINS: list[str] = []
 
     REPLAY_FIXTURES_DIR: str | None = None

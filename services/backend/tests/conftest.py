@@ -129,7 +129,7 @@ def migrator_url() -> str:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def ensure_database_migrated(migrator_url: str) -> None:
+def ensure_database_migrated(migrator_url: str) -> Generator[None, None, None]:
     """Ensure database schema is up to date before integration tests run."""
     backend_dir = Path(__file__).resolve().parents[1]
     alembic_cfg = Config(str(backend_dir / "alembic.ini"))
@@ -165,6 +165,31 @@ def ensure_database_migrated(migrator_url: str) -> None:
         engine.dispose()
     except Exception:
         # Ignore if database is not reachable (e.g. during unit tests without db)
+        pass
+
+    yield
+
+    try:
+        engine = create_engine(migrator_url)
+        with engine.begin() as conn:
+            from sqlalchemy import text
+
+            conn.execute(
+                text(
+                    "TRUNCATE TABLE jobs, documents, extractions, extracted_fields, "
+                    "extracted_lines, chunks, injection_flags, comparisons, "
+                    "matches, qa_logs CASCADE;"
+                )
+            )
+        from app.core.bootstrap import bootstrap
+        from seed.load import run_seed
+
+        run_seed(db_url=migrator_url)
+        SessionClass = sessionmaker(bind=engine)
+        with SessionClass() as session:
+            bootstrap(session)
+        engine.dispose()
+    except Exception:
         pass
 
 

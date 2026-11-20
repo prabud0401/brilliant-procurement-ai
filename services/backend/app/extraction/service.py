@@ -24,6 +24,7 @@ from app.documents.storage import get_storage
 from app.extraction.confidence import calculate_field_confidence
 from app.extraction.injection_detector import scan_text_for_injection
 from app.extraction.validation import parse_decimal, validate_extracted_data
+from app.observability.ai_events import emit_ai_metric_event
 
 logger = logging.getLogger("extraction.service")
 
@@ -134,6 +135,18 @@ def run_extraction(session: Session, document_id: uuid.UUID) -> Extraction:
     est_cost = calculate_cost_aed(tokens_in, tokens_out)
     latency_ms = metadata.get("latency_ms", 0)
     llm_model = metadata.get("model", "gpt-4o-mini")
+
+    emit_ai_metric_event(
+        task="extraction",
+        model=llm_model,
+        prompt_version=prompt_version,
+        latency_ms=latency_ms,
+        tokens_in=tokens_in,
+        tokens_out=tokens_out,
+        estimated_cost=est_cost,
+        refusal_flag=False,
+        injection_flag=bool(findings),
+    )
 
     # Determine extraction version number
     prev_count = session.execute(

@@ -30,9 +30,14 @@ from app.core.security import create_access_token, verify_password
 from app.documents.router import router as documents_router
 from app.extraction.router import router as extraction_router
 from app.matching.router import exceptions_router, matches_router
+from app.metrics.router import router as metrics_router
+from app.observability import setup_observability
 from app.orders.router import po_router, pr_router
 from app.qa.router import router as qa_router
 from app.settings_api.router import router as settings_router
+
+# Initialize observability (OpenTelemetry, correlation, log redaction)
+setup_observability("api")
 
 # Simple in-memory IP rate limiter for login
 LOGIN_ATTEMPTS: dict[str, list[float]] = defaultdict(list)
@@ -202,6 +207,7 @@ api_v1.include_router(matches_router)
 api_v1.include_router(exceptions_router)
 api_v1.include_router(settings_router)
 api_v1.include_router(qa_router)
+api_v1.include_router(metrics_router)
 
 
 @api_v1.get("/me", response_model=MeResponse, tags=["auth"])
