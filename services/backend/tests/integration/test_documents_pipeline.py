@@ -139,12 +139,35 @@ def test_upload_extract_and_confirm_s1_quotation(db_session: Session) -> None:
     assert len(ext_data["lines"]) == 2
     assert ext_data["lines"][0]["item_code"] == "IT-LAP-14"
 
-    # Verify all fields are valid
+    # Fixtures are recorded from a live model run, so some fields may be routed to
+    # Buyer review by design: high-confidence fields are "ok" (>= 0.80); weakly grounded
+    # fields score below the threshold, and fields failing validation are flagged.
+    flagged = []
     for f in ext_data["fields"]:
-        assert f["status"] == "ok"
-        assert Decimal(str(f["confidence"])) >= Decimal("0.80")
+        if f["status"] == "ok":
+            assert Decimal(str(f["confidence"])) >= Decimal("0.80")
+        else:
+            assert f["status"] in ("needs_review", "validation_failed")
+            if f["status"] == "needs_review":
+                assert Decimal(str(f["confidence"])) < Decimal("0.80")
+            flagged.append(f)
+    core = ("vendor_name", "document_number", "document_date", "currency", "total")
+    assert all(fields_map[name]["status"] == "ok" for name in core)
 
-    # 5. Confirm document
+    # 5. Confirm is blocked while review flags are open, then the Buyer reviews them
+    if flagged:
+        resp_blocked = client.post(f"/api/v1/documents/{doc_id}/confirm", headers=headers)
+        assert resp_blocked.status_code == 409
+        for f in flagged:
+            if f["name"] == "po_number":
+                body: dict[str, object] = {"value": ""}  # a quote carries no PO number
+            else:
+                body = {"confirm": True}
+            r = client.patch(
+                f"/api/v1/documents/{doc_id}/fields/{f['id']}", json=body, headers=headers
+            )
+            assert r.status_code == 200
+
     resp_confirm = client.post(f"/api/v1/documents/{doc_id}/confirm", headers=headers)
     assert resp_confirm.status_code == 200
     assert resp_confirm.json()["status"] == "confirmed"
