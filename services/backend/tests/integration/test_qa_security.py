@@ -104,7 +104,7 @@ def qa_security_fixture(db_session: Session, migrator_url: str) -> dict[str, obj
     }
 
 
-@pytest.mark.security
+@pytest.mark.integration
 def test_cross_user_leak_attempt_refused(qa_security_fixture: dict[str, object]) -> None:
     """User A asks about User B's private quote -> empty retrieved chunks -> refused."""
     client = TestClient(app)
@@ -123,7 +123,7 @@ def test_cross_user_leak_attempt_refused(qa_security_fixture: dict[str, object])
     assert len(data["answer"]) == 0
 
 
-@pytest.mark.security
+@pytest.mark.integration
 def test_scope_filter_pointing_at_another_user_document_returns_404(
     qa_security_fixture: dict[str, object],
 ) -> None:
@@ -146,7 +146,7 @@ def test_scope_filter_pointing_at_another_user_document_returns_404(
     assert resp.json().get("code") == "NOT_FOUND"
 
 
-@pytest.mark.security
+@pytest.mark.integration
 def test_admin_token_to_qa_ask_returns_403_forbidden(
     qa_security_fixture: dict[str, object],
 ) -> None:
@@ -164,7 +164,7 @@ def test_admin_token_to_qa_ask_returns_403_forbidden(
     assert resp.json().get("code") == "FORBIDDEN"
 
 
-@pytest.mark.security
+@pytest.mark.integration
 def test_prompt_injection_in_question_refused_and_audited(
     db_session: Session, qa_security_fixture: dict[str, object]
 ) -> None:
@@ -215,7 +215,7 @@ class HallucinatingAnswerWriter(AnswerWriter):
         )
 
 
-@pytest.mark.security
+@pytest.mark.integration
 def test_ungrounded_answer_dropped_by_grounding_verification(
     qa_security_fixture: dict[str, object],
 ) -> None:
