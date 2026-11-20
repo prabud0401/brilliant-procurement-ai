@@ -21,7 +21,7 @@ import json
 import logging
 from datetime import datetime, timezone
 
-from eval.runner import EvaluationRunner
+from eval.runner import CostLimitExceeded, EvaluationRunner
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("eval.run")
@@ -57,6 +57,11 @@ def main() -> int:
         help="Maximum allowable AI budget in USD for live evaluation (default: 0.50)",
     )
     parser.add_argument(
+        "--record-replay",
+        action="store_true",
+        help="Record live Document Intelligence and OpenAI extraction fixtures (live mode only)",
+    )
+    parser.add_argument(
         "--data-dir",
         type=str,
         default=str(_REPO_ROOT / "eval" / "data"),
@@ -64,6 +69,10 @@ def main() -> int:
     )
 
     args = parser.parse_args()
+
+    if args.record_replay and args.mode != "live":
+        print("Error: --record-replay is only supported in live mode (--mode live).", file=sys.stderr)
+        return 1
 
     # Determine report output directory
     if args.out:
@@ -80,6 +89,8 @@ def main() -> int:
             data_dir=args.data_dir,
             max_cost_usd=args.max_cost_usd,
             confirm_live=args.confirm_live,
+            record_replay=args.record_replay,
+            out_dir=out_dir,
         )
 
         if args.mode == "live":
@@ -89,6 +100,33 @@ def main() -> int:
             print("==================================================")
 
         report = runner.run()
+
+    except CostLimitExceeded as exc:
+        report = getattr(exc, "report", None)
+        if report:
+            json_path = out_dir / "report.json"
+            md_path = out_dir / "report.md"
+
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(report.to_dict(), f, indent=2)
+
+            with open(md_path, "w", encoding="utf-8") as f:
+                f.write(report.to_markdown())
+
+            print("\n" + report.to_markdown() + "\n")
+            print(f"Reports written to: {out_dir}")
+            print(f"  - JSON: {json_path}")
+            print(f"  - Markdown: {md_path}")
+            print(f"\nABORTED: {exc}", file=sys.stderr)
+            if report.actual_cost_usd is not None:
+                print(
+                    f"Actual Spend: ${report.actual_cost_usd:.4f} USD "
+                    f"(Tokens In: {report.tokens_in}, Tokens Out: {report.tokens_out})",
+                    file=sys.stderr,
+                )
+        else:
+            print(f"\nEvaluation failed with error: {exc}", file=sys.stderr)
+        return 1
 
     except Exception as exc:
         print(f"\nEvaluation failed with error: {exc}", file=sys.stderr)
@@ -109,6 +147,12 @@ def main() -> int:
     print(f"Reports written to: {out_dir}")
     print(f"  - JSON: {json_path}")
     print(f"  - Markdown: {md_path}")
+    if report.actual_cost_usd is not None:
+        print(
+            f"Actual Spend: ${report.actual_cost_usd:.4f} USD "
+            f"(Tokens In: {report.tokens_in}, Tokens Out: {report.tokens_out}, "
+            f"Total Tokens: {report.tokens_in + report.tokens_out})"
+        )
 
     if not report.all_passed:
         failed_list = [m.id for m in report.metrics if not m.passed]

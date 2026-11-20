@@ -12,17 +12,69 @@ from app.core.config import settings
 from app.core.errors import ProblemException
 from app.core.models import Extraction, Setting
 
-# gpt-4o-mini pricing: $0.15 / 1M prompt tokens, $0.60 / 1M completion tokens, USD/AED = 3.6725
-PRICE_PER_INPUT_TOKEN_AED = Decimal("0.0000005509")
-PRICE_PER_OUTPUT_TOKEN_AED = Decimal("0.0000022035")
+USD_TO_AED = Decimal("3.6725")
+
+# Price table in USD per 1M tokens (prompt / completion)
+MODEL_PRICES_USD_PER_1M: dict[str, dict[str, Decimal]] = {
+    "gpt-5-mini": {"input": Decimal("0.25"), "output": Decimal("2.00")},
+    "gpt-5.4-mini": {"input": Decimal("0.75"), "output": Decimal("4.50")},
+    "gpt-4o-mini": {"input": Decimal("0.15"), "output": Decimal("0.60")},
+    "text-embedding-3-small": {"input": Decimal("0.02"), "output": Decimal("0.00")},
+}
+
+# Conservative rates for unknown models: highest listed rates in the table
+UNKNOWN_MODEL_INPUT_PRICE_USD_PER_1M = max(p["input"] for p in MODEL_PRICES_USD_PER_1M.values())
+UNKNOWN_MODEL_OUTPUT_PRICE_USD_PER_1M = max(p["output"] for p in MODEL_PRICES_USD_PER_1M.values())
 
 
-def calculate_cost_aed(tokens_in: int, tokens_out: int) -> Decimal:
+def get_model_token_rates_usd(model: str | None = None) -> tuple[Decimal, Decimal]:
+    """Return (input_rate_usd, output_rate_usd) per token for model.
+
+    If model is unknown, falls back to the most expensive listed rate (conservative).
+    """
+    model_key = (model or settings.AZURE_OPENAI_DEPLOYMENT or "").strip().lower()
+
+    rates: dict[str, Decimal] | None = None
+    if model_key in MODEL_PRICES_USD_PER_1M:
+        rates = MODEL_PRICES_USD_PER_1M[model_key]
+    else:
+        # Check substring match (e.g. deployment aliases)
+        for key, price_dict in MODEL_PRICES_USD_PER_1M.items():
+            if key in model_key:
+                rates = price_dict
+                break
+
+    if rates is None:
+        rates = {
+            "input": UNKNOWN_MODEL_INPUT_PRICE_USD_PER_1M,
+            "output": UNKNOWN_MODEL_OUTPUT_PRICE_USD_PER_1M,
+        }
+
+    rate_in_usd = rates["input"] / Decimal("1000000")
+    rate_out_usd = rates["output"] / Decimal("1000000")
+    return rate_in_usd, rate_out_usd
+
+
+def calculate_cost_usd(tokens_in: int, tokens_out: int, model: str | None = None) -> Decimal:
+    """Calculate estimated cost in USD for LLM tokens."""
+    rate_in_usd, rate_out_usd = get_model_token_rates_usd(model)
+    return (Decimal(tokens_in) * rate_in_usd) + (Decimal(tokens_out) * rate_out_usd)
+
+
+def calculate_cost_aed(tokens_in: int, tokens_out: int, model: str | None = None) -> Decimal:
     """Calculate estimated cost in AED for LLM tokens."""
-    cost = (Decimal(tokens_in) * PRICE_PER_INPUT_TOKEN_AED) + (
-        Decimal(tokens_out) * PRICE_PER_OUTPUT_TOKEN_AED
-    )
-    return cost.quantize(Decimal("0.0001"))
+    cost_usd = calculate_cost_usd(tokens_in, tokens_out, model)
+    cost_aed = cost_usd * USD_TO_AED
+    return cost_aed.quantize(Decimal("0.0001"))
+
+
+# Backward-compatibility constants
+PRICE_PER_INPUT_TOKEN_AED = (
+    MODEL_PRICES_USD_PER_1M["gpt-4o-mini"]["input"] / Decimal("1000000") * USD_TO_AED
+)
+PRICE_PER_OUTPUT_TOKEN_AED = (
+    MODEL_PRICES_USD_PER_1M["gpt-4o-mini"]["output"] / Decimal("1000000") * USD_TO_AED
+)
 
 
 def record_ai_call_metrics(
@@ -36,7 +88,7 @@ def record_ai_call_metrics(
     injection_flag: bool = False,
 ) -> Decimal:
     """Calculate cost and emit an AI metric event per NFR-OBS-02."""
-    cost = calculate_cost_aed(tokens_in, tokens_out)
+    cost = calculate_cost_aed(tokens_in, tokens_out, model=model)
     try:
         from app.observability.ai_events import emit_ai_metric_event
 

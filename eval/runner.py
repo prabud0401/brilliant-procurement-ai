@@ -10,7 +10,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
-from app.ai.cost import calculate_cost_aed
+from app.ai.cost import calculate_cost_aed, calculate_cost_usd
 from app.ai.factory import (
     get_answer_writer,
     get_document_analyzer,
@@ -55,6 +55,49 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DATA_DIR = _REPO_ROOT / "eval" / "data"
 
 
+class CostLimitExceeded(Exception):
+    """Raised when live AI spending would exceed max_cost_usd."""
+
+    def __init__(self, message: str, report: EvaluationReport | None = None) -> None:
+        super().__init__(message)
+        self.report = report
+
+
+class RunningCostMeter:
+    """Running cost meter summing actual token usage of every live call."""
+
+    def __init__(self, max_cost_usd: float, default_model: str | None = None) -> None:
+        self.max_cost_usd = max_cost_usd
+        self.default_model = default_model
+        self.total_cost_usd = 0.0
+        self.tokens_in = 0
+        self.tokens_out = 0
+        self.call_count = 0
+
+    def record_usage(
+        self,
+        tokens_in: int,
+        tokens_out: int,
+        model: str | None = None,
+    ) -> float:
+        call_model = model or self.default_model
+        call_cost = float(calculate_cost_usd(tokens_in, tokens_out, call_model))
+        if (self.total_cost_usd + call_cost) > self.max_cost_usd:
+            self.total_cost_usd += call_cost
+            self.tokens_in += tokens_in
+            self.tokens_out += tokens_out
+            self.call_count += 1
+            raise CostLimitExceeded(
+                f"Live AI spending ${self.total_cost_usd:.4f} USD exceeds "
+                f"maximum allowed budget of ${self.max_cost_usd:.4f} USD."
+            )
+        self.total_cost_usd += call_cost
+        self.tokens_in += tokens_in
+        self.tokens_out += tokens_out
+        self.call_count += 1
+        return call_cost
+
+
 class EvaluationRunner:
     """Executes evaluation pipeline on documents, questions, attacks, and comparisons."""
 
@@ -64,17 +107,25 @@ class EvaluationRunner:
         data_dir: Path | str | None = None,
         max_cost_usd: float = 0.50,
         confirm_live: bool = False,
+        record_replay: bool = False,
+        out_dir: Path | str | None = None,
     ) -> None:
         self.mode = mode.lower()
         self.data_dir = Path(data_dir or DEFAULT_DATA_DIR)
         self.max_cost_usd = max_cost_usd
         self.confirm_live = confirm_live
+        self.record_replay = record_replay
+        self.out_dir = Path(out_dir) if out_dir else None
 
         self.truth_dir = self.data_dir / "truth"
         self.replay_dir = self.data_dir / "replay"
+        self.pdf_dir = _REPO_ROOT / "tools" / "datagen" / "out"
         self.manifest_path = self.data_dir / "manifest.json"
         self.qa_path = self.data_dir / "qa_questions.json"
         self.injections_path = self.data_dir / "injection_cases.json"
+
+        if self.record_replay and self.mode != "live":
+            raise ValueError("--record-replay is only supported in live mode.")
 
         # Validate live preconditions
         if self.mode == "live":
@@ -92,16 +143,41 @@ class EvaluationRunner:
                 "Live mode costs money. You must explicitly provide --confirm-live to execute live evaluation."
             )
 
+    def _document_bytes(self, doc_id: str) -> bytes:
+        """Return the generated PDF for live mode; replay mode resolves by doc_id."""
+        if self.mode != "live":
+            return b""
+        pdf_path = self.pdf_dir / f"{doc_id}.pdf"
+        if not pdf_path.exists():
+            raise FileNotFoundError(
+                f"Missing generated document {pdf_path}. Run 'make datagen' first."
+            )
+        return pdf_path.read_bytes()
+
     def estimate_live_cost_usd(self) -> float:
-        """Estimate token and dollar cost for live evaluation run."""
-        # Estimated tokens: 20 docs (~1500 in, 450 out) + 30 Q&A (~500 in, 80 out)
-        estimated_input_tokens = (20 * 1500) + (30 * 500)
-        estimated_output_tokens = (20 * 450) + (30 * 80)
-        # gpt-4o-mini pricing: $0.15/1M in, $0.60/1M out
-        cost_usd = (estimated_input_tokens * 0.00000015) + (estimated_output_tokens * 0.00000060)
-        # Plus Document Intelligence F0 / S0 small overhead
-        cost_usd += 20 * 0.001
-        return round(cost_usd, 4)
+        """Estimate token and dollar cost for live evaluation run with reasoning headroom."""
+        deployment = settings.AZURE_OPENAI_DEPLOYMENT
+        # Estimated tokens with realistic reasoning headroom:
+        # 20 docs extraction: ~2500 input tokens, ~3000 completion tokens (including reasoning)
+        # 30 Q&A questions: ~2000 input tokens, ~1000 completion tokens (including reasoning)
+        doc_in = 20 * 2500
+        doc_out = 20 * 3000
+        qa_in = 30 * 2000
+        qa_out = 30 * 1000
+        total_in = doc_in + qa_in
+        total_out = doc_out + qa_out
+
+        chat_cost_usd = calculate_cost_usd(total_in, total_out, deployment)
+
+        # Embeddings: ~30 chunks * 250 tokens = ~7500 input tokens
+        embed_in = 7500
+        embed_cost_usd = calculate_cost_usd(
+            embed_in, 0, settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT
+        )
+
+        # DI F0 cost is 0.0 USD
+        total_cost = chat_cost_usd + embed_cost_usd
+        return round(float(total_cost), 4)
 
     def run(self) -> EvaluationReport:
         """Execute full evaluation suite and calculate all AIQ metrics."""
@@ -118,6 +194,54 @@ class EvaluationRunner:
                     f"budget of ${self.max_cost_usd:.4f} USD."
                 )
 
+        cost_meter = RunningCostMeter(
+            max_cost_usd=self.max_cost_usd,
+            default_model=settings.AZURE_OPENAI_DEPLOYMENT,
+        )
+
+        try:
+            return self._run_pipeline(start_time, cost_estimate, cost_meter)
+        except CostLimitExceeded as exc:
+            duration = time.time() - start_time
+            timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+            aborted_report = EvaluationReport(
+                timestamp=timestamp,
+                mode=self.mode,
+                provider="replay" if self.mode == "replay" else "live",
+                model=settings.AZURE_OPENAI_DEPLOYMENT,
+                prompt_version="v1",
+                metrics=[],
+                documents_evaluated=0,
+                questions_evaluated=0,
+                injection_cases_evaluated=0,
+                cost_estimate_usd=cost_estimate,
+                actual_cost_usd=cost_meter.total_cost_usd,
+                tokens_in=cost_meter.tokens_in,
+                tokens_out=cost_meter.tokens_out,
+                duration_seconds=duration,
+                aborted=True,
+                abort_reason=str(exc),
+            )
+
+            if self.out_dir is not None:
+                out_p = Path(self.out_dir)
+                out_p.mkdir(parents=True, exist_ok=True)
+                with open(out_p / "report.json", "w", encoding="utf-8") as f:
+                    json.dump(aborted_report.to_dict(), f, indent=2)
+                with open(out_p / "report.md", "w", encoding="utf-8") as f:
+                    f.write(aborted_report.to_markdown())
+
+            logger.error("Run aborted cleanly due to cost limit: %s", exc)
+            exc.report = aborted_report
+            raise exc
+
+    def _run_pipeline(
+        self,
+        start_time: float,
+        cost_estimate: float | None,
+        cost_meter: RunningCostMeter,
+    ) -> EvaluationReport:
         # Initialize providers
         if self.mode == "replay":
             analyzer = ReplayDocumentAnalyzer(replay_dir=self.replay_dir)
@@ -156,6 +280,8 @@ class EvaluationRunner:
             "due_date",
         ]
 
+        ocr_cache: dict[str, Any] = {}
+
         for d in manifest_docs:
             doc_id = d["doc_id"]
             is_scanned = bool(d.get("is_scanned", False))
@@ -170,11 +296,12 @@ class EvaluationRunner:
 
             # Analyze and extract through pipeline components
             ocr_result = analyzer.analyze(
-                file_bytes=b"",
+                file_bytes=self._document_bytes(doc_id),
                 mime="application/pdf",
                 doc_type_hint=d.get("doc_type"),
                 doc_id=doc_id,
             )
+            ocr_cache[doc_id] = ocr_result
 
             doc_type_norm = (
                 "quote"
@@ -182,7 +309,24 @@ class EvaluationRunner:
                 else ("other" if d["doc_type"] == "purchase_request" else d["doc_type"])
             )
 
-            ext_result, _ = llm.extract(ocr_result, doc_type_norm, doc_id=doc_id)
+            ext_result, ext_meta = llm.extract(ocr_result, doc_type_norm, doc_id=doc_id)
+
+            if self.mode == "live":
+                tin = ext_meta.get("tokens_in", 0)
+                tout = ext_meta.get("tokens_out", 0)
+                m = ext_meta.get("model", settings.AZURE_OPENAI_DEPLOYMENT)
+                cost_meter.record_usage(tin, tout, m)
+
+            # Record fixtures if requested in live mode
+            if self.record_replay and self.mode == "live":
+                if getattr(ocr_result, "raw_result", None):
+                    di_file = self.replay_dir / f"{doc_id}.di.json"
+                    with open(di_file, "w", encoding="utf-8") as f:
+                        json.dump(ocr_result.raw_result, f, indent=2)
+                if ext_meta.get("raw_response"):
+                    openai_file = self.replay_dir / f"{doc_id}.openai.json"
+                    with open(openai_file, "w", encoding="utf-8") as f:
+                        json.dump(ext_meta["raw_response"], f, indent=2)
 
             # Evaluate Header Fields
             first_page = ocr_result.pages[0] if ocr_result.pages else None
@@ -269,8 +413,8 @@ class EvaluationRunner:
         corpus_chunks: list[RetrievedChunk] = []
         for d in manifest_docs:
             doc_id = d["doc_id"]
-            ocr_res = analyzer.analyze(
-                file_bytes=b"",
+            ocr_res = ocr_cache.get(doc_id) or analyzer.analyze(
+                file_bytes=self._document_bytes(doc_id),
                 mime="application/pdf",
                 doc_type_hint=d.get("doc_type"),
                 doc_id=doc_id,
@@ -301,6 +445,8 @@ class EvaluationRunner:
             expected_docs = q.get("expected_source_doc_ids", [])
 
             draft = answer_writer.answer(q_text, corpus_chunks)
+            if self.mode == "live":
+                cost_meter.record_usage(draft.tokens_in, draft.tokens_out, draft.model)
             was_refused = draft.refused or not draft.sentences
 
             # Refusal tracking (AIQ-07)
@@ -457,13 +603,16 @@ class EvaluationRunner:
             timestamp=timestamp,
             mode=self.mode,
             provider="replay" if self.mode == "replay" else "live",
-            model="gpt-4o-mini",
+            model=settings.AZURE_OPENAI_DEPLOYMENT,
             prompt_version="v1",
             metrics=metrics,
             documents_evaluated=len(manifest_docs),
             questions_evaluated=len(qa_questions),
             injection_cases_evaluated=len(attack_cases),
             cost_estimate_usd=cost_estimate,
+            actual_cost_usd=cost_meter.total_cost_usd if self.mode == "live" else None,
+            tokens_in=cost_meter.tokens_in if self.mode == "live" else 0,
+            tokens_out=cost_meter.tokens_out if self.mode == "live" else 0,
             duration_seconds=duration,
         )
 

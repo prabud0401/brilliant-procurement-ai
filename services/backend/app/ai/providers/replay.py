@@ -82,7 +82,9 @@ def resolve_doc_id(
 ) -> str:
     """Resolve which replay fixture doc_id to use."""
     r_dir = replay_dir or get_replay_dir()
-    if doc_id and (r_dir / f"{doc_id}.di.json").exists():
+    if doc_id and (
+        (r_dir / f"{doc_id}.di.json").exists() or (r_dir / f"{doc_id}.openai.json").exists()
+    ):
         return doc_id
 
     _init_sha256_map()

@@ -31,7 +31,7 @@ flowchart TD
     subgraph AI["AI Module Tier (app/ai)"]
         AI_Factory["AI Provider Factory"]
         DI["Azure Document Intelligence (or Replay/Mock)"]
-        OAI["Azure OpenAI gpt-4o-mini & Embeddings"]
+        OAI["Azure OpenAI Chat (default gpt-5-mini) & Embeddings"]
     end
 
     subgraph Integrations["Integration Adapters (app/integrations)"]
@@ -86,7 +86,7 @@ flowchart TD
 
 6. **AI Module Interface (`services/backend/app/ai`)**:
    - Central abstraction layer isolating all machine learning interactions.
-   - Supports three runtime providers: `mock` (deterministic unit testing), `replay` (high-fidelity offline test fixtures), and `live` (Azure Document Intelligence and Azure OpenAI `gpt-4o-mini`).
+   - Supports three runtime providers: `mock` (deterministic unit testing), `replay` (high-fidelity offline test fixtures), and `live` (Azure Document Intelligence and Azure OpenAI; chat model is configurable, default `gpt-5-mini`).
 
 7. **Integration Adapters (`services/backend/app/integrations`)**:
    - Pluggable interfaces for Odoo ERP, SharePoint, and Power Automate Teams notifications.
@@ -190,7 +190,7 @@ sequenceDiagram
     participant Web as Next.js BFF
     participant API as FastAPI Backend
     participant DB as PostgreSQL (pgvector + tsvector)
-    participant AI as Azure OpenAI (Embeddings + gpt-4o-mini)
+    participant AI as Azure OpenAI (Embeddings + Chat: default gpt-5-mini)
 
     User->>Web: Submit Query (e.g. "What are Gulf Line payment terms?")
     Web->>API: POST /api/v1/qa/ask
@@ -287,7 +287,7 @@ flowchart TD
 
 - Every state change writes an audit record in the **same database transaction** via `app.audit.service.record()`.
 - Records are chained using SHA-256:
-  $$\text{hash}_n = \text{SHA256}(\text{hash}_{n-1} \mathbin{\Vert} \text{sequence\_id}_n \mathbin{\Vert} \text{action}_n \mathbin{\Vert} \text{actor\_id}_n \mathbin{\Vert} \text{payload}_n)$$
+  `hash_n = SHA256(hash_{n-1} || sequence_id_n || action_n || actor_id_n || payload_n)`
 - Database permissions revoke `UPDATE` and `DELETE` on the `audit_log` table, backed by a PostgreSQL trigger raising exceptions on any mutation attempt.
 - The administrator can trigger on-demand cryptographic verification (`POST /api/v1/audit/verify`) to detect historical record tampering.
 
@@ -356,7 +356,7 @@ flowchart TB
         end
 
         subgraph RG_AI["Resource Group: rg-pda-ai-uaen (live AI mode only)"]
-            OpenAI["Azure OpenAI Service<br/>oai-pda-ai-uaen<br/>gpt-4o-mini & text-embedding-3-small"]
+            OpenAI["Azure OpenAI Service<br/>oai-pda-ai-uaen<br/>Chat (default gpt-5-mini) & text-embedding-3-small"]
             DocIntel["Azure Document Intelligence<br/>di-pda-ai-uaen<br/>SKU F0"]
         end
 

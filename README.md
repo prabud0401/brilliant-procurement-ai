@@ -16,10 +16,10 @@ The demo build delivers the complete set of in-scope procurement capabilities:
 
 - **Document Upload & AI Extraction (US-01, US-02, US-04):** Upload PDF, PNG, and JPEG procurement documents with MIME validation, SHA-256 duplicate detection, structured field extraction with confidence scores, and automated UAE VAT and TRN validation.
 - **Interactive Document Review (US-03):** Split-screen review interface pairing an interactive PDF canvas with bounding-box highlighting alongside editable extracted fields. Unconfirmed items block final document approval.
-- **Quote Comparison & Recommendation (US-08, US-09, US-10):** Multi-quote comparison matrix evaluating 2 to 5 competing vendor proposals with deterministic multi-criteria scoring (60% price, 20% delivery, 10% payment, 10% warranty). AI generates plain-language explanations verified by a faithfulness checker, supporting override justifications ($\ge$ 10 chars) and automated Purchase Order generation.
-- **Three-Way Matching & Exceptions (US-13, US-14, US-15):** Line-level reconciliation across Purchase Order, Delivery Note, and Vendor Invoice with configurable tolerances. Exceptions are categorized into an actionable queue where Buyers can resolve minor non-quantity variances ($\le$ AED 500) and escalate over-billing to Managers.
+- **Quote Comparison & Recommendation (US-08, US-09, US-10):** Multi-quote comparison matrix evaluating 2 to 5 competing vendor proposals with deterministic multi-criteria scoring (60% price, 20% delivery, 10% payment, 10% warranty). AI generates plain-language explanations verified by a faithfulness checker, supporting override justifications (≥ 10 chars) and automated Purchase Order generation.
+- **Three-Way Matching & Exceptions (US-13, US-14, US-15):** Line-level reconciliation across Purchase Order, Delivery Note, and Vendor Invoice with configurable tolerances. Exceptions are categorized into an actionable queue where Buyers can resolve minor non-quantity variances (≤ AED 500) and escalate over-billing to Managers.
 - **Document Assistant Q&A (US-17, US-18, US-19):** Conversational search assistant retrieving grounded answers citing specific document names and page numbers. Hybrid retrieval (vector embeddings + full-text search) enforces relevance floors to refuse out-of-scope questions and partitions document chunks by department visibility.
-- **Approval Workflows & Segregation of Duties (US-21, US-22, US-23, US-25):** Multi-tier approval routing based on commitment amount ($\le$ AED 5k, AED 5k–50k, > AED 50k). Approvers review a unified One-Screen Approval Bundle. System strictly prevents self-approval, blocks Buyers from approving their own orders, and prohibits Administrators from approving financial commitments.
+- **Approval Workflows & Segregation of Duties (US-21, US-22, US-23, US-25):** Multi-tier approval routing based on commitment amount (≤ AED 5k, AED 5k–50k, > AED 50k). Approvers review a unified One-Screen Approval Bundle. System strictly prevents self-approval, blocks Buyers from approving their own orders, and prohibits Administrators from approving financial commitments.
 - **Cryptographic Audit Trail (US-24):** Append-only audit table with SHA-256 hash chaining, database mutation triggers, in-app chain verification, and CSV export.
 - **Prompt-Injection Defence (US-29):** Defense-in-depth protection combining rule-based pattern scanning, XML delimiter isolation, red alert banners, and mandatory Buyer acknowledgement before document confirmation.
 - **Email Ingestion Channel (R13):** Automated intake via Azure Logic Apps polling a demo mailbox and securely delivering attachments to the intake API.
@@ -54,7 +54,7 @@ flowchart TD
     subgraph AI["AI Module Interface (app/ai)"]
         AI_Provider["AI Provider Interface<br/>(replay / mock / live)"]
         DI["Azure Document Intelligence (or Replay)"]
-        OAI["Azure OpenAI gpt-4o-mini & Embeddings"]
+        OAI["Azure OpenAI Chat (default gpt-5-mini) & Embeddings"]
     end
 
     subgraph Integrations["Adapter Interfaces (app/integrations)"]
@@ -190,7 +190,7 @@ The application abstracts all artificial intelligence operations behind the `app
    - Perfect for local development, CI pipelines, and repeatable evaluation testing.
 
 2. **Live Mode (`AI_PROVIDER=live`):**
-   - Connects to Azure Document Intelligence (`F0` SKU) for layout extraction and Azure OpenAI (`gpt-4o-mini` and `text-embedding-3-small`) for synthesis and semantic retrieval.
+   - Connects to Azure Document Intelligence (`F0` SKU) for layout extraction and Azure OpenAI (configurable chat model, default `gpt-5-mini`, and `text-embedding-3-small`) for synthesis and semantic retrieval.
    - Configured via environment variables (`AZURE_OPENAI_ENDPOINT`, `AZURE_DOCINTEL_ENDPOINT`).
    - Uses Microsoft Entra Managed Identity in Azure deployments.
 
