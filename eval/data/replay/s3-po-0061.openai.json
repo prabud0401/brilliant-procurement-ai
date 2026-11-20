@@ -1,21 +1,111 @@
 {
-  "id": "chatcmpl-replay-s3-po-0061",
-  "object": "chat.completion",
-  "created": 1732040000,
-  "model": "gpt-4o-mini",
+  "id": "chatcmpl-EmI6nOtSt9utod3GvZ9ShEC4a8mzJ",
   "choices": [
     {
+      "finish_reason": "stop",
       "index": 0,
+      "logprobs": null,
       "message": {
+        "content": "{\n  \"doc_type\": \"purchase_order\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Oasis Facility Services\",\n      \"page\": 1,\n      \"source_text\": \"Oasis Facility Services TRN: 100000000000003 Building 7, ICAD 1, Musaffah South, Abu Dhabi, UAE\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000003\",\n      \"page\": 1,\n      \"source_text\": \"Oasis Facility Services TRN: 100000000000003 Building 7, ICAD 1, Musaffah South, Abu Dhabi, UAE\"\n    },\n    \"document_number\": {\n      \"value\": \"PO-0061\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0061\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-07\",\n      \"page\": 1,\n      \"source_text\": \"Date: 2026-11-07 Currency: AED\"\n    },\n    \"po_number\": null,\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Date: 2026-11-07 Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 45\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 45\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"5800.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n5800.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"290.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n290.00 AED\"\n    },\n    \"total\": {\n      \"value\": \"6090.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n6090.00 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"FUR-CHR-ERG\",\n      \"description\": \"Ergonomic High-Back Mesh Office Chair with Lumbar\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"580.00\",\n      \"discount\": null,\n      \"vat_rate\": \"5%\",\n      \"line_total\": \"5800.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nFUR-CHR-ERG\\nErgonomic High-Back Mesh Office Chair with Lumbar\\n10\\nEA\\n580.00\\n5800.00\"\n    }\n  ]\n}",
+        "refusal": null,
         "role": "assistant",
-        "content": "{\n  \"doc_type\": \"purchase_order\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Oasis Facility Services\",\n      \"page\": 1,\n      \"source_text\": \"Oasis Facility Services\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000003\",\n      \"page\": 1,\n      \"source_text\": \"TRN: 100000000000003\"\n    },\n    \"document_number\": {\n      \"value\": \"PO-0061\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0061\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-07\",\n      \"page\": 1,\n      \"source_text\": \"Date: 2026-11-07\"\n    },\n    \"po_number\": null,\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 45\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 45\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"5800.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal: 5800.00\"\n    },\n    \"vat_amount\": {\n      \"value\": \"290.00\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%): 290.00\"\n    },\n    \"total\": {\n      \"value\": \"6090.00\",\n      \"page\": 1,\n      \"source_text\": \"Total: 6090.00\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"FUR-CHR-ERG\",\n      \"description\": \"Ergonomic High-Back Mesh Office Chair with Lumbar\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"580.00\",\n      \"discount\": \"0.00\",\n      \"vat_rate\": \"5\",\n      \"line_total\": \"5800.00\",\n      \"page\": 1,\n      \"source_text\": \"1 FUR-CHR-ERG Ergonomic High-Back Mesh Office Chair with Lumbar 10 EA 580.00 5800.00\"\n    }\n  ]\n}"
+        "annotations": [],
+        "audio": null,
+        "function_call": null,
+        "tool_calls": null
       },
-      "finish_reason": "stop"
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "protected_material_code": {
+          "detected": false,
+          "filtered": false
+        },
+        "protected_material_text": {
+          "detected": false,
+          "filtered": false
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      }
     }
   ],
+  "created": 1795178061,
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "chat.completion",
+  "metadata": null,
+  "moderation": null,
+  "service_tier": "default",
+  "system_fingerprint": null,
   "usage": {
-    "prompt_tokens": 1250,
-    "completion_tokens": 388,
-    "total_tokens": 1638
+    "completion_tokens": 1055,
+    "prompt_tokens": 1285,
+    "total_tokens": 2340,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 448,
+      "rejected_prediction_tokens": 0,
+      "text_tokens": null
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": null,
+      "cached_tokens": 1024,
+      "image_tokens": null,
+      "text_tokens": null
+    },
+    "latency_checkpoint": {
+      "engine_tbt_ms": 7,
+      "engine_ttft_ms": 33,
+      "engine_ttlt_ms": 7454,
+      "pre_inference_ms": 164,
+      "service_tbt_ms": 7,
+      "service_ttft_ms": 754,
+      "service_ttlt_ms": 8170,
+      "user_visible_ttft_ms": 590
+    }
+  },
+  "prompt_filter_results": [
+    {
+      "prompt_index": 0,
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "jailbreak": {
+          "detected": false,
+          "filtered": false
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      }
+    }
+  ],
+  "routing": {
+    "serving_pipereplica": "d20261104051536-8d035801-default-r2-dp0-default"
   }
 }
