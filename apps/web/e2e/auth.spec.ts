@@ -122,6 +122,8 @@ test.describe("Authentication, RBAC Navigation and Security", () => {
   });
 
   test("signs in successfully for all seeded demo accounts", async ({ page }) => {
+    // Eight sequential sign-ins; hosted stacks (0.5 vCPU, password hashing) need more than the 30s default.
+    test.setTimeout(120_000);
     const demoEmails = [
       "requester.fac@demo-holdings.example",
       "requester.it@demo-holdings.example",
@@ -139,7 +141,7 @@ test.describe("Authentication, RBAC Navigation and Security", () => {
       await page.fill('input[name="password"]', DEMO_PASSWORD);
       await page.click('button[type="submit"]');
 
-      await page.waitForURL("/", { timeout: 10000 });
+      await page.waitForURL("/", { timeout: 20000 });
       await expect(page.locator("h1")).toContainText(/Welcome back/i);
 
       // Sign out

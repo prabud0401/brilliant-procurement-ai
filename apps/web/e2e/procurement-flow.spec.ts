@@ -3,6 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
+import { isHostedTarget, LOCAL_ONLY_REASON } from "./target";
 
 const DEMO_PASSWORD = process.env.DEMO_USER_PASSWORD || "demo_password_123";
 
@@ -51,6 +52,8 @@ async function loginAs(page: any, email: string) { // eslint-disable-line @types
 }
 
 test.describe("Procurement Lifecycle & Governance Flows (R09)", () => {
+  test.skip(isHostedTarget(), LOCAL_ONLY_REASON);
+
   test.beforeEach(() => {
     cleanE2E();
   });

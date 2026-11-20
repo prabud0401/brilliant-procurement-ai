@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
+import { isHostedTarget, LOCAL_ONLY_REASON } from "../target";
 
 const DEMO_PASSWORD = process.env.DEMO_USER_PASSWORD || "demo_password_123";
 
@@ -82,6 +83,8 @@ async function loginAs(page: any, email: string) { // eslint-disable-line @types
 }
 
 test.describe("5-Minute Demo Script End-to-End Suite (US-01..US-29, AIQ-01..AIQ-10)", () => {
+  test.skip(isHostedTarget(), LOCAL_ONLY_REASON);
+
   test.beforeAll(() => {
     cleanE2E();
   });
