@@ -33,6 +33,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Prepare lowercase image names
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_BACKEND=ghcr.io/${REPO_LOWER}/backend:${{ github.sha }}" >> $GITHUB_ENV
+          echo "IMAGE_BACKEND_LATEST=ghcr.io/${REPO_LOWER}/backend:latest" >> $GITHUB_ENV
+          echo "IMAGE_WEB=ghcr.io/${REPO_LOWER}/web:${{ github.sha }}" >> $GITHUB_ENV
+          echo "IMAGE_WEB_LATEST=ghcr.io/${REPO_LOWER}/web:latest" >> $GITHUB_ENV
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -47,8 +55,8 @@ jobs:
           file: services/backend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
-            ghcr.io/${{ github.repository }}/backend:latest
+            ${{ env.IMAGE_BACKEND }}
+            ${{ env.IMAGE_BACKEND_LATEST }}
 
       - name: Build and push web image
         uses: docker/build-push-action@v5
@@ -57,8 +65,8 @@ jobs:
           file: apps/web/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/web:${{ github.sha }}
-            ghcr.io/${{ github.repository }}/web:latest
+            ${{ env.IMAGE_WEB }}
+            ${{ env.IMAGE_WEB_LATEST }}
 
       - name: Azure login via OIDC
         uses: azure/login@v2
@@ -87,11 +95,11 @@ jobs:
               appDbPassword="${{ secrets.APP_DB_PASSWORD }}" \
               demoUserPassword="${{ secrets.DEMO_USER_PASSWORD }}" \
               containerRegistryServer="ghcr.io" \
-              containerRegistryUsername="${{ github.actor }}" \
-              containerRegistryPassword="${{ secrets.GITHUB_TOKEN }}" \
-              webImage="ghcr.io/${{ github.repository }}/web:${{ github.sha }}" \
-              apiImage="ghcr.io/${{ github.repository }}/backend:${{ github.sha }}" \
-              workerImage="ghcr.io/${{ github.repository }}/backend:${{ github.sha }}"
+              containerRegistryUsername="${{ secrets.CONTAINER_REGISTRY_USERNAME }}" \
+              containerRegistryPassword="${{ secrets.CONTAINER_REGISTRY_PASSWORD }}" \
+              webImage="${{ env.IMAGE_WEB }}" \
+              apiImage="${{ env.IMAGE_BACKEND }}" \
+              workerImage="${{ env.IMAGE_BACKEND }}"
 
       - name: Deploy infrastructure (create)
         run: |
@@ -107,11 +115,11 @@ jobs:
               appDbPassword="${{ secrets.APP_DB_PASSWORD }}" \
               demoUserPassword="${{ secrets.DEMO_USER_PASSWORD }}" \
               containerRegistryServer="ghcr.io" \
-              containerRegistryUsername="${{ github.actor }}" \
-              containerRegistryPassword="${{ secrets.GITHUB_TOKEN }}" \
-              webImage="ghcr.io/${{ github.repository }}/web:${{ github.sha }}" \
-              apiImage="ghcr.io/${{ github.repository }}/backend:${{ github.sha }}" \
-              workerImage="ghcr.io/${{ github.repository }}/backend:${{ github.sha }}"
+              containerRegistryUsername="${{ secrets.CONTAINER_REGISTRY_USERNAME }}" \
+              containerRegistryPassword="${{ secrets.CONTAINER_REGISTRY_PASSWORD }}" \
+              webImage="${{ env.IMAGE_WEB }}" \
+              apiImage="${{ env.IMAGE_BACKEND }}" \
+              workerImage="${{ env.IMAGE_BACKEND }}"
 
       - name: Start database migration job and wait for completion
         run: |

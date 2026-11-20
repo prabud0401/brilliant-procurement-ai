@@ -59,15 +59,16 @@ scripts/
 - **`infra/modules/database.bicep`**:
   - Azure Database for PostgreSQL Flexible Server (`psql-pda-<env>-uaen`, Burstable `Standard_B1ms`, PostgreSQL 16, 32 GB storage, 7-day backup retention, High Availability disabled).
   - Database named `pda`.
-  - Configuration `azure.extensions` allow-listing `VECTOR,PGCRYPTO`.
+  - Administrator login parameter defaulting to `pdaadmin`.
+  - Configuration `azure.extensions` allow-listing `VECTOR,PGCRYPTO,UUID-OSSP`.
   - Firewall rule `AllowAllAzureServicesAndResourcesWithinAzureIps` (`0.0.0.0` - `0.0.0.0`) permitting Azure services to connect.
 - **`infra/modules/containerapps.bicep`**:
   - Azure Container Apps Environment (`cae-pda-<env>-uaen`, Consumption workload profile) connected to Log Analytics.
-  - `ca-web-pda-<env>-uaen`: Web front-end app (external ingress on port 3000, min 0, max 1 replica, probes on `/healthz` and `/readyz`).
+  - `ca-web-pda-<env>-uaen`: Web front-end app (external ingress on port 3000, min 0, max 1 replica, probes on `/healthz` and `/readyz`, uses `API_BASE_URL`).
   - `ca-api-pda-<env>-uaen`: API backend app (internal ingress on port 8000, min 0, max 1 replica, probes on `/healthz` and `/readyz`).
-  - `ca-worker-pda-<env>-uaen`: Asynchronous document processing worker (no ingress, min 0, max 1 replica, runs `python -m app.worker_main`).
+  - `ca-worker-pda-<env>-uaen`: Asynchronous document processing worker (no ingress, min 1, max 1 replica, runs `python -m app.worker_main`).
   - All apps mount secrets from Key Vault via the User-Assigned Managed Identity.
-  - `migrate` Job: Manual trigger Container Apps job that executes `alembic upgrade head && python -m app.core.bootstrap && python -m seed.load`.
+  - `migrate` Job: Manual trigger Container Apps job that executes `set -e && alembic upgrade head && python -m app.core.bootstrap && python -m seed.load`.
 
 ---
 
@@ -181,3 +182,47 @@ The teardown script performs the following in sequence:
 - **Cognitive Services**: No API keys are returned or stored. The managed identity is granted `Cognitive Services User`.
 - **CI/CD via OIDC**: GitHub Actions authenticates to Azure using OpenID Connect (`azure/login` with `client-id`, `tenant-id`, and `subscription-id`), requiring no long-lived Azure credentials in GitHub.
 - **Probe Endpoints**: Liveness and readiness probes query `/healthz` and `/readyz` to verify healthy container operation.
+
+---
+
+## 6. Manual Setup & Prerequisite Configuration
+
+Before triggering deployment via GitHub Actions (`deploy.yml`) or running the deployment scripts, the following one-time manual steps must be performed:
+
+### 1. Microsoft Entra ID OIDC App Registration & Federated Credential
+1. In Microsoft Entra ID (Azure Portal or CLI), register an application named `app-pda-github-deploy`.
+2. Under **Certificates & secrets** > **Federated credentials**, add a credential:
+   - **Federated credential scenario**: GitHub Actions deploying Azure resources.
+   - **Organization**: Your GitHub organization or username (`prabud0401`).
+   - **Repository**: `brilliant-procurement-ai`.
+   - **Entity type**: `Environment`.
+   - **Environment name**: `prod`.
+3. In Azure Subscriptions > Access Control (IAM), grant this App Registration the `Contributor` and `User Access Administrator` (or `Role Based Access Control Administrator`) role on the subscription or resource group.
+
+### 2. GitHub Environment Secrets List
+In the GitHub repository, configure an Environment named `prod` with the following secrets:
+
+| Secret Name | Description | Example / Format |
+|---|---|---|
+| `AZURE_CLIENT_ID` | Application (Client) ID of the Entra ID app registration | UUID |
+| `AZURE_TENANT_ID` | Directory (Tenant) ID of Microsoft Entra ID | UUID |
+| `AZURE_SUBSCRIPTION_ID` | Azure Subscription ID | UUID |
+| `JWT_SECRET` | Secret key for HS256 JWT tokens (minimum 32 characters) | Base64 / 32+ char string |
+| `POSTGRES_ADMIN_PASSWORD` | Administrator password for PostgreSQL server (`pdaadmin`) | Strong alphanumeric + symbol |
+| `APP_DB_PASSWORD` | Application user password (`app_user`) | Strong alphanumeric + symbol |
+| `DEMO_USER_PASSWORD` | Password for seeded demo user accounts | Strong alphanumeric + symbol |
+| `CONTAINER_REGISTRY_USERNAME` | *(Optional)* Private container registry username (leave blank for public GHCR) | String |
+| `CONTAINER_REGISTRY_PASSWORD` | *(Optional)* Private container registry password (leave blank for public GHCR) | String |
+
+### 3. Making GitHub Container Registry (GHCR) Packages Public
+By default, GitHub Packages for private repositories are published with private visibility. Because `GITHUB_TOKEN` expires when the workflow run finishes, Container Apps cannot use it for future container pulls (e.g. scaling up from zero or node restarts).
+
+1. After the initial build pushes images to GHCR:
+   - `ghcr.io/<owner>/backend`
+   - `ghcr.io/<owner>/web`
+2. Go to repository page > **Packages** tab (or profile Packages).
+3. Select the package (`backend` / `web`) > **Package settings**.
+4. Scroll to **Danger Zone** > **Change package visibility**.
+5. Select **Public** and confirm.
+6. With public packages, Container Apps pulls images directly without requiring registry credentials or tokens.
+

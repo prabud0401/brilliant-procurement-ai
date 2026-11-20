@@ -21,8 +21,10 @@ class Settings(BaseSettings):
 
     DEMO_USER_PASSWORD: str | None = None
 
+    BLOB_ACCOUNT_URL: str | None = None
     BLOB_CONNECTION_STRING: str | None = None
     BLOB_CONTAINER: str = "documents"
+    AZURE_CLIENT_ID: str | None = None
 
     AI_PROVIDER: str = "mock"
     INTEGRATIONS_MODE: str = "mock"

@@ -11,7 +11,7 @@ param tags object
 param postgresServerName string = 'psql-pda-${env}-uaen'
 
 @description('Administrator login username')
-param administratorLogin string = 'postgres'
+param administratorLogin string = 'pdaadmin'
 
 @secure()
 @description('Administrator login password')
@@ -55,7 +55,7 @@ resource azureExtensions 'Microsoft.DBforPostgreSQL/flexibleServers/configuratio
   parent: postgresServer
   name: 'azure.extensions'
   properties: {
-    value: 'VECTOR,PGCRYPTO'
+    value: 'VECTOR,PGCRYPTO,UUID-OSSP'
     source: 'user-override'
   }
 }

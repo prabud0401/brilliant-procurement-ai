@@ -30,8 +30,14 @@ param containerRegistryServer string = 'ghcr.io'
 param containerRegistryUsername string = ''
 
 @secure()
-@description('Container registry password or token')
-param containerRegistryPassword string = ''
+@description('Container registry password or token (empty if public registry)')
+param containerRegistryPassword string
+
+@description('Blob storage account URL')
+param blobAccountUrl string = ''
+
+@description('Azure Managed Identity client ID')
+param azureClientId string = ''
 
 @description('Web container image')
 param webImage string = 'ghcr.io/prabud0401/brilliant-procurement-ai/web:latest'
@@ -69,8 +75,13 @@ param azureOpenAiEmbeddingDeployment string = 'text-embedding-3-small'
 @description('Azure Document Intelligence endpoint')
 param azureDocIntelEndpoint string = ''
 
-@description('AI provider mode (azure, replay, mock)')
-param aiProvider string = 'mock'
+@description('AI provider mode (mock, replay, live)')
+@allowed([
+  'mock'
+  'replay'
+  'live'
+])
+param aiProvider string = 'replay'
 
 var baseSecrets = [
   {
@@ -93,9 +104,14 @@ var baseSecrets = [
     keyVaultUrl: '${keyVaultUri}secrets/demo-user-password'
     identity: managedIdentityId
   }
+  {
+    name: 'app-db-password'
+    keyVaultUrl: '${keyVaultUri}secrets/app-db-password'
+    identity: managedIdentityId
+  }
 ]
 
-var registrySecrets = !empty(containerRegistryPassword)
+var registrySecrets = (!empty(containerRegistryUsername) && !empty(containerRegistryPassword))
   ? [
       {
         name: 'registry-password'
@@ -107,7 +123,7 @@ var registrySecrets = !empty(containerRegistryPassword)
 
 var allSecrets = concat(baseSecrets, registrySecrets)
 
-var registries = !empty(containerRegistryUsername)
+var registries = (!empty(containerRegistryUsername) && !empty(containerRegistryPassword))
   ? [
       {
         server: containerRegistryServer
@@ -200,8 +216,16 @@ resource apiApp 'Microsoft.App/containerApps@2024-03-01' = {
               secretRef: 'demo-user-password'
             }
             {
+              name: 'BLOB_ACCOUNT_URL'
+              value: blobAccountUrl
+            }
+            {
               name: 'BLOB_CONTAINER'
               value: 'documents'
+            }
+            {
+              name: 'AZURE_CLIENT_ID'
+              value: azureClientId
             }
             {
               name: 'AI_PROVIDER'
@@ -262,7 +286,7 @@ resource apiApp 'Microsoft.App/containerApps@2024-03-01' = {
   }
 }
 
-// Worker Container App (No ingress, min 0, max 1)
+// Worker Container App (No ingress, min 1, max 1)
 resource workerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: workerAppName
   location: location
@@ -320,8 +344,16 @@ resource workerApp 'Microsoft.App/containerApps@2024-03-01' = {
               secretRef: 'demo-user-password'
             }
             {
+              name: 'BLOB_ACCOUNT_URL'
+              value: blobAccountUrl
+            }
+            {
               name: 'BLOB_CONTAINER'
               value: 'documents'
+            }
+            {
+              name: 'AZURE_CLIENT_ID'
+              value: azureClientId
             }
             {
               name: 'AI_PROVIDER'
@@ -355,7 +387,7 @@ resource workerApp 'Microsoft.App/containerApps@2024-03-01' = {
         }
       ]
       scale: {
-        minReplicas: 0
+        minReplicas: 1
         maxReplicas: 1
       }
     }
@@ -396,11 +428,7 @@ resource webApp 'Microsoft.App/containerApps@2024-03-01' = {
           }
           env: [
             {
-              name: 'API_URL'
-              value: 'https://${apiApp.properties.configuration.ingress.fqdn}'
-            }
-            {
-              name: 'NEXT_PUBLIC_API_URL'
+              name: 'API_BASE_URL'
               value: 'https://${apiApp.properties.configuration.ingress.fqdn}'
             }
             {
@@ -470,12 +498,16 @@ resource migrateJob 'Microsoft.App/jobs@2024-03-01' = {
           command: [
             '/bin/sh'
             '-c'
-            'alembic upgrade head && python -m app.core.bootstrap && python -m seed.load'
+            'set -e && alembic upgrade head && python -m app.core.bootstrap && python -m seed.load'
           ]
           env: [
             {
               name: 'APP_ENV'
               value: env
+            }
+            {
+              name: 'APP_DB_PASSWORD'
+              secretRef: 'app-db-password'
             }
             {
               name: 'DATABASE_URL'
@@ -496,6 +528,18 @@ resource migrateJob 'Microsoft.App/jobs@2024-03-01' = {
             {
               name: 'DEMO_USER_PASSWORD'
               secretRef: 'demo-user-password'
+            }
+            {
+              name: 'BLOB_ACCOUNT_URL'
+              value: blobAccountUrl
+            }
+            {
+              name: 'BLOB_CONTAINER'
+              value: 'documents'
+            }
+            {
+              name: 'AZURE_CLIENT_ID'
+              value: azureClientId
             }
             {
               name: 'INTEGRATIONS_MODE'

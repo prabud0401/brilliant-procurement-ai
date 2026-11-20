@@ -184,3 +184,6 @@ jobs:
               az bicep build --file "$file" --stdout > /dev/null
             fi
           done
+
+      - name: Run infrastructure guard test
+        run: python3 infra/tests/check_templates.py

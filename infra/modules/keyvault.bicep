@@ -38,8 +38,8 @@ param databaseUrl string
 param databaseUrlMigrator string
 
 @secure()
-@description('Optional container registry password')
-param containerRegistryPassword string = ''
+@description('Optional container registry password (empty if public registry)')
+param containerRegistryPassword string
 
 // Built-in role: Key Vault Secrets User (4633458b-17de-408a-b874-0445c86b69e6)
 var keyVaultSecretsUserRoleId = subscriptionResourceId(

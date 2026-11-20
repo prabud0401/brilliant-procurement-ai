@@ -39,8 +39,8 @@ param containerRegistryServer string = 'ghcr.io'
 param containerRegistryUsername string = ''
 
 @secure()
-@description('Container registry password or token')
-param containerRegistryPassword string = ''
+@description('Container registry password or token (empty if public registry)')
+param containerRegistryPassword string
 
 // Container images
 @description('Web container image')
@@ -65,8 +65,13 @@ param azureOpenAiEmbeddingDeployment string = 'text-embedding-3-small'
 @description('Azure Document Intelligence endpoint')
 param azureDocIntelEndpoint string = ''
 
-@description('AI provider mode (azure, replay, mock)')
-param aiProvider string = 'mock'
+@description('AI provider mode (mock, replay, live)')
+@allowed([
+  'mock'
+  'replay'
+  'live'
+])
+param aiProvider string = 'replay'
 
 // Resource names per design 9.2: <type>-pda-<env>-uaen
 var logAnalyticsWorkspaceName = 'log-pda-${env}-uaen'
@@ -75,7 +80,10 @@ var managedIdentityName = 'id-pda-${env}-uaen'
 var keyVaultName = 'kv-pda-${env}-uaen'
 var storageAccountName = 'stpda${replace(env, '-', '')}uaen'
 var postgresServerName = 'psql-pda-${env}-uaen'
-var postgresAdminLogin = 'postgres'
+
+@description('PostgreSQL administrator login username')
+param postgresAdminLogin string = 'pdaadmin'
+
 var containerAppsEnvironmentName = 'cae-pda-${env}-uaen'
 var webAppName = 'ca-web-pda-${env}-uaen'
 var apiAppName = 'ca-api-pda-${env}-uaen'
@@ -181,6 +189,8 @@ module containerApps 'modules/containerapps.bicep' = {
     azureOpenAiEmbeddingDeployment: azureOpenAiEmbeddingDeployment
     azureDocIntelEndpoint: azureDocIntelEndpoint
     aiProvider: aiProvider
+    blobAccountUrl: storage.outputs.primaryBlobEndpoint
+    azureClientId: identity.outputs.managedIdentityClientId
   }
 }
 

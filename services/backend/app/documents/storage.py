@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from app.core.config import settings
 
@@ -70,23 +70,40 @@ class InMemoryBlobStorage:
 class AzureBlobStorage:
     """Azure Blob Storage client (works with live Azure Storage or local Azurite)."""
 
-    def __init__(self, connection_string: str, container_name: str = "documents") -> None:
+    def __init__(
+        self,
+        connection_string: str | None = None,
+        container_name: str = "documents",
+        account_url: str | None = None,
+        credential: Any = None,
+    ) -> None:
         from azure.storage.blob import BlobServiceClient
 
-        if "DevelopmentStorageProxyUri=" in connection_string:
-            m = re.search(r"DevelopmentStorageProxyUri=([^;]+)", connection_string)
-            if m:
-                proxy = m.group(1).rstrip("/")
-                connection_string = (
-                    f"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey={_AZURITE_DEV_KEY};"
-                    f"BlobEndpoint={proxy}/devstoreaccount1;"
-                )
+        if account_url:
+            self._service_client = BlobServiceClient(
+                account_url=account_url,
+                credential=credential,
+                connection_timeout=5,
+                read_timeout=10,
+            )
+        elif connection_string:
+            if "DevelopmentStorageProxyUri=" in connection_string:
+                m = re.search(r"DevelopmentStorageProxyUri=([^;]+)", connection_string)
+                if m:
+                    proxy = m.group(1).rstrip("/")
+                    connection_string = (
+                        f"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey={_AZURITE_DEV_KEY};"
+                        f"BlobEndpoint={proxy}/devstoreaccount1;"
+                    )
 
-        self._service_client = BlobServiceClient.from_connection_string(
-            connection_string,
-            connection_timeout=5,
-            read_timeout=10,
-        )
+            self._service_client = BlobServiceClient.from_connection_string(
+                connection_string,
+                connection_timeout=5,
+                read_timeout=10,
+            )
+        else:
+            raise ValueError("Either account_url or connection_string must be provided")
+
         self._container_name = container_name
         self._container_client = self._service_client.get_container_client(container_name)
         try:
@@ -132,10 +149,33 @@ def get_storage() -> BlobStorage:
     if _storage_instance is not None:
         return _storage_instance
 
+    if settings.BLOB_ACCOUNT_URL and settings.BLOB_ACCOUNT_URL.strip():
+        try:
+            from azure.identity import DefaultAzureCredential
+
+            credential = DefaultAzureCredential(
+                managed_identity_client_id=settings.AZURE_CLIENT_ID or None
+            )
+            _storage_instance = AzureBlobStorage(
+                account_url=settings.BLOB_ACCOUNT_URL.strip(),
+                container_name=settings.BLOB_CONTAINER,
+                credential=credential,
+            )
+            return _storage_instance
+        except Exception as exc:
+            logger.warning(
+                "Failed to initialize AzureBlobStorage with BLOB_ACCOUNT_URL: %s, "
+                "falling back to InMemory",
+                exc,
+            )
+
     conn_str = settings.BLOB_CONNECTION_STRING
     if conn_str and conn_str.strip():
         try:
-            _storage_instance = AzureBlobStorage(conn_str, settings.BLOB_CONTAINER)
+            _storage_instance = AzureBlobStorage(
+                connection_string=conn_str,
+                container_name=settings.BLOB_CONTAINER,
+            )
             return _storage_instance
         except Exception as exc:
             logger.warning(
