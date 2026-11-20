@@ -88,14 +88,20 @@ def calculate_field_confidence(
     di_field_value: str | None = None,
     is_invoice: bool = False,
     has_conflicting_value: bool = False,
+    was_cleaned: bool = False,
+    parse_failed: bool = False,
+    has_arithmetic_mismatch: bool = False,
 ) -> tuple[Decimal, dict[str, Any] | None]:
     """Calculate calibrated confidence score per design 6.3.
 
     Signals:
     - Base: lowest word confidence in matched evidence span.
     - Missing evidence: capped at 0.50.
+    - Unmatched value (cleaned value not in page or source text): capped at 0.50.
+    - Value modified by cleanup: capped at 0.75 (below AI_LOW_CONFIDENCE_THRESHOLD 0.80).
+    - Arithmetic mismatch: capped at 0.70.
+    - Format failure or parse failed: capped at 0.40.
     - Disagreement with prebuilt-invoice: capped at 0.60.
-    - Format failure: capped at 0.40.
     - Conflicting duplicate value: capped at 0.70.
     """
     if raw_value is None or raw_value.strip() == "":
@@ -108,15 +114,56 @@ def calculate_field_confidence(
     if not found:
         score = min(score, 0.50)
 
-    # 2. Agreement with prebuilt-invoice model
+    clean_val = raw_value.strip()
+
+    # 2. Check if the value itself appears in source text or page words
+    page_words_text = " ".join(w.content for w in page.words).lower() if page and page.words else ""
+    src_text_lower = (source_text or "").lower()
+
+    if field_name in ("subtotal", "vat_amount", "total", "unit_price", "line_total", "vendor_trn"):
+        val_digits = re.sub(r"\D", "", clean_val)
+        val_in_doc = (
+            (
+                (val_digits in re.sub(r"\D", "", src_text_lower))
+                or (val_digits in re.sub(r"\D", "", page_words_text))
+            )
+            if val_digits
+            else False
+        )
+    else:
+        clean_text_norm = re.sub(r"\W+", " ", clean_val.lower()).strip()
+        val_in_doc = (
+            (
+                (clean_text_norm in re.sub(r"\W+", " ", src_text_lower))
+                or (clean_text_norm in re.sub(r"\W+", " ", page_words_text))
+            )
+            if clean_text_norm
+            else False
+        )
+
+    if not val_in_doc:
+        score = min(score, 0.50)
+
+    # 3. Value cleanup penalty: if cleanup had to alter the value, cap below 0.80
+    if was_cleaned:
+        score = min(score, 0.75)
+
+    # 4. Arithmetic mismatch penalty
+    if has_arithmetic_mismatch:
+        score = min(score, 0.70)
+
+    # 5. Parse failure penalty
+    if parse_failed:
+        score = min(score, 0.40)
+
+    # 6. Agreement with prebuilt-invoice model
     if is_invoice and di_field_value is not None:
-        clean_ext = re.sub(r"[\s,\.\-]+", "", raw_value.lower())
+        clean_ext = re.sub(r"[\s,\.\-]+", "", clean_val.lower())
         clean_di = re.sub(r"[\s,\.\-]+", "", str(di_field_value).lower())
         if clean_ext != clean_di and clean_ext not in clean_di and clean_di not in clean_ext:
             score = min(score, 0.60)
 
-    # 3. Format check for field type
-    clean_val = raw_value.strip()
+    # 7. Format check for field type
     if "date" in field_name:
         # Date format check (e.g. YYYY-MM-DD or DD/MM/YYYY)
         if not re.search(r"\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2}[-/]\d{4}", clean_val):
@@ -124,7 +171,7 @@ def calculate_field_confidence(
     elif field_name in ("subtotal", "vat_amount", "total", "unit_price", "line_total"):
         # Amount format check
         try:
-            cleaned_num = re.sub(r"[^\d\.]", "", clean_val)
+            cleaned_num = re.sub(r"[^\d\.\-]", "", clean_val)
             float(cleaned_num)
         except ValueError:
             score = min(score, 0.40)
@@ -134,7 +181,7 @@ def calculate_field_confidence(
         if len(digits) != 15:
             score = min(score, 0.40)
 
-    # 4. Duplicate conflicting values
+    # 8. Duplicate conflicting values
     if has_conflicting_value:
         score = min(score, 0.70)
 

@@ -659,7 +659,7 @@ def test_extraction_sends_strict_json_schema_and_field_guide() -> None:
         # 5. Recursive strict check
         assert_strict_schema_compatible(schema)
 
-        # 6. System prompt contains field guide and injection defence
+        # 6. System prompt contains field guide, injection defence, and value-only rules
         messages = kwargs["messages"]
         system_msg = next(m["content"] for m in messages if m["role"] == "system")
         assert "field guide" in system_msg.lower()
@@ -667,6 +667,10 @@ def test_extraction_sends_strict_json_schema_and_field_guide() -> None:
         assert "page" in system_msg.lower()
         assert "source text" in system_msg.lower() or "source_text" in system_msg.lower()
         assert "data, not instructions" in system_msg
+        assert "value only" in system_msg.lower()
+        assert "legal/trading" in system_msg.lower()
+        assert "plain numbers" in system_msg.lower()
+        assert "iso" in system_msg.lower()
 
 
 @pytest.mark.unit

@@ -108,3 +108,71 @@ def test_confidence_caps_duplicate_conflict(sample_ocr_page: OCRPage) -> None:
         has_conflicting_value=True,
     )
     assert score <= Decimal("0.7000")
+
+
+@pytest.mark.unit
+def test_confidence_caps_cleaned_fields(sample_ocr_page: OCRPage) -> None:
+    # Field that required value cleanup must score below 0.80
+    score, _ = calculate_field_confidence(
+        field_name="total",
+        raw_value="19950.00",
+        source_text="19,950.00",
+        page=sample_ocr_page,
+        was_cleaned=True,
+    )
+    assert score <= Decimal("0.7500")
+    assert score < Decimal("0.8000")
+
+
+@pytest.mark.unit
+def test_confidence_caps_arithmetic_mismatch(sample_ocr_page: OCRPage) -> None:
+    # Field with arithmetic mismatch must score below 0.80
+    score, _ = calculate_field_confidence(
+        field_name="total",
+        raw_value="19950.00",
+        source_text="19,950.00",
+        page=sample_ocr_page,
+        has_arithmetic_mismatch=True,
+    )
+    assert score <= Decimal("0.7000")
+    assert score < Decimal("0.8000")
+
+
+@pytest.mark.unit
+def test_confidence_caps_parse_failure(sample_ocr_page: OCRPage) -> None:
+    # Field where parsing failed must score <= 0.40
+    score, _ = calculate_field_confidence(
+        field_name="total",
+        raw_value="19950.00",
+        source_text="19,950.00",
+        page=sample_ocr_page,
+        parse_failed=True,
+    )
+    assert score <= Decimal("0.4000")
+
+
+@pytest.mark.unit
+def test_confidence_caps_unmatched_value_not_in_doc(sample_ocr_page: OCRPage) -> None:
+    # Cleaned value does not appear in page words or source text -> capped at 0.50
+    score, _ = calculate_field_confidence(
+        field_name="vendor_name",
+        raw_value="Unrelated Vendor Name",
+        source_text="Falcon Office Supplies",
+        page=sample_ocr_page,
+    )
+    assert score <= Decimal("0.5000")
+
+
+@pytest.mark.unit
+def test_confidence_high_only_for_exact_match(sample_ocr_page: OCRPage) -> None:
+    # Exact match, uncleaned, grounded, valid -> high confidence (>= 0.80)
+    score, _ = calculate_field_confidence(
+        field_name="total",
+        raw_value="19,950.00",
+        source_text="19,950.00",
+        page=sample_ocr_page,
+        was_cleaned=False,
+        has_arithmetic_mismatch=False,
+        parse_failed=False,
+    )
+    assert score >= Decimal("0.8000")

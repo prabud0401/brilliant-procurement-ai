@@ -10,6 +10,15 @@ from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from eval.models import MetricResult
+from app.ai.normalize import (
+    clean_amount,
+    clean_currency,
+    clean_date,
+    clean_quantity,
+    clean_trn,
+    clean_vendor_name,
+    strip_known_label,
+)
 
 # ---------------------------------------------------------------------------
 # Normalization functions for robust comparison
@@ -31,13 +40,11 @@ def normalize_number(val: Any) -> Decimal | None:
     if isinstance(val, (int, float, Decimal)):
         return Decimal(str(val)).quantize(Decimal("0.01"))
 
-    clean = str(val).strip()
-    # Strip currency symbols and letters e.g. "AED", "aed", "$"
-    clean = re.sub(r"[^\d\.\-]", "", clean)
-    if not clean:
+    cleaned_str, _, parse_err = clean_amount(str(val))
+    if parse_err or not cleaned_str:
         return None
     try:
-        return Decimal(clean).quantize(Decimal("0.01"))
+        return Decimal(cleaned_str).quantize(Decimal("0.01"))
     except (InvalidOperation, ValueError):
         return None
 
@@ -46,20 +53,10 @@ def normalize_date(val: Any) -> str:
     """Normalize date string to YYYY-MM-DD if possible, else trimmed text."""
     if val is None:
         return ""
-    s = str(val).strip()
-    # Match YYYY-MM-DD
-    m1 = re.match(r"^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$", s)
-    if m1:
-        y, m, d = m1.groups()
-        return f"{int(y):04d}-{int(m):02d}-{int(d):02d}"
-
-    # Match DD/MM/YYYY or DD-MM-YYYY
-    m2 = re.match(r"^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$", s)
-    if m2:
-        d, m, y = m2.groups()
-        return f"{int(y):04d}-{int(m):02d}-{int(d):02d}"
-
-    return normalize_text(s)
+    cleaned_date, _, parse_err = clean_date(str(val))
+    if not parse_err and cleaned_date:
+        return cleaned_date
+    return normalize_text(val)
 
 
 def normalize_trn(val: Any) -> str:
@@ -92,8 +89,122 @@ def compare_header_field(field_name: str, truth_val: Any, extracted_val: Any) ->
     if field_name == "vendor_trn":
         return normalize_trn(truth_val) == normalize_trn(extracted_val)
 
-    # General text fields (vendor_name, document_number, currency, payment_terms, etc.)
-    return normalize_text(truth_val) == normalize_text(extracted_val)
+    # Vendor name
+    if field_name == "vendor_name":
+        t_v, _, _ = clean_vendor_name(str(truth_val))
+        e_v, _, _ = clean_vendor_name(str(extracted_val))
+        return normalize_text(t_v) == normalize_text(e_v)
+
+    # General text fields (document_number, currency, payment_terms, etc.)
+    t_clean, _ = strip_known_label(str(truth_val))
+    e_clean, _ = strip_known_label(str(extracted_val))
+    if field_name == "currency":
+        t_clean, _, _ = clean_currency(t_clean)
+        e_clean, _, _ = clean_currency(e_clean)
+    return normalize_text(t_clean) == normalize_text(e_clean)
+
+
+# ---------------------------------------------------------------------------
+# Q&A Scoring (AIQ-06)
+# ---------------------------------------------------------------------------
+
+_IGNORED_UNIT_WORDS: set[str] = {
+    "units",
+    "unit",
+    "pcs",
+    "piece",
+    "pieces",
+    "items",
+    "item",
+    "ea",
+    "aed",
+    "dhs",
+    "dirhams",
+    "box",
+    "boxes",
+    "roll",
+    "rolls",
+    "of",
+    "in",
+    "and",
+    "by",
+    "vs",
+    "on",
+    "per",
+    "the",
+}
+
+
+def extract_numeric_values(text: str) -> list[Decimal]:
+    """Extract numeric values from text as Decimals."""
+    cleaned = re.sub(r"(?i)\b(?:AED|DHS|USD|EUR|GBP)\b", "", text)
+    tokens = re.findall(r"[-+]?\b\d[\d,\.]*\b%?", cleaned)
+    values: list[Decimal] = []
+    for t in tokens:
+        t_clean = t.rstrip("%").replace(",", "")
+        try:
+            values.append(Decimal(t_clean))
+        except (InvalidOperation, ValueError):
+            pass
+    return values
+
+
+def score_qa_answer(
+    expected_answer: str,
+    actual_answer: str,
+    was_refused: bool = False,
+) -> bool:
+    """Score Q&A answer correctness per AIQ-06 requirements.
+
+    - Numbers in expected answer are strictly required and matched.
+    - Numbers are normalized (10 == 10.00 == 10 units, 28,875.00 == AED 28,875).
+    - Unit words ('units', 'pcs', 'items', etc.) are not required.
+    - For compound answers with parenthetical alternatives (e.g. '2 (invoiced 12 vs received 10)'
+      or '16.00 (+5% above PO price)'), matching the main numbers or the parenthetical numbers
+      satisfies the numeric requirement.
+    - Wrong numbers cause failure.
+    - Non-numeric questions require key-term matching.
+    """
+    if was_refused or not expected_answer or not actual_answer:
+        return False
+
+    exp_lower = expected_answer.lower().strip()
+    act_lower = actual_answer.lower().strip()
+    if exp_lower in act_lower:
+        return True
+
+    exp_nums = extract_numeric_values(expected_answer)
+    act_nums = extract_numeric_values(actual_answer)
+
+    # Check numeric requirement
+    if exp_nums:
+        def _matches_group(group: list[Decimal]) -> bool:
+            if not group:
+                return False
+            return all(any(en == an for an in act_nums) for en in group)
+
+        num_matched = _matches_group(exp_nums)
+        if not num_matched and "(" in expected_answer and ")" in expected_answer:
+            main_text = re.sub(r"\(.*?\)", "", expected_answer)
+            paren_texts = re.findall(r"\((.*?)\)", expected_answer)
+            main_nums = extract_numeric_values(main_text)
+            paren_groups = [extract_numeric_values(pt) for pt in paren_texts]
+            if _matches_group(main_nums) or any(_matches_group(pg) for pg in paren_groups):
+                num_matched = True
+
+        if not num_matched:
+            return False
+
+    # Extract non-unit key terms
+    words = re.findall(r"[a-zA-Z]{3,}", exp_lower)
+    key_terms = [w for w in words if w not in _IGNORED_UNIT_WORDS]
+
+    if not key_terms:
+        # If all expected words were numbers/units, matching numbers is sufficient
+        return len(exp_nums) > 0
+
+    matched = [w for w in key_terms if w in act_lower]
+    return len(matched) >= min(len(key_terms), 2)
 
 
 # ---------------------------------------------------------------------------
@@ -111,6 +222,17 @@ def compute_aiq01(digital_fields_eval: list[dict[str, Any]]) -> MetricResult:
     ratio = (correct / total) if total > 0 else 1.0
     passed = ratio >= 0.95
 
+    failures = [
+        {
+            "doc_id": item.get("doc_id", "unknown"),
+            "field_name": item.get("field_name", ""),
+            "expected": item.get("truth_value"),
+            "got": item.get("extracted_value"),
+        }
+        for item in digital_fields_eval
+        if not item.get("is_correct", False)
+    ]
+
     return MetricResult(
         id="AIQ-01",
         name="Header field accuracy, digital PDFs",
@@ -123,6 +245,7 @@ def compute_aiq01(digital_fields_eval: list[dict[str, Any]]) -> MetricResult:
             "total_fields": total,
             "correct_fields": correct,
             "incorrect_fields": total - correct,
+            "failures": failures,
         },
     )
 
@@ -137,6 +260,17 @@ def compute_aiq02(scanned_fields_eval: list[dict[str, Any]]) -> MetricResult:
     ratio = (correct / total) if total > 0 else 1.0
     passed = ratio >= 0.90
 
+    failures = [
+        {
+            "doc_id": item.get("doc_id", "unknown"),
+            "field_name": item.get("field_name", ""),
+            "expected": item.get("truth_value"),
+            "got": item.get("extracted_value"),
+        }
+        for item in scanned_fields_eval
+        if not item.get("is_correct", False)
+    ]
+
     return MetricResult(
         id="AIQ-02",
         name="Header field accuracy, scanned documents",
@@ -149,6 +283,7 @@ def compute_aiq02(scanned_fields_eval: list[dict[str, Any]]) -> MetricResult:
             "total_fields": total,
             "correct_fields": correct,
             "incorrect_fields": total - correct,
+            "failures": failures,
         },
     )
 
@@ -270,6 +405,17 @@ def compute_aiq06(answerable_eval: list[dict[str, Any]]) -> MetricResult:
     ratio = (correct / total) if total > 0 else 1.0
     passed = ratio >= 0.90
 
+    failures = [
+        {
+            "question_id": q.get("question_id", "unknown"),
+            "question": q.get("question", ""),
+            "expected": q.get("expected_answer", ""),
+            "got": q.get("answer_text", ""),
+        }
+        for q in answerable_eval
+        if not q.get("is_correct", False)
+    ]
+
     return MetricResult(
         id="AIQ-06",
         name="Answer correctness (answerable questions)",
@@ -282,6 +428,7 @@ def compute_aiq06(answerable_eval: list[dict[str, Any]]) -> MetricResult:
             "total_answerable_questions": total,
             "correct_answers": correct,
             "incorrect_answers": total - correct,
+            "failures": failures,
         },
     )
 

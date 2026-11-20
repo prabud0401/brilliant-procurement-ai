@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.ai.cache import get_cached_extraction, store_cached_extraction
 from app.ai.cost import calculate_cost_aed, check_daily_budget
 from app.ai.factory import get_document_analyzer, get_llm_client
+from app.ai.normalize import CleanupMetadata, cleanup_extraction_result
 from app.audit.service import record as record_audit
 from app.core.models import (
     Document,
@@ -117,6 +118,11 @@ def run_extraction(session: Session, document_id: uuid.UUID) -> Extraction:
         )
         store_cached_extraction(document.file_sha256, prompt_version, extraction_result, metadata)
 
+    # Ensure deterministic cleanup is applied and metadata available
+    cleanup_meta: CleanupMetadata | None = metadata.get("cleanup")
+    if cleanup_meta is None:
+        extraction_result, cleanup_meta = cleanup_extraction_result(extraction_result)
+
     # If doc_type was generic "other", update from classified type
     if document.doc_type == "other" and extraction_result.doc_type:
         dt = extraction_result.doc_type.lower()
@@ -219,6 +225,9 @@ def run_extraction(session: Session, document_id: uuid.UUID) -> Extraction:
             page=page_obj,
             di_field_value=di_val,
             is_invoice=(document.doc_type == "invoice"),
+            was_cleaned=cleanup_meta.was_cleaned(fname),
+            parse_failed=cleanup_meta.parse_failed(fname),
+            has_arithmetic_mismatch=cleanup_meta.has_arithmetic_mismatch(fname),
         )
 
         val_msg = val_result.field_errors.get(fname)
@@ -252,12 +261,18 @@ def run_extraction(session: Session, document_id: uuid.UUID) -> Extraction:
         elif ocr_result.pages:
             line_page_obj = ocr_result.pages[0]
 
+        line_prefix = f"lines[{item.line_no - 1}]"
         conf, bbox = calculate_field_confidence(
             field_name="line_total",
             raw_value=item.line_total,
             source_text=item.source_text,
             page=line_page_obj,
             is_invoice=(document.doc_type == "invoice"),
+            was_cleaned=cleanup_meta.was_cleaned(f"{line_prefix}.line_total"),
+            parse_failed=cleanup_meta.parse_failed(f"{line_prefix}.line_total"),
+            has_arithmetic_mismatch=cleanup_meta.has_arithmetic_mismatch(
+                f"{line_prefix}.line_total"
+            ),
         )
 
         line_val_msg = val_result.line_errors.get(item.line_no)

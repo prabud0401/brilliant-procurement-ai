@@ -7,6 +7,7 @@ import math
 import re
 from typing import Any
 
+from app.ai.normalize import cleanup_extraction_result
 from app.ai.schemas import (
     AnswerDraft,
     AnswerSentence,
@@ -167,12 +168,14 @@ class MockLlmClient:
         ]
 
         result = ExtractionResult(doc_type=doc_type, header=header, lines=lines)
+        result, cleanup_meta = cleanup_extraction_result(result)
         metadata = {
             "tokens_in": 500,
             "tokens_out": 200,
             "latency_ms": 150,
             "model": "mock-llm",
             "prompt_version": "prompts/extract_v1.md",
+            "cleanup": cleanup_meta,
         }
         return result, metadata
 
