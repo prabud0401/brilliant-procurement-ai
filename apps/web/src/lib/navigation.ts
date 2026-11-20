@@ -34,7 +34,7 @@ export const NAV_CONFIG: NavItem[] = [
     href: "/documents",
     iconName: "FileText",
     allowedRoles: ["requester", "buyer", "manager", "admin"],
-    enabled: false, // Activated in R08
+    enabled: true, // Activated in R08
     description: "Upload, view and review procurement documents and extractions",
   },
   {
@@ -43,7 +43,7 @@ export const NAV_CONFIG: NavItem[] = [
     href: "/requests",
     iconName: "ShoppingCart",
     allowedRoles: ["requester", "buyer", "manager"],
-    enabled: false, // Activated in R09
+    enabled: true, // Activated in R09
     description: "Create and track purchase requests and line items",
   },
   {
@@ -52,8 +52,17 @@ export const NAV_CONFIG: NavItem[] = [
     href: "/comparisons",
     iconName: "GitCompare",
     allowedRoles: ["requester", "buyer", "manager"],
-    enabled: false, // Activated in R09
+    enabled: true, // Activated in R09
     description: "Quote comparison matrices, scoring, and recommendations",
+  },
+  {
+    id: "purchase-orders",
+    label: "Purchase Orders",
+    href: "/purchase-orders",
+    iconName: "FileCheck",
+    allowedRoles: ["requester", "buyer", "manager"],
+    enabled: true, // Activated in R09
+    description: "Manage purchase orders and push approved orders to Odoo",
   },
   {
     id: "approvals",
@@ -61,7 +70,7 @@ export const NAV_CONFIG: NavItem[] = [
     href: "/approvals",
     iconName: "CheckSquare",
     allowedRoles: ["buyer", "manager"],
-    enabled: false, // Activated in R09
+    enabled: true, // Activated in R09
     description: "Review and approve pending purchase requests and POs",
   },
   {
@@ -70,7 +79,7 @@ export const NAV_CONFIG: NavItem[] = [
     href: "/matches",
     iconName: "Layers",
     allowedRoles: ["buyer", "manager"],
-    enabled: false, // Activated in R09
+    enabled: true, // Activated in R09
     description: "Match POs, delivery notes, and invoices with tolerance rules",
   },
   {
@@ -88,7 +97,7 @@ export const NAV_CONFIG: NavItem[] = [
     href: "/audit",
     iconName: "Shield",
     allowedRoles: ["requester", "buyer", "manager", "admin"],
-    enabled: false, // Activated in R09
+    enabled: true, // Activated in R09
     description: "Tamper-evident hash-chained audit log and CSV export",
   },
   {
@@ -97,7 +106,7 @@ export const NAV_CONFIG: NavItem[] = [
     href: "/admin",
     iconName: "Settings",
     allowedRoles: ["admin"],
-    enabled: false, // Activated in R09
+    enabled: true, // Activated in R09
     description: "System configuration, user management, and tolerances",
   },
 ];

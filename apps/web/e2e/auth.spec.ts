@@ -41,9 +41,9 @@ test.describe("Authentication, RBAC Navigation and Security", () => {
       page.locator('h3:has-text("Requester Workspace")')
     ).toBeVisible();
 
-    // Verify Navigation has ONLY finished features (Home only)
+    // Verify Navigation has finished features for Requester (no admin or QA)
     const navLinks = page.locator('nav[aria-label="Main Navigation"] a');
-    await expect(navLinks).toHaveCount(1);
+    await expect(navLinks).toHaveCount(6);
     await expect(navLinks.first()).toHaveText("Home");
 
     // Security Verification: HttpOnly and SameSite=Lax cookie
