@@ -11,4 +11,4 @@ Implement email intake using an Azure Logic App (Consumption) connected to a ded
 
 ## Consequences
 - **Positive:** Fully automated document intake mirroring enterprise Power Automate workflows; logic app secures input/output payloads in run history; documents enter the standard queue tagged with source `email` and full audit metadata.
-- **Negative:** Requires one-time interactive OAuth sign-in to the demo mailbox via the Outlook API Connection at deployment gate G2; consumption polling introduces up to a 5-minute intake latency.
+- **Negative:** Requires one-time interactive OAuth sign-in to the demo mailbox via the Outlook API Connection at deployment time; consumption polling introduces up to a 5-minute intake latency.

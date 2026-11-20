@@ -81,7 +81,7 @@ flowchart TD
 ## Quick Start
 
 ### Prerequisites
-- **For Running:** Docker, Docker Compose v2, and GNU `make`
+- **For Running:** Docker, Docker Compose v2, GNU `make`, and Python 3.12+ with `uv` (used by `make seed` and `make datagen`, which run on the host against the containerised database)
 - **For Local Development:** Node.js 20+ and Python 3.12+ with `uv`
 
 ### Setup and Run

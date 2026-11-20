@@ -355,13 +355,13 @@ flowchart TB
             ManagedID["User-Assigned Managed Identity<br/>id-pda-prod-uaen"]
         end
 
-        subgraph RG_AI["Resource Group: rg-pda-ai-uaen (Gate G1)"]
+        subgraph RG_AI["Resource Group: rg-pda-ai-uaen (live AI mode only)"]
             OpenAI["Azure OpenAI Service<br/>oai-pda-ai-uaen<br/>gpt-4o-mini & text-embedding-3-small"]
             DocIntel["Azure Document Intelligence<br/>di-pda-ai-uaen<br/>SKU F0"]
         end
 
-        subgraph Budget_Sub["Subscription Scope (Gate G1)"]
-            Budget["Cost Budget ($20/mo)<br/>Alerts at 50% ($10) & 100% ($20)"]
+        subgraph Budget_Sub["Subscription Scope"]
+            Budget["Cost Budget<br/>Alerts at 50% & 100%"]
         end
     end
 

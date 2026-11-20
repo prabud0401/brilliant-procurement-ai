@@ -18,6 +18,8 @@ This report documents the performance of the AI components in the Procurement Do
 
 ---
 
+> **How to read these numbers.** Replay mode feeds the real pipeline code (extraction validation, retrieval, refusal logic, injection screening, comparison facts) with recorded AI responses. The replay fixtures are generated from the ground truth, so a 100% replay score proves that the pipeline, the metrics and the plumbing work end to end; it does not measure model quality. The live run (section 5) is the real measure.
+
 ## 2. Evaluation Dataset & Scope
 
 The evaluation harness evaluates a focused benchmark suite matching the reduced evaluation dataset per Sprint Plan Section 3.2:

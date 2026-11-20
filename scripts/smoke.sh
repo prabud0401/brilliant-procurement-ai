@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-BASE_URL="${1:-${WEB_BASE_URL:-http://localhost:3021}}"
+BASE_URL="${1:-${WEB_BASE_URL:-http://localhost:3000}}"
 # Strip trailing slash
 BASE_URL="${BASE_URL%/}"
 

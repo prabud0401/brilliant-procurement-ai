@@ -88,8 +88,4 @@ The following capabilities are scheduled for post-demo enterprise hardening per 
 
 ## 5. Known Issues Observed During Run
 
-1. **Smoke Script Default Port:**
-   - In `scripts/smoke.sh`, line 8 defaults to `http://localhost:3021` if executed directly without arguments and without `$WEB_BASE_URL` defined in the environment.
-   - *Mitigation:* The `Makefile` target `make smoke` and automated CI workflows explicitly pass `http://localhost:3000`.
-2. **Minimal Environment Tooling:**
-   - In lightweight container environments where GNU `make` is not pre-installed, commands can be executed using standard `uv run ...` and `npm run ...` invocations as documented in the runbook.
+None beyond the known limits listed above.
