@@ -42,7 +42,7 @@ def setup_storage_and_bootstrap(
 
     run_seed(db_url=migrator_url)
     test_password = "".join(["D", "e", "m", "o", "1", "2", "3", "!", "@", "#"])
-    bootstrap(db_session, password=test_password)
+    bootstrap(db_session, password=test_password, include_intake=True)
 
     # Clean existing document, job, and audit state
     db_session.execute(text("DELETE FROM extracted_lines"))
@@ -320,3 +320,43 @@ def test_sender_not_in_allowlist_returns_403(
         headers={"X-Intake-Key": plain_key},
     )
     assert resp.status_code == 403
+
+
+@pytest.mark.integration
+def test_intake_returns_503_when_account_not_bootstrapped(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    client = TestClient(app)
+    plain_key, key_hash = generate_key_and_hash()
+    monkeypatch.setattr(settings, "INTAKE_KEY_HASH", key_hash)
+
+    # Temporarily remove intake service account from DB
+    intake_user = db_session.execute(
+        select(User).where(User.email == "intake@demo-holdings.example")
+    ).scalar_one_or_none()
+    if intake_user:
+        db_session.execute(
+            text("DELETE FROM user_roles WHERE user_id = :uid"), {"uid": intake_user.id}
+        )
+        db_session.execute(text("DELETE FROM users WHERE id = :uid"), {"uid": intake_user.id})
+        db_session.commit()
+
+    try:
+        resp = client.post(
+            "/api/v1/intake/email",
+            data={
+                "sender": "supplier@example.com",
+                "subject": "Missing service account test",
+                "received_at": "2026-11-20T10:00:00Z",
+                "message_id": "<no-acct-1@supplier.example>",
+            },
+            files={"file": ("test.pdf", io.BytesIO(b"%PDF-1.4 sample data"), "application/pdf")},
+            headers={"X-Intake-Key": plain_key},
+        )
+        assert resp.status_code == 503
+        data = resp.json()
+        assert data["code"] == "INTAKE_NOT_BOOTSTRAPPED"
+    finally:
+        # Re-bootstrap intake for test isolation
+        test_password = "".join(["D", "e", "m", "o", "1", "2", "3", "!", "@", "#"])
+        bootstrap(db_session, password=test_password, include_intake=True)

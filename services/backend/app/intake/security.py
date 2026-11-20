@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import hmac
-import uuid
 from decimal import Decimal
 
 from argon2 import PasswordHasher
@@ -15,7 +14,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.errors import ProblemException
-from app.core.models import User, UserRole
+from app.core.models import User
 from app.core.policy import Principal
 
 _hasher = PasswordHasher()
@@ -80,31 +79,27 @@ def get_intake_principal(
             detail="Invalid intake API key",
         )
 
-    # Resolve or provision intake service account user
+    # Resolve intake service account user (must exist in DB from bootstrap)
     user = db.query(User).filter(User.email == INTAKE_SERVICE_EMAIL).first()
     if not user:
-        user = User(
-            id=uuid.uuid4(),
-            email=INTAKE_SERVICE_EMAIL,
-            display_name="Intake Service Account",
-            approval_limit_aed=Decimal("0.00"),
-            is_demo=True,
-            active=True,
-            password_hash=None,  # Service account only, no password login
+        raise ProblemException(
+            status_code=503,
+            code="INTAKE_NOT_BOOTSTRAPPED",
+            title="Service Unavailable",
+            detail="Intake service account has not been bootstrapped",
         )
-        db.add(user)
-        db.flush()
-        db.add(UserRole(user_id=user.id, role="intake"))
-        db.flush()
+
+    dept_name = user.department.name if user.department else None
+    user_roles = [r.role for r in user.roles] or ["intake"]
 
     return Principal(
         id=user.id,
         email=user.email,
         display_name=user.display_name,
-        roles=["intake"],
-        department_id=None,
-        department_name=None,
-        approval_limit_aed=Decimal("0.00"),
-        is_demo=True,
-        active=True,
+        roles=user_roles,
+        department_id=user.department_id,
+        department_name=dept_name,
+        approval_limit_aed=user.approval_limit_aed or Decimal("0.00"),
+        is_demo=user.is_demo,
+        active=user.active,
     )

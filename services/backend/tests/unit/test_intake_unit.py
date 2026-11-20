@@ -185,3 +185,22 @@ def test_intake_role_in_policy_matrix() -> None:
         assert scope == ScopeRule.NONE, (
             f"Intake principal should have ScopeRule.NONE for capability '{cap}', got {scope}"
         )
+
+
+@pytest.mark.unit
+def test_get_intake_principal_missing_account_returns_503(monkeypatch: pytest.MonkeyPatch) -> None:
+    from unittest.mock import MagicMock
+
+    from app.intake.security import get_intake_principal
+
+    plain_key, key_hash = generate_key_and_hash()
+    monkeypatch.setattr(settings, "INTAKE_KEY_HASH", key_hash)
+
+    mock_db = MagicMock()
+    mock_db.query.return_value.filter.return_value.first.return_value = None
+
+    with pytest.raises(ProblemException) as exc_info:
+        get_intake_principal(x_intake_key=plain_key, db=mock_db)
+
+    assert exc_info.value.status_code == 503
+    assert exc_info.value.code == "INTAKE_NOT_BOOTSTRAPPED"

@@ -48,7 +48,13 @@ param enableEmailIntake bool = false
 
 @secure()
 @description('API key for email intake Logic App (empty if enableEmailIntake is false)')
-param intakeKey string
+param intakeKey string = ''
+
+@description('Optional intake key hash for email intake (empty = not configured)')
+param intakeKeyHash string = ''
+
+@description('Allowed sender emails or domains for email intake (comma-separated, empty = allow all)')
+param intakeSenderAllowlist string = ''
 
 // Container images
 @description('Web container image')
@@ -154,6 +160,7 @@ module keyVault 'modules/keyvault.bicep' = {
     databaseUrl: databaseUrl
     databaseUrlMigrator: databaseUrlMigrator
     containerRegistryPassword: containerRegistryPassword
+    intakeKeyHash: intakeKeyHash
   }
 }
 
@@ -199,8 +206,11 @@ module containerApps 'modules/containerapps.bicep' = {
     aiProvider: aiProvider
     blobAccountUrl: storage.outputs.primaryBlobEndpoint
     azureClientId: identity.outputs.managedIdentityClientId
+    intakeSenderAllowlist: intakeSenderAllowlist
   }
 }
+
+var validatedIntakeKey = (enableEmailIntake && empty(intakeKey)) ? fail('intakeKey must not be empty when enableEmailIntake is true') : intakeKey
 
 // 7. Email Intake Logic App (Stretch, Gate G2)
 module logicApp 'logicapp/logicapp.bicep' = if (enableEmailIntake) {
@@ -210,7 +220,7 @@ module logicApp 'logicapp/logicapp.bicep' = if (enableEmailIntake) {
     location: location
     tags: tags
     apiBaseUrl: 'https://${containerApps.outputs.apiAppFqdn}'
-    intakeKey: intakeKey
+    intakeKey: validatedIntakeKey
     enabled: enableEmailIntake
   }
 }

@@ -83,68 +83,6 @@ SERVICE_ACCOUNTS: list[dict[str, Any]] = [
 ]
 
 
-def bootstrap_intake(db: Session) -> User:
-    """Bootstrap the intake service account (service account only, no password login)."""
-    dept = db.query(Department).filter(Department.name == "IT").first()
-    if not dept:
-        dept = Department(name="IT")
-        db.add(dept)
-        db.flush()
-
-    s_email = "intake@demo-holdings.example"
-    s_user = db.query(User).filter(User.email == s_email).first()
-    is_new = False
-    if not s_user:
-        is_new = True
-        s_user = User(
-            email=s_email,
-            display_name="Intake Service",
-            department_id=dept.id,
-            approval_limit_aed=Decimal("0.00"),
-            is_demo=True,
-            active=True,
-            password_hash=None,  # Service account only, no password login
-        )
-        db.add(s_user)
-        db.flush()
-    else:
-        s_user.display_name = "Intake Service"
-        s_user.department_id = dept.id
-        s_user.approval_limit_aed = Decimal("0.00")
-        s_user.is_demo = True
-        s_user.active = True
-        s_user.password_hash = None
-        db.flush()
-
-    existing_roles = {r.role for r in s_user.roles}
-    target_roles = {"intake"}
-    for r in list(s_user.roles):
-        if r.role not in target_roles:
-            db.delete(r)
-    for role_name in target_roles - existing_roles:
-        db.add(UserRole(user_id=s_user.id, role=role_name))
-    db.flush()
-
-    record_audit(
-        session=db,
-        actor=None,
-        action="user.bootstrapped",
-        entity_type="user",
-        entity_id=s_user.id,
-        after={
-            "email": s_user.email,
-            "roles": ["intake"],
-            "department": dept.name,
-            "approval_limit_aed": "0.00",
-            "is_new": is_new,
-            "service_account": True,
-        },
-        reason="System bootstrap (service account)",
-    )
-    db.commit()
-    return s_user
-
-
 def bootstrap(
     db: Session,
     password: str | None = None,

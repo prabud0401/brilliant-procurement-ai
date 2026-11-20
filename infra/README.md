@@ -213,6 +213,8 @@ In the GitHub repository, configure an Environment named `prod` with the followi
 | `DEMO_USER_PASSWORD` | Password for seeded demo user accounts | Strong alphanumeric + symbol |
 | `CONTAINER_REGISTRY_USERNAME` | *(Optional)* Private container registry username (leave blank for public GHCR) | String |
 | `CONTAINER_REGISTRY_PASSWORD` | *(Optional)* Private container registry password (leave blank for public GHCR) | String |
+| `INTAKE_KEY` | *(Optional)* Plain API key for email intake Logic App (required when `ENABLE_EMAIL_INTAKE` is true) | Alphanumeric string |
+| `ENABLE_EMAIL_INTAKE` | *(Optional)* Variable to enable email intake (`true`/`false`, default `false`) | Boolean string |
 
 ### 3. Making GitHub Container Registry (GHCR) Packages Public
 By default, GitHub Packages for private repositories are published with private visibility. Because `GITHUB_TOKEN` expires when the workflow run finishes, Container Apps cannot use it for future container pulls (e.g. scaling up from zero or node restarts).
@@ -240,6 +242,20 @@ When enabled (`enableEmailIntake=true`), the infrastructure provisions an automa
 1. **Trigger**: "When a new email arrives (V2)" polls the mailbox every 5 minutes with `hasAttachments=true` and `includeAttachments=true`.
 2. **Filtering**: For each attachment, checks that the MIME type or file extension is PDF, PNG, or JPEG, and file size is $\le$ 4 MB (or configured limit). Non-matching files (e.g. `.exe`, `.zip`, oversized files) are skipped.
 3. **API Delivery**: Approved attachments are sent via HTTP POST to `${apiBaseUrl}/api/v1/intake/email` with header `X-Intake-Key: <intakeKey>`, sender, subject, received time, and message ID. Inputs and outputs on the HTTP action are secured (`secureData`).
+
+### Key Generation and Secret Routing
+Email intake authentication requires a shared API key between the Logic App and the API backend:
+1. **Key and Hash Generation**:
+   Run the intake keygen tool:
+   ```bash
+   python -m app.intake.keygen
+   ```
+   This generates a secure random plain key and its Argon2id hash.
+2. **Where Each Value Goes**:
+   - **Plain key (`intakeKey`)**: Provided to the Logic App secure parameter or GitHub secret `INTAKE_KEY`. The plain key must never be stored in Key Vault for the api or appear in any file, template environment, or response.
+   - **Hash (`intake-key-hash`)**: Stored in Key Vault secret `intake-key-hash` (e.g. via `az keyvault secret set --vault-name kv-pda-<env>-uaen --name intake-key-hash --value "<hash>"` or passed via `intakeKeyHash`). The api Container App mounts this via Key Vault reference as `INTAKE_KEY_HASH`.
+3. **Sender Allowlist**:
+   - `INTAKE_SENDER_ALLOWLIST`: Configured as a plain environment variable on the api Container App from parameter `intakeSenderAllowlist` (default empty, which allows all senders).
 
 ### One-Time Manual Sign-In Step
 Because Azure Logic Apps API connections require interactive OAuth consent to connect to an Outlook.com account:
