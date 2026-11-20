@@ -42,6 +42,20 @@ param containerRegistryUsername string = ''
 @description('Container registry password or token (empty if public registry)')
 param containerRegistryPassword string
 
+// Email intake parameters (R13 stretch)
+@description('Enable email intake via Azure Logic App (default false)')
+param enableEmailIntake bool = false
+
+@secure()
+@description('API key for email intake Logic App (empty if enableEmailIntake is false)')
+param intakeKey string = ''
+
+@description('Optional intake key hash for email intake (empty = not configured)')
+param intakeKeyHash string = ''
+
+@description('Allowed sender emails or domains for email intake (comma-separated, empty = allow all)')
+param intakeSenderAllowlist string = ''
+
 // Container images
 @description('Web container image')
 param webImage string = 'ghcr.io/prabud0401/brilliant-procurement-ai/web:latest'
@@ -146,6 +160,7 @@ module keyVault 'modules/keyvault.bicep' = {
     databaseUrl: databaseUrl
     databaseUrlMigrator: databaseUrlMigrator
     containerRegistryPassword: containerRegistryPassword
+    intakeKeyHash: intakeKeyHash
   }
 }
 
@@ -191,6 +206,22 @@ module containerApps 'modules/containerapps.bicep' = {
     aiProvider: aiProvider
     blobAccountUrl: storage.outputs.primaryBlobEndpoint
     azureClientId: identity.outputs.managedIdentityClientId
+    intakeSenderAllowlist: intakeSenderAllowlist
+  }
+}
+
+var validatedIntakeKey = (enableEmailIntake && empty(intakeKey)) ? fail('intakeKey must not be empty when enableEmailIntake is true') : intakeKey
+
+// 7. Email Intake Logic App (Stretch, Gate G2)
+module logicApp 'logicapp/logicapp.bicep' = if (enableEmailIntake) {
+  name: 'logicAppDeployment'
+  params: {
+    env: env
+    location: location
+    tags: tags
+    apiBaseUrl: 'https://${containerApps.outputs.apiAppFqdn}'
+    intakeKey: validatedIntakeKey
+    enabled: enableEmailIntake
   }
 }
 
@@ -209,3 +240,5 @@ output managedIdentityId string = identity.outputs.managedIdentityId
 output managedIdentityPrincipalId string = identity.outputs.managedIdentityPrincipalId
 output logAnalyticsWorkspaceName string = monitoring.outputs.logAnalyticsWorkspaceName
 output appInsightsName string = monitoring.outputs.appInsightsName
+output logicAppName string = logicApp.?outputs.logicAppName ?? ''
+output outlookConnectionName string = logicApp.?outputs.outlookConnectionName ?? ''

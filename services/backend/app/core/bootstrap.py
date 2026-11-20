@@ -72,8 +72,22 @@ DEMO_USERS: list[dict[str, Any]] = [
     },
 ]
 
+SERVICE_ACCOUNTS: list[dict[str, Any]] = [
+    {
+        "email": "intake@demo-holdings.example",
+        "display_name": "Intake Service",
+        "department": "IT",
+        "roles": ["intake"],
+        "approval_limit_aed": Decimal("0.00"),
+    },
+]
 
-def bootstrap(db: Session, password: str | None = None) -> dict[str, int]:
+
+def bootstrap(
+    db: Session,
+    password: str | None = None,
+    include_intake: bool = False,
+) -> dict[str, int]:
     """Idempotently bootstrap demo departments and accounts."""
     pwd = password or settings.DEMO_USER_PASSWORD or os.environ.get("DEMO_USER_PASSWORD")
     if not pwd:
@@ -167,6 +181,66 @@ def bootstrap(db: Session, password: str | None = None) -> dict[str, int]:
             reason="System bootstrap",
         )
 
+    # 3. Dedicated Service Accounts (service account only, no password login)
+    if include_intake:
+        for s_data in SERVICE_ACCOUNTS:
+            s_email = str(s_data["email"])
+            s_dept = dept_map[s_data["department"]]
+            s_roles = list(s_data["roles"])
+            s_limit = Decimal(str(s_data["approval_limit_aed"]))
+
+            s_user = db.query(User).filter(User.email == s_email).first()
+            s_is_new = False
+            if not s_user:
+                s_is_new = True
+                s_user = User(
+                    email=s_email,
+                    display_name=s_data["display_name"],
+                    department_id=s_dept.id,
+                    approval_limit_aed=s_limit,
+                    is_demo=True,
+                    active=True,
+                    password_hash=None,  # Service account only, no password login
+                )
+                db.add(s_user)
+                db.flush()
+                users_created += 1
+            else:
+                s_user.display_name = s_data["display_name"]
+                s_user.department_id = s_dept.id
+                s_user.approval_limit_aed = s_limit
+                s_user.is_demo = True
+                s_user.active = True
+                s_user.password_hash = None
+                db.flush()
+                users_updated += 1
+
+            existing_s_roles = {r.role for r in s_user.roles}
+            target_s_roles = set(s_roles)
+            for r in list(s_user.roles):
+                if r.role not in target_s_roles:
+                    db.delete(r)
+            for role_name in target_s_roles - existing_s_roles:
+                db.add(UserRole(user_id=s_user.id, role=role_name))
+            db.flush()
+
+            record_audit(
+                session=db,
+                actor=None,
+                action="user.bootstrapped",
+                entity_type="user",
+                entity_id=s_user.id,
+                after={
+                    "email": s_user.email,
+                    "roles": s_roles,
+                    "department": s_dept.name,
+                    "approval_limit_aed": str(s_limit),
+                    "is_new": s_is_new,
+                    "service_account": True,
+                },
+                reason="System bootstrap (service account)",
+            )
+
     db.commit()
     return {
         "departments_created": depts_created,
@@ -187,7 +261,7 @@ def main() -> None:
         session = SessionLocal()
 
     try:
-        results = bootstrap(session, pwd)
+        results = bootstrap(session, pwd, include_intake=True)
         print(
             f"Bootstrap completed successfully: "
             f"{results['departments_created']} departments created, "

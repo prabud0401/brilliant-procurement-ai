@@ -83,6 +83,9 @@ param azureDocIntelEndpoint string = ''
 ])
 param aiProvider string = 'replay'
 
+@description('Allowed sender emails or domains for email intake (comma-separated, empty = allow all)')
+param intakeSenderAllowlist string = ''
+
 var baseSecrets = [
   {
     name: 'jwt-secret'
@@ -107,6 +110,11 @@ var baseSecrets = [
   {
     name: 'app-db-password'
     keyVaultUrl: '${keyVaultUri}secrets/app-db-password'
+    identity: managedIdentityId
+  }
+  {
+    name: 'intake-key-hash'
+    keyVaultUrl: '${keyVaultUri}secrets/intake-key-hash'
     identity: managedIdentityId
   }
 ]
@@ -254,6 +262,14 @@ resource apiApp 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
               value: appInsightsConnectionString
+            }
+            {
+              name: 'INTAKE_SENDER_ALLOWLIST'
+              value: intakeSenderAllowlist
+            }
+            {
+              name: 'INTAKE_KEY_HASH'
+              secretRef: 'intake-key-hash'
             }
           ]
           probes: [

@@ -74,7 +74,7 @@ web-e2e:
 	cd apps/web && WEB_BASE_URL=$${WEB_BASE_URL:-http://localhost:3000} npm run e2e
 
 infra-check:
-	@for file in infra/*.bicep infra/modules/*.bicep; do \
+	@for file in infra/*.bicep infra/modules/*.bicep infra/logicapp/*.bicep; do \
 		echo "Linting $$file..."; \
 		az bicep lint --file "$$file"; \
 		echo "Building $$file..."; \
