@@ -56,7 +56,7 @@ module = ["pgvector.*", "argon2.*", "reportlab.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "eval/tests"]
 pythonpath = [".", "../.."]
 asyncio_default_fixture_loop_scope = "function"
 markers = [

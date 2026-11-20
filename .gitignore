@@ -22,6 +22,7 @@ build/
 tools/datagen/out/
 seed/out/
 eval/data/generated/
+eval/reports/
 azurite-data/
 playwright-report/
 test-results/

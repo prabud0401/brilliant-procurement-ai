@@ -1,4 +1,4 @@
-.PHONY: env up down logs migrate seed datagen lint fmt test test-int qa-reindex web-lint web-test web-e2e infra-check
+.PHONY: env up down logs migrate seed datagen lint fmt test test-int qa-reindex web-lint web-test web-e2e infra-check eval eval-test e2e-demo smoke
 
 SHELL := /bin/bash
 
@@ -82,3 +82,18 @@ infra-check:
 	done
 	python3 infra/tests/check_templates.py
 	shellcheck scripts/*.sh
+
+eval:
+	cd services/backend && uv run python -m eval.run $(ARGS)
+
+eval-test:
+	cd services/backend && uv run pytest eval/tests
+
+REPEAT_ARGS ?= --repeat-each 3
+
+e2e-demo:
+	cd apps/web && WEB_BASE_URL=$${WEB_BASE_URL:-http://localhost:3021} npx playwright test e2e/demo/demo-script.spec.ts $(REPEAT_ARGS)
+
+smoke:
+	./scripts/smoke.sh $${WEB_BASE_URL:-http://localhost:3021}
+

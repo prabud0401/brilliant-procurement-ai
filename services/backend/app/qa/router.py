@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.ai.cost import check_daily_budget
+from app.ai.cost import check_daily_budget, record_ai_call_metrics
 from app.ai.factory import get_answer_writer, get_embedder
 from app.audit.service import record as record_audit
 from app.core.database import get_db
@@ -86,6 +86,17 @@ def ask_question(
         )
         db.add(qa_log)
         db.commit()
+
+        record_ai_call_metrics(
+            task="qa",
+            tokens_in=0,
+            tokens_out=0,
+            model="injection_detector",
+            prompt_version="prompts/qa_v1.md",
+            latency_ms=latency_ms,
+            refusal_flag=True,
+            injection_flag=True,
+        )
 
         return QuestionResponse(
             answer=[],
@@ -171,6 +182,17 @@ def ask_question(
         db.add(qa_log)
         db.commit()
 
+        record_ai_call_metrics(
+            task="qa",
+            tokens_in=0,
+            tokens_out=0,
+            model="relevance_floor",
+            prompt_version="prompts/qa_v1.md",
+            latency_ms=latency_ms,
+            refusal_flag=True,
+            injection_flag=False,
+        )
+
         return QuestionResponse(
             answer=[],
             refused=True,
@@ -192,12 +214,23 @@ def ask_question(
             refused=True,
             llm_model=draft.model,
             prompt_version=draft.prompt_version,
-            tokens_in=draft.tokens_in,
-            tokens_out=draft.tokens_out,
+            tokens_in=draft.tokens_in or 0,
+            tokens_out=draft.tokens_out or 0,
             latency_ms=latency_ms,
         )
         db.add(qa_log)
         db.commit()
+
+        record_ai_call_metrics(
+            task="qa",
+            tokens_in=draft.tokens_in or 0,
+            tokens_out=draft.tokens_out or 0,
+            model=draft.model,
+            prompt_version=draft.prompt_version,
+            latency_ms=latency_ms,
+            refusal_flag=True,
+            injection_flag=False,
+        )
 
         return QuestionResponse(
             answer=[],
@@ -220,12 +253,23 @@ def ask_question(
             refused=True,
             llm_model=draft.model,
             prompt_version=draft.prompt_version,
-            tokens_in=draft.tokens_in,
-            tokens_out=draft.tokens_out,
+            tokens_in=draft.tokens_in or 0,
+            tokens_out=draft.tokens_out or 0,
             latency_ms=latency_ms,
         )
         db.add(qa_log)
         db.commit()
+
+        record_ai_call_metrics(
+            task="qa",
+            tokens_in=draft.tokens_in or 0,
+            tokens_out=draft.tokens_out or 0,
+            model=draft.model,
+            prompt_version=draft.prompt_version,
+            latency_ms=latency_ms,
+            refusal_flag=True,
+            injection_flag=False,
+        )
 
         return QuestionResponse(
             answer=[],
@@ -278,12 +322,23 @@ def ask_question(
         refused=False,
         llm_model=draft.model,
         prompt_version=draft.prompt_version,
-        tokens_in=draft.tokens_in,
-        tokens_out=draft.tokens_out,
+        tokens_in=draft.tokens_in or 0,
+        tokens_out=draft.tokens_out or 0,
         latency_ms=latency_ms,
     )
     db.add(qa_log)
     db.commit()
+
+    record_ai_call_metrics(
+        task="qa",
+        tokens_in=draft.tokens_in or 0,
+        tokens_out=draft.tokens_out or 0,
+        model=draft.model,
+        prompt_version=draft.prompt_version,
+        latency_ms=latency_ms,
+        refusal_flag=False,
+        injection_flag=False,
+    )
 
     return QuestionResponse(
         answer=answer_items,
