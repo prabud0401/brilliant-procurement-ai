@@ -8,7 +8,7 @@ param location string = 'uaenorth'
 
 @description('Resource tags')
 param tags object = {
-  project: 'brilliant-pda'
+  project: 'brilliant-demo'
   env: env
   expires: '2026-11-29'
 }
@@ -70,7 +70,7 @@ param workerImage string = 'ghcr.io/prabud0401/brilliant-procurement-ai/worker:l
 param azureOpenAiEndpoint string = ''
 
 @description('Azure OpenAI chat deployment name')
-param azureOpenAiDeployment string = 'gpt-4o-mini'
+param azureOpenAiDeployment string = 'gpt-5-mini'
 
 @description('Azure OpenAI embedding deployment name')
 param azureOpenAiEmbeddingDeployment string = 'text-embedding-3-small'

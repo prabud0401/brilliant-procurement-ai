@@ -30,17 +30,17 @@ scripts/
 
 - **`infra/budget.bicep` (Subscription scope, Gate G1)**:
   - Deploys a monthly subscription budget of USD 20 with notifications at 50% actual (USD 10) and 100% actual (USD 20) sent to the configured alert email.
-- **`infra/ai.bicep` (Resource-group scope: `rg-pda-ai-uaen`, Gate G1)**:
+- **`infra/ai.bicep` (Resource-group scope: `rg-brilliant-demo`, Gate G1)**:
   - Azure OpenAI Account (`S0`) in UAE North.
-  - Chat deployment: `gpt-4o-mini` (version `2024-07-18`, GlobalStandard, 10k TPM).
+  - Chat deployment: `gpt-5-mini` (version `2025-08-07`, GlobalStandard).
   - Embedding deployment: `text-embedding-3-small` (version `1`, GlobalStandard, 10k TPM).
   - Azure Document Intelligence (`FormRecognizer`, SKU `F0`).
   - Outputs endpoint URLs only, never API keys.
   - Role assignments granting the user-assigned managed identity `Cognitive Services User` (`a97b65f3-24c7-4388-baec-2e87135dc908`).
-- **`infra/main.bicep` (Resource-group scope: `rg-pda-<env>-uaen`, Gate G2)**:
+- **`infra/main.bicep` (Resource-group scope: `rg-brilliant-demo-<env>`, Gate G2)**:
   - Connects and provisions all modules for environment `<env>` (default `prod`).
   - Implements the naming convention `<type>-pda-<env>-uaen` per Design 9.2.
-  - Applies mandatory tags: `project=brilliant-pda`, `env=<env>`, `expires=2026-11-29`.
+  - Applies mandatory tags: `project=brilliant-demo`, `env=<env>`, `expires=2026-11-29`.
 - **`infra/modules/identity.bicep`**:
   - User-assigned managed identity (`id-pda-<env>-uaen`).
 - **`infra/modules/monitoring.bicep`**:
@@ -80,12 +80,12 @@ Infrastructure rollout occurs strictly in two progressive gates:
 [Gate G1]
   ├── 1. Deploy infra/budget.bicep (subscription scope)
   │      └── USD 20 budget with actual alerts at 50% ($10) and 100% ($20)
-  └── 2. Deploy infra/ai.bicep (resource group: rg-pda-ai-uaen)
-         ├── Azure OpenAI (gpt-4o-mini & text-embedding-3-small)
+  └── 2. Deploy infra/ai.bicep (resource group: rg-brilliant-demo)
+         ├── Azure OpenAI (gpt-5-mini & text-embedding-3-small)
          └── Document Intelligence (F0)
          
 [Gate G2]
-  └── Deploy infra/main.bicep (resource group: rg-pda-prod-uaen)
+  └── Deploy infra/main.bicep (resource group: rg-brilliant-demo-prod)
       ├── Managed Identity & RBAC role assignments
       ├── Log Analytics & Application Insights
       ├── Key Vault with secure parameters
@@ -104,7 +104,7 @@ This list exactly matches **Sprint Plan 9.1**:
 
 | Gate | Resources created after approval |
 |---|---|
-| **G1, Sat 21 Nov 14:00** | Budget with alerts (first); Azure OpenAI (`gpt-4o-mini` and `text-embedding-3-small` deployments); Document Intelligence F0 |
+| **G1, Sat 21 Nov 14:00** | Budget with alerts (first); Azure OpenAI (`gpt-5-mini` and `text-embedding-3-small` deployments); Document Intelligence F0 |
 | **G2, Sun 22 Nov 10:00** | Resource group for production; Container Apps environment and three apps; Postgres Flexible Server B1ms; storage account; Key Vault; Application Insights and Log Analytics; managed identity; registry (GHCR, or ACR Basic). **If email intake ships:** Logic App (Consumption) and its Outlook.com API connection |
 
 ### Detailed Resource Matrix
@@ -112,22 +112,22 @@ This list exactly matches **Sprint Plan 9.1**:
 | Resource Type | Gate | Target Resource Name | Scope / Group | SKU / Tier |
 |---|---|---|---|---|
 | Consumption Budget | G1 | `budget-pda-monthly` | Subscription | USD 20/mo |
-| Resource Group | G1 | `rg-pda-ai-uaen` | Subscription | Resource Group |
-| Azure OpenAI | G1 | `oai-pda-ai-uaen` | `rg-pda-ai-uaen` | S0 (GlobalStandard) |
-| Document Intelligence | G1 | `di-pda-ai-uaen` | `rg-pda-ai-uaen` | F0 |
-| Resource Group | G2 | `rg-pda-prod-uaen` | Subscription | Resource Group |
-| Managed Identity | G2 | `id-pda-prod-uaen` | `rg-pda-prod-uaen` | User-Assigned |
-| Log Analytics Workspace | G2 | `log-pda-prod-uaen` | `rg-pda-prod-uaen` | PerGB2018 |
-| Application Insights | G2 | `appi-pda-prod-uaen` | `rg-pda-prod-uaen` | Workspace-based |
-| Key Vault | G2 | `kv-pda-prod-uaen` | `rg-pda-prod-uaen` | Standard (RBAC) |
-| Storage Account | G2 | `stpdaproduaen` | `rg-pda-prod-uaen` | Standard_LRS |
-| PostgreSQL Flexible Server | G2 | `psql-pda-prod-uaen` | `rg-pda-prod-uaen` | Standard_B1ms |
+| Resource Group | G1 | `rg-brilliant-demo` | Subscription | Resource Group |
+| Azure OpenAI | G1 | `oai-pda-ai-uaen` | `rg-brilliant-demo` | S0 (GlobalStandard) |
+| Document Intelligence | G1 | `di-pda-ai-uaen` | `rg-brilliant-demo` | F0 |
+| Resource Group | G2 | `rg-brilliant-demo-prod` | Subscription | Resource Group |
+| Managed Identity | G2 | `id-pda-prod-uaen` | `rg-brilliant-demo-prod` | User-Assigned |
+| Log Analytics Workspace | G2 | `log-pda-prod-uaen` | `rg-brilliant-demo-prod` | PerGB2018 |
+| Application Insights | G2 | `appi-pda-prod-uaen` | `rg-brilliant-demo-prod` | Workspace-based |
+| Key Vault | G2 | `kv-pda-prod-uaen` | `rg-brilliant-demo-prod` | Standard (RBAC) |
+| Storage Account | G2 | `stpdaproduaen` | `rg-brilliant-demo-prod` | Standard_LRS |
+| PostgreSQL Flexible Server | G2 | `psql-pda-prod-uaen` | `rg-brilliant-demo-prod` | Standard_B1ms |
 | PostgreSQL Database | G2 | `pda` | `psql-pda-prod-uaen` | UTF-8 |
-| Container Apps Environment | G2 | `cae-pda-prod-uaen` | `rg-pda-prod-uaen` | Consumption |
-| Container App (Web) | G2 | `ca-web-pda-prod-uaen` | `rg-pda-prod-uaen` | External Ingress, 0-1 replicas |
-| Container App (API) | G2 | `ca-api-pda-prod-uaen` | `rg-pda-prod-uaen` | Internal Ingress, 0-1 replicas |
-| Container App (Worker) | G2 | `ca-worker-pda-prod-uaen`| `rg-pda-prod-uaen` | No Ingress, 0-1 replicas |
-| Container Apps Job | G2 | `migrate` | `rg-pda-prod-uaen` | Manual trigger |
+| Container Apps Environment | G2 | `cae-pda-prod-uaen` | `rg-brilliant-demo-prod` | Consumption |
+| Container App (Web) | G2 | `ca-web-pda-prod-uaen` | `rg-brilliant-demo-prod` | External Ingress, 0-1 replicas |
+| Container App (API) | G2 | `ca-api-pda-prod-uaen` | `rg-brilliant-demo-prod` | Internal Ingress, 0-1 replicas |
+| Container App (Worker) | G2 | `ca-worker-pda-prod-uaen`| `rg-brilliant-demo-prod` | No Ingress, 0-1 replicas |
+| Container Apps Job | G2 | `migrate` | `rg-brilliant-demo-prod` | Manual trigger |
 
 ---
 
@@ -166,11 +166,11 @@ scripts/teardown.sh prod --yes
 ```
 
 The teardown script performs the following in sequence:
-1. Deletes the primary environment resource group (`rg-pda-prod-uaen`).
-2. Deletes the AI resource group (`rg-pda-ai-uaen`).
+1. Deletes the primary environment resource group (`rg-brilliant-demo-prod`).
+2. Deletes the AI resource group (`rg-brilliant-demo`).
 3. Purges the soft-deleted Key Vault (`kv-pda-prod-uaen`) from the subscription so no name collisions or lingering state remain.
 4. Purges soft-deleted Cognitive Services accounts.
-5. Queries Azure for any remaining resources tagged `project=brilliant-pda` and reports clean status.
+5. Queries Azure for any remaining resources tagged `project=brilliant-demo` and reports clean status.
 
 ---
 
@@ -260,13 +260,13 @@ Email intake authentication requires a shared API key between the Logic App and 
 ### One-Time Manual Sign-In Step
 Because Azure Logic Apps API connections require interactive OAuth consent to connect to an Outlook.com account:
 1. Deploy with `enableEmailIntake=true` and provide `intakeKey`.
-2. Open the Azure Portal and navigate to `rg-pda-<env>-uaen`.
+2. Open the Azure Portal and navigate to `rg-brilliant-demo-<env>`.
 3. Select the API Connection resource: `outlook-pda-<env}-uaen`.
 4. In the left navigation, click **Edit API connection**.
 5. Click **Authorize** and sign in with the demo-only Outlook.com mailbox credentials.
 6. Click **Save**. The Logic App trigger is now active and polling.
 
 ### Teardown Note
-The Logic App and Outlook API connection are deployed within the environment resource group (`rg-pda-<env>-uaen`). Running `scripts/teardown.sh <env>` deletes this resource group in full, automatically destroying the Logic App, the API connection, and revoking associated session tokens. Key Vault secrets containing the intake key and hash are purged as part of standard teardown.
+The Logic App and Outlook API connection are deployed within the environment resource group (`rg-brilliant-demo-<env>`). Running `scripts/teardown.sh <env>` deletes this resource group in full, automatically destroying the Logic App, the API connection, and revoking associated session tokens. Key Vault secrets containing the intake key and hash are purged as part of standard teardown.
 
 

@@ -78,14 +78,14 @@ jobs:
       - name: Ensure target resource group exists
         run: |
           az group create \
-            --name rg-pda-prod-uaen \
+            --name rg-brilliant-demo-prod \
             --location uaenorth \
-            --tags project=brilliant-pda env=prod expires=2026-11-29
+            --tags project=brilliant-demo env=prod expires=2026-11-29
 
       - name: Preview infrastructure changes (what-if)
         run: |
           az deployment group what-if \
-            --resource-group rg-pda-prod-uaen \
+            --resource-group rg-brilliant-demo-prod \
             --template-file infra/main.bicep \
             --parameters \
               env=prod \
@@ -101,13 +101,17 @@ jobs:
               apiImage="${{ env.IMAGE_BACKEND }}" \
               workerImage="${{ env.IMAGE_BACKEND }}" \
               enableEmailIntake="${{ vars.ENABLE_EMAIL_INTAKE || 'false' }}" \
-              intakeKey="${{ secrets.INTAKE_KEY }}"
+              intakeKey="${{ secrets.INTAKE_KEY }}" \
+              aiProvider="${{ vars.AI_PROVIDER || 'live' }}" \
+              azureOpenAiEndpoint="${{ vars.AZURE_OPENAI_ENDPOINT }}" \
+              azureOpenAiDeployment="${{ vars.AZURE_OPENAI_DEPLOYMENT || 'gpt-5-mini' }}" \
+              azureDocIntelEndpoint="${{ vars.AZURE_DOCINTEL_ENDPOINT }}"
 
       - name: Deploy infrastructure (create)
         run: |
           az deployment group create \
             --name "deploy-${{ github.sha }}" \
-            --resource-group rg-pda-prod-uaen \
+            --resource-group rg-brilliant-demo-prod \
             --template-file infra/main.bicep \
             --parameters \
               env=prod \
@@ -123,20 +127,24 @@ jobs:
               apiImage="${{ env.IMAGE_BACKEND }}" \
               workerImage="${{ env.IMAGE_BACKEND }}" \
               enableEmailIntake="${{ vars.ENABLE_EMAIL_INTAKE || 'false' }}" \
-              intakeKey="${{ secrets.INTAKE_KEY }}"
+              intakeKey="${{ secrets.INTAKE_KEY }}" \
+              aiProvider="${{ vars.AI_PROVIDER || 'live' }}" \
+              azureOpenAiEndpoint="${{ vars.AZURE_OPENAI_ENDPOINT }}" \
+              azureOpenAiDeployment="${{ vars.AZURE_OPENAI_DEPLOYMENT || 'gpt-5-mini' }}" \
+              azureDocIntelEndpoint="${{ vars.AZURE_DOCINTEL_ENDPOINT }}"
 
       - name: Start database migration job and wait for completion
         run: |
           echo "Starting migrate job..."
           az containerapp job start \
             --name migrate \
-            --resource-group rg-pda-prod-uaen
+            --resource-group rg-brilliant-demo-prod
 
           echo "Waiting for migration job execution to complete..."
           for i in $(seq 1 30); do
             STATUS=$(az containerapp job execution list \
               --name migrate \
-              --resource-group rg-pda-prod-uaen \
+              --resource-group rg-brilliant-demo-prod \
               --query "[0].properties.status" -o tsv 2>/dev/null || echo "Running")
             echo "Migration job status ($i/30): $STATUS"
             if [ "$STATUS" = "Succeeded" ]; then
@@ -153,7 +161,7 @@ jobs:
         run: |
           WEB_FQDN=$(az containerapp show \
             --name ca-web-pda-prod-uaen \
-            --resource-group rg-pda-prod-uaen \
+            --resource-group rg-brilliant-demo-prod \
             --query properties.configuration.ingress.fqdn -o tsv)
           WEB_URL="https://${WEB_FQDN}"
 

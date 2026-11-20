@@ -44,8 +44,8 @@ for arg in "$@"; do
 done
 
 LOCATION="uaenorth"
-MAIN_RG="rg-pda-${ENV}-uaen"
-AI_RG="rg-pda-ai-uaen"
+MAIN_RG="${MAIN_RG:-rg-brilliant-demo-${ENV}}"
+AI_RG="${AI_RG:-rg-brilliant-demo}"
 
 echo "=========================================================="
 echo "Brilliant PDA Deployment Script (Dry Run & Deploy)"
@@ -105,7 +105,7 @@ deploy_gate_1() {
   fi
 
   echo "[G1 Step 2] Ensuring AI resource group ${AI_RG} exists..."
-  az group create --name "${AI_RG}" --location "${LOCATION}" --tags project=brilliant-pda
+  az group create --name "${AI_RG}" --location "${LOCATION}" --tags project=brilliant-demo
 
   echo "[G1 Step 3] What-if for AI services (Azure OpenAI + Document Intelligence)..."
   az deployment group what-if \
@@ -139,7 +139,7 @@ deploy_gate_2() {
   check_secure_params
 
   echo "[G2 Step 1] Ensuring resource group ${MAIN_RG} exists..."
-  az group create --name "${MAIN_RG}" --location "${LOCATION}" --tags project=brilliant-pda env="${ENV}"
+  az group create --name "${MAIN_RG}" --location "${LOCATION}" --tags project=brilliant-demo env="${ENV}"
 
   echo "[G2 Step 2] What-if preview for main infrastructure..."
   az deployment group what-if \
@@ -155,7 +155,11 @@ deploy_gate_2() {
       containerRegistryPassword="${CONTAINER_REGISTRY_PASSWORD:-}" \
       enableEmailIntake="${ENABLE_EMAIL_INTAKE:-false}" \
       intakeKey="${INTAKE_KEY:-}" \
-      intakeSenderAllowlist="${INTAKE_SENDER_ALLOWLIST:-}"
+      intakeSenderAllowlist="${INTAKE_SENDER_ALLOWLIST:-}" \
+      aiProvider="${AI_PROVIDER:-live}" \
+      azureOpenAiEndpoint="${AZURE_OPENAI_ENDPOINT:-}" \
+      azureOpenAiDeployment="${AZURE_OPENAI_DEPLOYMENT:-gpt-5-mini}" \
+      azureDocIntelEndpoint="${AZURE_DOCINTEL_ENDPOINT:-}"
 
   if [ "$AUTO_CONFIRM" != "true" ]; then
     read -r -p "Proceed with main stack deployment? (y/N): " CONFIRM_MAIN
@@ -179,7 +183,11 @@ deploy_gate_2() {
       containerRegistryPassword="${CONTAINER_REGISTRY_PASSWORD:-}" \
       enableEmailIntake="${ENABLE_EMAIL_INTAKE:-false}" \
       intakeKey="${INTAKE_KEY:-}" \
-      intakeSenderAllowlist="${INTAKE_SENDER_ALLOWLIST:-}"
+      intakeSenderAllowlist="${INTAKE_SENDER_ALLOWLIST:-}" \
+      aiProvider="${AI_PROVIDER:-live}" \
+      azureOpenAiEndpoint="${AZURE_OPENAI_ENDPOINT:-}" \
+      azureOpenAiDeployment="${AZURE_OPENAI_DEPLOYMENT:-gpt-5-mini}" \
+      azureDocIntelEndpoint="${AZURE_DOCINTEL_ENDPOINT:-}"
 
   echo "[G2 Step 4] Triggering database migration and seed job..."
   az containerapp job start --name migrate --resource-group "${MAIN_RG}"
