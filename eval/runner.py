@@ -119,6 +119,7 @@ class EvaluationRunner:
 
         self.truth_dir = self.data_dir / "truth"
         self.replay_dir = self.data_dir / "replay"
+        self.pdf_dir = _REPO_ROOT / "tools" / "datagen" / "out"
         self.manifest_path = self.data_dir / "manifest.json"
         self.qa_path = self.data_dir / "qa_questions.json"
         self.injections_path = self.data_dir / "injection_cases.json"
@@ -141,6 +142,17 @@ class EvaluationRunner:
             raise ValueError(
                 "Live mode costs money. You must explicitly provide --confirm-live to execute live evaluation."
             )
+
+    def _document_bytes(self, doc_id: str) -> bytes:
+        """Return the generated PDF for live mode; replay mode resolves by doc_id."""
+        if self.mode != "live":
+            return b""
+        pdf_path = self.pdf_dir / f"{doc_id}.pdf"
+        if not pdf_path.exists():
+            raise FileNotFoundError(
+                f"Missing generated document {pdf_path}. Run 'make datagen' first."
+            )
+        return pdf_path.read_bytes()
 
     def estimate_live_cost_usd(self) -> float:
         """Estimate token and dollar cost for live evaluation run with reasoning headroom."""
@@ -268,6 +280,8 @@ class EvaluationRunner:
             "due_date",
         ]
 
+        ocr_cache: dict[str, Any] = {}
+
         for d in manifest_docs:
             doc_id = d["doc_id"]
             is_scanned = bool(d.get("is_scanned", False))
@@ -282,11 +296,12 @@ class EvaluationRunner:
 
             # Analyze and extract through pipeline components
             ocr_result = analyzer.analyze(
-                file_bytes=b"",
+                file_bytes=self._document_bytes(doc_id),
                 mime="application/pdf",
                 doc_type_hint=d.get("doc_type"),
                 doc_id=doc_id,
             )
+            ocr_cache[doc_id] = ocr_result
 
             doc_type_norm = (
                 "quote"
@@ -398,8 +413,8 @@ class EvaluationRunner:
         corpus_chunks: list[RetrievedChunk] = []
         for d in manifest_docs:
             doc_id = d["doc_id"]
-            ocr_res = analyzer.analyze(
-                file_bytes=b"",
+            ocr_res = ocr_cache.get(doc_id) or analyzer.analyze(
+                file_bytes=self._document_bytes(doc_id),
                 mime="application/pdf",
                 doc_type_hint=d.get("doc_type"),
                 doc_id=doc_id,
