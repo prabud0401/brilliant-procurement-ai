@@ -332,6 +332,8 @@ The application treats document text as **untrusted data, never instructions**:
 
 The production architecture is deployed in **UAE North (`uaenorth`)** using Azure Infrastructure-as-Code (Bicep):
 
+> **Demo-only exception: PostgreSQL region.** For this demo the database runs in **North Europe** (`postgresLocation=northeurope`), while everything else stays in UAE North. The demo subscription is not offered Burstable PostgreSQL Flexible Server SKUs in UAE North (`SkuNotAvailable` for B1ms and B2s), and General Purpose would break the demo budget. All data in the demo is synthetic (fake vendors and documents), so data residency does not apply. A real Brilliant deployment would keep PostgreSQL in UAE North (leave `postgresLocation` at its default) on a subscription with that SKU, or use General Purpose.
+
 ```mermaid
 flowchart TB
     subgraph Internet["Public Internet"]
@@ -349,7 +351,7 @@ flowchart TB
 
             KV["Azure Key Vault<br/>kv-pda-prod-uaen<br/>RBAC Mode | Secure Secrets"]
             Storage["Azure Storage Account<br/>stpdaproduaen<br/>TLS 1.2 | Private 'documents' Container"]
-            Postgres["Azure PostgreSQL Flexible Server<br/>psql-pda-prod-uaen<br/>Standard_B1ms | pgvector | DB: pda"]
+            Postgres["Azure PostgreSQL Flexible Server<br/>psql-pda-prod-uaen<br/>Standard_B1ms | pgvector | DB: pda<br/>(demo: North Europe)"]
             AppInsights["Application Insights<br/>appi-pda-prod-uaen"]
             LogAnalytics["Log Analytics Workspace<br/>log-pda-prod-uaen"]
             ManagedID["User-Assigned Managed Identity<br/>id-pda-prod-uaen"]
