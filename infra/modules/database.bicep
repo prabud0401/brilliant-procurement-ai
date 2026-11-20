@@ -54,6 +54,10 @@ resource pdaDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-1
 resource azureExtensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-12-01-preview' = {
   parent: postgresServer
   name: 'azure.extensions'
+  // Serialize child writes: Flexible Server rejects concurrent operations (ServerIsBusy).
+  dependsOn: [
+    pdaDatabase
+  ]
   properties: {
     value: 'VECTOR,PGCRYPTO,UUID-OSSP'
     source: 'user-override'
@@ -63,6 +67,9 @@ resource azureExtensions 'Microsoft.DBforPostgreSQL/flexibleServers/configuratio
 resource allowAzureServicesFirewallRule 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-12-01-preview' = {
   parent: postgresServer
   name: 'AllowAllAzureServicesAndResourcesWithinAzureIps'
+  dependsOn: [
+    azureExtensions
+  ]
   properties: {
     startIpAddress: '0.0.0.0'
     endIpAddress: '0.0.0.0'
