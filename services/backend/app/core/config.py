@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     MAX_UPLOAD_PAGES: int = 20
     UPLOAD_RATE_LIMIT_PER_MINUTE: int = 60
 
+    INTAKE_KEY_HASH: str | None = None
+    INTAKE_SENDER_ALLOWLIST: str | list[str] = ""
+    INTAKE_RATE_LIMIT_PER_MINUTE: int = 60
+
     AZURE_OPENAI_ENDPOINT: str | None = None
     AZURE_OPENAI_DEPLOYMENT: str = "gpt-4o-mini"
     AZURE_OPENAI_EMBEDDING_DEPLOYMENT: str = "text-embedding-3-small"

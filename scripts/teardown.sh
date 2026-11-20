@@ -57,8 +57,11 @@ if [ "$AUTO_CONFIRM" != "true" ]; then
 fi
 
 # 1. Delete main environment resource group if it exists
+# Note: This permanently deletes all environment resources including Container Apps,
+# PostgreSQL Flexible Server, Storage Account, Key Vault, and (if email intake was enabled)
+# the Logic App workflow and Outlook API Connection.
 if az group exists --name "${MAIN_RG}" 2>/dev/null | grep -q "true"; then
-  echo "Deleting resource group: ${MAIN_RG}..."
+  echo "Deleting resource group: ${MAIN_RG} (including email intake Logic App and Outlook connection if deployed)..."
   az group delete --name "${MAIN_RG}" --yes
   echo "Resource group ${MAIN_RG} deleted."
 else

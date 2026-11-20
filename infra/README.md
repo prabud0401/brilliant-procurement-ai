@@ -226,3 +226,31 @@ By default, GitHub Packages for private repositories are published with private 
 5. Select **Public** and confirm.
 6. With public packages, Container Apps pulls images directly without requiring registry credentials or tokens.
 
+---
+
+## 7. Email Intake via Azure Logic Apps (R13 Stretch)
+
+When enabled (`enableEmailIntake=true`), the infrastructure provisions an automated email intake pipeline connecting an Outlook.com demo mailbox to the Procurement Document Assistant API.
+
+### Components Deployed
+- **Logic App (Consumption)**: `logic-pda-${env}-uaen`
+- **Outlook.com API Connection**: `outlook-pda-${env}-uaen` (`Microsoft.Web/connections`, managed API `outlook`)
+
+### Workflow Behavior
+1. **Trigger**: "When a new email arrives (V2)" polls the mailbox every 5 minutes with `hasAttachments=true` and `includeAttachments=true`.
+2. **Filtering**: For each attachment, checks that the MIME type or file extension is PDF, PNG, or JPEG, and file size is $\le$ 4 MB (or configured limit). Non-matching files (e.g. `.exe`, `.zip`, oversized files) are skipped.
+3. **API Delivery**: Approved attachments are sent via HTTP POST to `${apiBaseUrl}/api/v1/intake/email` with header `X-Intake-Key: <intakeKey>`, sender, subject, received time, and message ID. Inputs and outputs on the HTTP action are secured (`secureData`).
+
+### One-Time Manual Sign-In Step
+Because Azure Logic Apps API connections require interactive OAuth consent to connect to an Outlook.com account:
+1. Deploy with `enableEmailIntake=true` and provide `intakeKey`.
+2. Open the Azure Portal and navigate to `rg-pda-<env>-uaen`.
+3. Select the API Connection resource: `outlook-pda-<env}-uaen`.
+4. In the left navigation, click **Edit API connection**.
+5. Click **Authorize** and sign in with the demo-only Outlook.com mailbox credentials.
+6. Click **Save**. The Logic App trigger is now active and polling.
+
+### Teardown Note
+The Logic App and Outlook API connection are deployed within the environment resource group (`rg-pda-<env>-uaen`). Running `scripts/teardown.sh <env>` deletes this resource group in full, automatically destroying the Logic App, the API connection, and revoking associated session tokens. Key Vault secrets containing the intake key and hash are purged as part of standard teardown.
+
+
