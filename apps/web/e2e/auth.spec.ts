@@ -122,8 +122,8 @@ test.describe("Authentication, RBAC Navigation and Security", () => {
   });
 
   test("signs in successfully for all seeded demo accounts", async ({ page }) => {
-    // Eight sequential sign-ins; hosted stacks (0.5 vCPU, password hashing) need more than the 30s default.
-    test.setTimeout(120_000);
+    // Fifteen sequential sign-ins; hosted stacks (0.5 vCPU, password hashing) need more than the 30s default.
+    test.setTimeout(240_000);
     const demoEmails = [
       "requester.fac@demo-holdings.example",
       "requester.it@demo-holdings.example",
@@ -133,6 +133,13 @@ test.describe("Authentication, RBAC Navigation and Security", () => {
       "manager.it@demo-holdings.example",
       "manager.projects@demo-holdings.example",
       "admin@demo-holdings.example",
+      "requester.finance@demo-holdings.example",
+      "manager.finance@demo-holdings.example",
+      "requester.hr@demo-holdings.example",
+      "manager.hr@demo-holdings.example",
+      "requester.ops@demo-holdings.example",
+      "manager.ops@demo-holdings.example",
+      "requester.projects@demo-holdings.example",
     ];
 
     for (const email of demoEmails) {
@@ -147,6 +154,35 @@ test.describe("Authentication, RBAC Navigation and Security", () => {
       // Sign out
       await page.click('button:has-text("Sign Out")');
       await page.waitForURL("/login", { timeout: 10000 });
+    }
+  });
+
+  test("admin metrics displays Spend by department card with all six departments", async ({
+    page,
+  }) => {
+    await page.goto("/login");
+    await page.fill('input[name="email"]', "admin@demo-holdings.example");
+    await page.fill('input[name="password"]', DEMO_PASSWORD);
+    await page.click('button[type="submit"]');
+    await page.waitForURL("/", { timeout: 15000 });
+
+    await page.goto("/admin/metrics");
+    await expect(page.locator("h1")).toContainText(/Observability & Business Metrics/i);
+
+    // Verify Spend by Department card
+    await expect(page.getByText("Spend by Department", { exact: true })).toBeVisible();
+
+    // Verify all six departments are rendered in the table
+    const expectedDepartments = [
+      "Facilities",
+      "Finance",
+      "HR",
+      "IT",
+      "Operations",
+      "Projects",
+    ];
+    for (const dept of expectedDepartments) {
+      await expect(page.getByRole("cell", { name: dept, exact: true })).toBeVisible();
     }
   });
 

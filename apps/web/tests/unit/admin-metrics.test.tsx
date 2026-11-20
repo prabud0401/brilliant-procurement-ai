@@ -43,6 +43,62 @@ const mockMetrics: AdminMetricsResponse = {
   qa_refusal_rate: 0.08,
   qa_total_questions: 25,
   qa_refused_questions: 2,
+  spend_by_department: [
+    {
+      department_id: "dept-1",
+      department_name: "Facilities",
+      purchase_requests_count: 3,
+      purchase_requests_total_aed: 7500.0,
+      purchase_orders_count: 2,
+      purchase_orders_total_aed: 6000.0,
+      pending_approvals_count: 1,
+    },
+    {
+      department_id: "dept-2",
+      department_name: "IT",
+      purchase_requests_count: 5,
+      purchase_requests_total_aed: 24000.0,
+      purchase_orders_count: 4,
+      purchase_orders_total_aed: 22000.0,
+      pending_approvals_count: 0,
+    },
+    {
+      department_id: "dept-3",
+      department_name: "Projects",
+      purchase_requests_count: 2,
+      purchase_requests_total_aed: 150000.0,
+      purchase_orders_count: 1,
+      purchase_orders_total_aed: 120000.0,
+      pending_approvals_count: 2,
+    },
+    {
+      department_id: "dept-4",
+      department_name: "Finance",
+      purchase_requests_count: 0,
+      purchase_requests_total_aed: 0.0,
+      purchase_orders_count: 0,
+      purchase_orders_total_aed: 0.0,
+      pending_approvals_count: 0,
+    },
+    {
+      department_id: "dept-5",
+      department_name: "HR",
+      purchase_requests_count: 0,
+      purchase_requests_total_aed: 0.0,
+      purchase_orders_count: 0,
+      purchase_orders_total_aed: 0.0,
+      pending_approvals_count: 0,
+    },
+    {
+      department_id: "dept-6",
+      department_name: "Operations",
+      purchase_requests_count: 1,
+      purchase_requests_total_aed: 3500.0,
+      purchase_orders_count: 1,
+      purchase_orders_total_aed: 3500.0,
+      pending_approvals_count: 0,
+    },
+  ],
 };
 
 describe("MetricsClient Component (NFR-OBS-03, NFR-OBS-05)", () => {
@@ -116,5 +172,34 @@ describe("MetricsClient Component (NFR-OBS-03, NFR-OBS-05)", () => {
     await waitFor(() => {
       expect(screen.getByText("45")).toBeInTheDocument();
     });
+  });
+
+  it("renders Spend by Department card and department rows", () => {
+    renderWithToast(<MetricsClient initialData={mockMetrics} />);
+
+    expect(screen.getByText("Spend by Department")).toBeInTheDocument();
+    expect(screen.getByText("Facilities")).toBeInTheDocument();
+    expect(screen.getByText("Finance")).toBeInTheDocument();
+    expect(screen.getByText("HR")).toBeInTheDocument();
+    expect(screen.getByText("IT")).toBeInTheDocument();
+    expect(screen.getByText("Operations")).toBeInTheDocument();
+    expect(screen.getByText("Projects")).toBeInTheDocument();
+
+    // Verify values rendered
+    expect(screen.getByText("AED 7,500.00")).toBeInTheDocument();
+    expect(screen.getByText("AED 150,000.00")).toBeInTheDocument();
+  });
+
+  it("renders empty state when spend_by_department is empty or absent", () => {
+    const emptyMetrics: AdminMetricsResponse = {
+      ...mockMetrics,
+      spend_by_department: [],
+    };
+    renderWithToast(<MetricsClient initialData={emptyMetrics} />);
+
+    expect(screen.getByText("Spend by Department")).toBeInTheDocument();
+    expect(
+      screen.getByText("No department spend data available.")
+    ).toBeInTheDocument();
   });
 });

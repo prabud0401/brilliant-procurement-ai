@@ -34,12 +34,12 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
   {
     email: "buyer1@demo-holdings.example",
     role: "Buyer",
-    department: "Procurement",
+    department: "Facilities",
   },
   {
     email: "buyer2@demo-holdings.example",
     role: "Buyer",
-    department: "Procurement",
+    department: "IT",
   },
   {
     email: "manager.facilities@demo-holdings.example",
@@ -51,7 +51,7 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
     email: "manager.it@demo-holdings.example",
     role: "Manager",
     department: "IT",
-    notes: "AED 100,000 limit",
+    notes: "AED 50,000 limit",
   },
   {
     email: "manager.projects@demo-holdings.example",
@@ -64,6 +64,44 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
     role: "Admin",
     department: "IT / Operations",
     notes: "Full admin privileges",
+  },
+  {
+    email: "requester.finance@demo-holdings.example",
+    role: "Requester",
+    department: "Finance",
+  },
+  {
+    email: "manager.finance@demo-holdings.example",
+    role: "Manager",
+    department: "Finance",
+    notes: "AED 50,000 limit",
+  },
+  {
+    email: "requester.hr@demo-holdings.example",
+    role: "Requester",
+    department: "HR",
+  },
+  {
+    email: "manager.hr@demo-holdings.example",
+    role: "Manager",
+    department: "HR",
+    notes: "AED 50,000 limit",
+  },
+  {
+    email: "requester.ops@demo-holdings.example",
+    role: "Requester",
+    department: "Operations",
+  },
+  {
+    email: "manager.ops@demo-holdings.example",
+    role: "Manager",
+    department: "Operations",
+    notes: "AED 50,000 limit",
+  },
+  {
+    email: "requester.projects@demo-holdings.example",
+    role: "Requester",
+    department: "Projects",
   },
 ];
 

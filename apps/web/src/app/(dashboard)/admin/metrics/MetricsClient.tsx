@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Coins,
   ShieldCheck,
+  Building2,
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 
@@ -32,6 +33,16 @@ export interface AITodayMetrics {
   budget_utilization_pct: number;
 }
 
+export interface DepartmentSpendMetric {
+  department_id: string;
+  department_name: string;
+  purchase_requests_count: number;
+  purchase_requests_total_aed: number;
+  purchase_orders_count: number;
+  purchase_orders_total_aed: number;
+  pending_approvals_count: number;
+}
+
 export interface AdminMetricsResponse {
   documents_processed: number;
   total_fields: number;
@@ -47,6 +58,7 @@ export interface AdminMetricsResponse {
   qa_refusal_rate: number;
   qa_total_questions: number;
   qa_refused_questions: number;
+  spend_by_department?: DepartmentSpendMetric[];
 }
 
 export function MetricsClient({
@@ -399,6 +411,72 @@ export function MetricsClient({
                         }`}
                       >
                         {(item.correction_rate * 100).toFixed(1)}%
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Spend by Department Table */}
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-2xs">
+        <div className="flex items-center gap-2 mb-4">
+          <Building2 className="h-5 w-5 text-blue-600" />
+          <h2 className="text-lg font-bold tracking-tight text-slate-900">
+            Spend by Department
+          </h2>
+        </div>
+        <p className="text-xs text-slate-500 mb-4">
+          Aggregated procurement spend and approval volume across all active departments.
+        </p>
+
+        {(!metrics?.spend_by_department || metrics.spend_by_department.length === 0) ? (
+          <div className="py-8 text-center text-sm text-slate-500">
+            No department spend data available.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
+              <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-600">
+                <tr>
+                  <th scope="col" className="px-4 py-3">Department</th>
+                  <th scope="col" className="px-4 py-3 text-right">Purchase Requests</th>
+                  <th scope="col" className="px-4 py-3 text-right">PR Total (AED)</th>
+                  <th scope="col" className="px-4 py-3 text-right">Purchase Orders</th>
+                  <th scope="col" className="px-4 py-3 text-right">PO Total (AED)</th>
+                  <th scope="col" className="px-4 py-3 text-right">Pending Approvals</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {metrics.spend_by_department.map((dept) => (
+                  <tr key={dept.department_id || dept.department_name} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="px-4 py-3 font-medium text-slate-900">
+                      {dept.department_name}
+                    </td>
+                    <td className="px-4 py-3 text-right text-slate-600 font-mono text-xs">
+                      {dept.purchase_requests_count}
+                    </td>
+                    <td className="px-4 py-3 text-right text-slate-900 font-mono text-xs font-medium">
+                      AED {dept.purchase_requests_total_aed.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                    <td className="px-4 py-3 text-right text-slate-600 font-mono text-xs">
+                      {dept.purchase_orders_count}
+                    </td>
+                    <td className="px-4 py-3 text-right text-slate-900 font-mono text-xs font-medium">
+                      AED {dept.purchase_orders_total_aed.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                          dept.pending_approvals_count > 0
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {dept.pending_approvals_count}
                       </span>
                     </td>
                   </tr>

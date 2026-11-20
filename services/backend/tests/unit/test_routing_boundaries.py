@@ -163,3 +163,103 @@ def test_routing_tier_3_boundaries_two_managers() -> None:
     assert steps[1].sequence == 2
     assert steps[1].tier == 3
     assert steps[1].assigned_to == mgr2_id
+
+
+@pytest.mark.unit
+def test_routing_tier_2_new_departments() -> None:
+    """Verify Finance, HR, and Operations tier-2 requests route to each dept's manager."""
+    creator_id = uuid.uuid4()
+    dept_finance = uuid.uuid4()
+    dept_hr = uuid.uuid4()
+    dept_ops = uuid.uuid4()
+
+    mgr_finance = User(
+        id=uuid.uuid4(),
+        email="manager.finance@demo-holdings.example",
+        display_name="Hassan Demo-Manager",
+        department_id=dept_finance,
+        approval_limit_aed=Decimal("50000.00"),
+        active=True,
+    )
+    mgr_hr = User(
+        id=uuid.uuid4(),
+        email="manager.hr@demo-holdings.example",
+        display_name="Zayed Demo-Manager",
+        department_id=dept_hr,
+        approval_limit_aed=Decimal("50000.00"),
+        active=True,
+    )
+    mgr_ops = User(
+        id=uuid.uuid4(),
+        email="manager.ops@demo-holdings.example",
+        display_name="Reem Demo-Manager",
+        department_id=dept_ops,
+        approval_limit_aed=Decimal("50000.00"),
+        active=True,
+    )
+
+    all_managers = [mgr_finance, mgr_hr, mgr_ops]
+
+    for target_dept, expected_mgr in [
+        (dept_finance, mgr_finance),
+        (dept_hr, mgr_hr),
+        (dept_ops, mgr_ops),
+    ]:
+        mock_db = MagicMock()
+        q = mock_db.query.return_value.join.return_value.filter.return_value
+        q.filter.return_value.all.return_value = list(all_managers)
+
+        steps, snapshot = build_approval_steps(
+            db=mock_db,
+            subject_type="pr",
+            subject_id=uuid.uuid4(),
+            total_aed=Decimal("15000.00"),
+            department_id=target_dept,
+            creator_id=creator_id,
+        )
+        assert snapshot["tier"] == 2
+        assert len(steps) == 1
+        assert steps[0].tier == 2
+        assert steps[0].assigned_to == expected_mgr.id
+
+
+@pytest.mark.unit
+def test_routing_manager_fallback_deterministic() -> None:
+    """Verify fallback ordering is deterministic when no dept match exists."""
+    from datetime import datetime, timezone
+
+    from app.approvals.routing import find_eligible_manager
+
+    creator_id = uuid.uuid4()
+    t1 = datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    t2 = datetime(2026, 1, 2, 0, 0, 0, tzinfo=timezone.utc)
+
+    # Earlier-created manager (facilities) should win fallback over later-created managers
+    mgr_fac = User(
+        id=uuid.uuid4(),
+        email="manager.facilities@demo-holdings.example",
+        approval_limit_aed=Decimal("50000.00"),
+        created_at=t1,
+        active=True,
+    )
+    mgr_fin = User(
+        id=uuid.uuid4(),
+        email="manager.finance@demo-holdings.example",
+        approval_limit_aed=Decimal("50000.00"),
+        created_at=t2,
+        active=True,
+    )
+
+    mock_db = MagicMock()
+    # Regardless of permutation in returned list:
+    q = mock_db.query.return_value.join.return_value.filter.return_value.filter.return_value
+    q.all.return_value = [
+        mgr_fin,
+        mgr_fac,
+    ]
+
+    chosen = find_eligible_manager(
+        mock_db, creator_id=creator_id, min_limit_aed=Decimal("10000.00")
+    )
+    assert chosen is not None
+    assert chosen.id == mgr_fac.id

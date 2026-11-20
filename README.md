@@ -131,6 +131,13 @@ All accounts use the password generated in your `.env` file under `DEMO_USER_PAS
 | `manager.it@demo-holdings.example` | Yousef Demo-Manager | Manager | IT | AED 50,000.00 |
 | `manager.projects@demo-holdings.example` | Khalid Demo-Manager | Manager | Projects | AED 250,000.00 |
 | `admin@demo-holdings.example` | Aisha Demo-Admin | Admin | IT | AED 0.00 *(Approval blocked)* |
+| `requester.finance@demo-holdings.example` | Layla Demo-Requester | Requester | Finance | AED 0.00 |
+| `manager.finance@demo-holdings.example` | Hassan Demo-Manager | Manager | Finance | AED 50,000.00 |
+| `requester.hr@demo-holdings.example` | Noura Demo-Requester | Requester | HR | AED 0.00 |
+| `manager.hr@demo-holdings.example` | Zayed Demo-Manager | Manager | HR | AED 50,000.00 |
+| `requester.ops@demo-holdings.example` | Hamad Demo-Requester | Requester | Operations | AED 0.00 |
+| `manager.ops@demo-holdings.example` | Reem Demo-Manager | Manager | Operations | AED 50,000.00 |
+| `requester.projects@demo-holdings.example` | Salem Demo-Requester | Requester | Projects | AED 0.00 |
 
 ---
 

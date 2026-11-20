@@ -6,7 +6,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from app.metrics.schemas import AdminMetricsResponse, AITodayMetrics, FieldCorrectionRate
+from app.metrics.schemas import (
+    AdminMetricsResponse,
+    AITodayMetrics,
+    DepartmentSpendMetric,
+    FieldCorrectionRate,
+)
 from app.metrics.service import compute_admin_metrics
 
 
@@ -35,6 +40,17 @@ def test_admin_metrics_schema_validation() -> None:
             correction_rate=0.0,
         ),
     ]
+    spend = [
+        DepartmentSpendMetric(
+            department_id="00000000-0000-0000-0000-000000000001",
+            department_name="Facilities",
+            purchase_requests_count=5,
+            purchase_requests_total_aed=12500.00,
+            purchase_orders_count=3,
+            purchase_orders_total_aed=10000.00,
+            pending_approvals_count=1,
+        )
+    ]
     resp = AdminMetricsResponse(
         documents_processed=12,
         total_fields=120,
@@ -50,6 +66,7 @@ def test_admin_metrics_schema_validation() -> None:
         qa_refusal_rate=0.10,
         qa_total_questions=20,
         qa_refused_questions=2,
+        spend_by_department=spend,
     )
 
     data = resp.model_dump()
@@ -59,6 +76,9 @@ def test_admin_metrics_schema_validation() -> None:
     assert data["match_exception_rate"] == 0.08
     assert data["ai_today"]["estimated_cost_aed"] == 0.0350
     assert data["qa_refusal_rate"] == 0.10
+    assert len(data["spend_by_department"]) == 1
+    assert data["spend_by_department"][0]["department_name"] == "Facilities"
+    assert data["spend_by_department"][0]["purchase_requests_count"] == 5
 
 
 @pytest.mark.unit
@@ -77,3 +97,38 @@ def test_compute_admin_metrics_empty_db() -> None:
     assert metrics.match_exception_rate == 0.0
     assert metrics.ai_today.calls_today == 0
     assert metrics.qa_refusal_rate == 0.0
+    assert metrics.spend_by_department == []
+
+
+@pytest.mark.unit
+def test_compute_admin_metrics_spend_by_department_zero_rows() -> None:
+    import uuid
+
+    from app.core.models import Department
+
+    mock_session = MagicMock()
+    mock_session.execute.return_value.scalar_one.return_value = 0
+    mock_session.execute.return_value.first.return_value = None
+
+    dept_it = Department(id=uuid.uuid4(), name="IT")
+    dept_fin = Department(id=uuid.uuid4(), name="Finance")
+
+    # When querying departments, return 2 departments; for all other queries, return empty list
+    def mock_execute(stmt: object) -> MagicMock:
+        mock_res = MagicMock()
+        mock_res.scalar_one.return_value = 0
+        mock_res.first.return_value = None
+        mock_res.all.return_value = []
+        mock_res.scalars.return_value.all.return_value = [dept_fin, dept_it]
+        return mock_res
+
+    mock_session.execute.side_effect = mock_execute
+
+    metrics = compute_admin_metrics(mock_session)
+    assert len(metrics.spend_by_department) == 2
+    for d in metrics.spend_by_department:
+        assert d.purchase_requests_count == 0
+        assert d.purchase_requests_total_aed == 0.0
+        assert d.purchase_orders_count == 0
+        assert d.purchase_orders_total_aed == 0.0
+        assert d.pending_approvals_count == 0
