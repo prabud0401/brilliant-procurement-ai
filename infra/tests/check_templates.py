@@ -10,7 +10,7 @@ Asserts required configuration on compiled ARM template JSON:
 6. every @secure() param has no default
 7. every app env var name used for api/worker exists as a field in services/backend/app/core/config.py Settings
    (or is in a short documented allowlist such as APPLICATIONINSIGHTS_CONNECTION_STRING)
-8. all tagged resources carry the four tags (project, env, owner, expires)
+8. all tagged resources carry the three tags (project, env, expires)
 """
 
 from __future__ import annotations
@@ -35,7 +35,6 @@ DISALLOWED_ADMIN_LOGINS = {
 REQUIRED_TAG_KEYS = {
     "project",
     "env",
-    "owner",
     "expires",
 }
 
@@ -387,7 +386,7 @@ def main() -> None:
 
     # 8. all resources carry the four tags
     check_resource_tags(all_templates)
-    print("  ✓ All resources carry the required four tags (project, env, owner, expires)")
+    print("  ✓ All resources carry the required three tags (project, env, expires)")
 
     # 9. intakeKey has a default of '' (review finding 1)
     check_intake_key_default(main_template)

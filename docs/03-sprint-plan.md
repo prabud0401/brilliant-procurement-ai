@@ -43,7 +43,7 @@ All times are Dubai time (UTC+4). Requirement IDs (US-xx, NFR-xx, AIQ-xx) refer 
 - **Smaller scope, done properly.** The demo covers the Must stories that make the strongest case: AI extraction with review, quote comparison with an explained recommendation, three-way match, Q&A with citations, approval workflow with role-based access, the audit trail and prompt-injection defence. Should and Could stories move to a clearly labelled after-demo backlog (section 3.2). If something cannot be finished properly, it is cut, not shipped half done.
 - **Stretch item: email intake.** Supplier documents emailed to a demo-only mailbox are picked up by an Azure Logic App and sent into the normal extraction flow (section 3.3, run R13). It is built only if the core is on track on Saturday evening and ships only if it passes the release checklist by gate G2; otherwise it moves to the after-demo backlog.
 - **Twelve bigger build runs (R01–R12)** replace the 31 small tasks of v1.0. Each run still has one branch, one pull request and one review. Independent runs work in parallel on separate branches and folders, at most two at a time.
-- **Two approval gates stay with Prabudeva:** G1, Azure AI services, **Saturday 21 November, 14:00**; G2, hosting, **Sunday 22 November, 10:00**.
+- **Two approval steps before any Azure spending:** G1 (Azure AI services) and G2 (hosting). Nothing is created in Azure before each is approved.
 - **Hosted window:** Sunday 22 November to Sunday 29 November; teardown on **Sunday 29 November**, with a zero-cost check on Wednesday 2 December.
 - **Hardening and bug bash on Saturday evening and Sunday**, then a release checklist (section 9) that must be all green before anything is sent to Brilliant.
 
@@ -58,7 +58,6 @@ All times are Dubai time (UTC+4). Requirement IDs (US-xx, NFR-xx, AIQ-xx) refer 
 | A-04 | **Model:** gpt-4o-mini and text-embedding-3-small, set in configuration. | Another small model is a configuration change plus one evaluation run. |
 | A-05 | **Seven phases:** (1) Requirements, (2) Design, (3) Sprint plan, (4) Build, (5) Testing, (6) CI/CD and deployment, (7) Handover. The specification listed six; this replaces that list. Phases 4–7 now overlap in time. | – |
 | A-06 | **Repository:** `prabud0401/brilliant-procurement-ai` on GitHub, private until shared on purpose. | – |
-| A-07 | **Prabudeva's time:** about 10 minutes for each gate, about 30 minutes on Sunday evening for a rehearsal, and Monday 14:00–18:00 for the final review. He has the SC-900 exam on Monday at 10:00, so **nothing needs him on Monday morning**. | – |
 
 # 3. Scope: what ships and what waits
 
@@ -113,7 +112,7 @@ flowchart LR
 
 | Part | How it works |
 |---|---|
-| Mailbox | A new Outlook.com mailbox created only for the demo, holding no personal mail. Its password stays with Prabudeva; the Logic App connects to it once through the Outlook.com connector sign-in at gate G2. |
+| Mailbox | A new Outlook.com mailbox created only for the demo, holding no personal mail. Its password stays with the project owner; the Logic App connects to it once through the Outlook.com connector sign-in at deployment. |
 | Trigger | "When a new email arrives" with "only with attachments" on, polling every 5 minutes. |
 | Filtering in the Logic App | Only PDF, PNG and JPEG attachments up to the upload size limit are sent; anything else is skipped and logged in the run history. Inputs and outputs are marked secure so attachment content and the key are not kept in run history. |
 | Call to the API | One HTTPS POST per attachment to `POST /api/v1/intake/email` (multipart: file, sender, subject, received time, message ID). The service API key is sent in a header. |
@@ -148,25 +147,25 @@ All code is written by the agy coding agent, one prompt per run. I write the pro
 
 # 6. Calendar
 
-Blocks are half days. "Him" marks the only points where Prabudeva is needed.
+Blocks are half days.
 
-| Date | Block | Work | Him |
-|---|---|---|---|
-| Thu 19 Nov | Night (22:00–02:00) | Plan approved; repository created with branch protection; rules and prompts written; **R01 Foundation** and **R02 Data and documents** start in parallel | Approve this plan (10 min) |
-| Fri 20 Nov | Morning (08:00–13:00) | Review and merge R01 and R02; start **R03 Documents and extraction API** and **R04 Procurement flow API** in parallel | – |
-| Fri 20 Nov | Afternoon (13:00–18:00) | R03 and R04 finish; review; start **R05 Web app shell** and **R06 Infrastructure and pipeline** in parallel | – |
-| Fri 20 Nov | Evening (18:00–24:00) | Merge R03–R06; start **R07 Q&A API** and **R08 Document and review screens** | – |
-| Sat 21 Nov | Morning (08:00–13:00) | Merge R07 and R08; start **R09 Procurement screens and admin** and **R10 Q&A screen, monitoring, error handling** | – |
-| Sat 21 Nov | Afternoon (13:00–18:00) | **Gate G1 at 14:00**; budget and alerts created, then Azure OpenAI and Document Intelligence F0; merge R09 and R10; start **R11 Evaluation suite and end-to-end tests** | Approve G1 (10 min) |
-| Sat 21 Nov | Evening (18:00–24:00) | Live evaluation run and replay fixtures refreshed; **bug bash 1** locally on every flow and role; fix-up runs. **Stretch R13 Email intake** starts only if R01–R11 are merged and bug bash 1 has no open blocking bug | Create the demo-only Outlook.com mailbox (5 min, only if R13 starts) |
-| Sun 22 Nov | Morning (08:00–13:00) | **Gate G2 at 10:00**, which is also the **email intake cut-off**: R13 is either merged and tested, or moved to after-demo. Hosting resources created by the pipeline; deploy; smoke test and full end-to-end run on the hosted URL | Approve G2 (10 min); if email intake ships, sign in once to the demo mailbox in the Logic App connector (5 min) |
-| Sun 22 Nov | Afternoon (13:00–18:00) | **Bug bash 2** on the hosted URL; fix and redeploy; scope cut-off at 18:00; **R12 Handover documents** | – |
-| Sun 22 Nov | Evening (18:00–24:00) | Record the demo video; build the slides; release checklist first pass; ready to show by 23:00 | Watch a rehearsal (30 min, optional) |
-| Mon 23 Nov | Morning (08:00–13:00) | No asks. Final automated checks on the hosted URL, release tag `v1.0.0`, documents frozen, Notion and Drive updated | SC-900 exam 10:00 |
-| Mon 23 Nov | Afternoon (13:00–18:00) | Final review from 14:00: link, video, slides, documents; small fixes only, one fix-up run at most, redeploy and re-run the checklist | Final review (up to 4 h) |
-| Mon 23 Nov | Evening (18:00–24:00) | Release checklist all green; the message to Brilliant drafted for Prabudeva to send himself | Send when happy |
-| Sun 29 Nov | – | End of hosted window; teardown script removes all resource groups | Confirm teardown |
-| Wed 2 Dec | – | Check Cost Management shows no new charges after teardown | – |
+| Date | Block | Work |
+|---|---|---|
+| Thu 19 Nov | Night (22:00–02:00) | Plan approved; repository created with branch protection; rules and prompts written; **R01 Foundation** and **R02 Data and documents** start in parallel |
+| Fri 20 Nov | Morning (08:00–13:00) | Review and merge R01 and R02; start **R03 Documents and extraction API** and **R04 Procurement flow API** in parallel |
+| Fri 20 Nov | Afternoon (13:00–18:00) | R03 and R04 finish; review; start **R05 Web app shell** and **R06 Infrastructure and pipeline** in parallel |
+| Fri 20 Nov | Evening (18:00–24:00) | Merge R03–R06; start **R07 Q&A API** and **R08 Document and review screens** |
+| Sat 21 Nov | Morning (08:00–13:00) | Merge R07 and R08; start **R09 Procurement screens and admin** and **R10 Q&A screen, monitoring, error handling** |
+| Sat 21 Nov | Afternoon (13:00–18:00) | G1 approval; budget and alerts created, then Azure OpenAI and Document Intelligence F0; merge R09 and R10; start **R11 Evaluation suite and end-to-end tests** |
+| Sat 21 Nov | Evening (18:00–24:00) | Live evaluation run and replay fixtures refreshed; **bug bash 1** locally on every flow and role; fix-up runs. **Stretch R13 Email intake** starts only if R01–R11 are merged and bug bash 1 has no open blocking bug |
+| Sun 22 Nov | Morning (08:00–13:00) | G2 approval, which is also the **email intake cut-off**: R13 is either merged and tested, or moved to after-demo. Hosting resources created by the pipeline; deploy; smoke test and full end-to-end run on the hosted URL |
+| Sun 22 Nov | Afternoon (13:00–18:00) | **Bug bash 2** on the hosted URL; fix and redeploy; scope cut-off at 18:00; **R12 Handover documents** |
+| Sun 22 Nov | Evening (18:00–24:00) | Record the demo video; build the slides; release checklist first pass; ready to show by 23:00 |
+| Mon 23 Nov | Morning (08:00–13:00) | No asks. Final automated checks on the hosted URL, release tag `v1.0.0`, documents frozen, Notion and Drive updated |
+| Mon 23 Nov | Afternoon (13:00–18:00) | Final review from 14:00: link, video, slides, documents; small fixes only, one fix-up run at most, redeploy and re-run the checklist |
+| Mon 23 Nov | Evening (18:00–24:00) | Release checklist all green; the message to Brilliant drafted |
+| Sun 29 Nov | – | End of hosted window; teardown script removes all resource groups |
+| Wed 2 Dec | – | Check Cost Management shows no new charges after teardown |
 
 # 7. Build runs
 
@@ -323,16 +322,16 @@ Everything here must be green before the link, video, slides or documents are se
 | 16 | Slides match the application as it is (no promised features that are not there) | Read-through |
 | 17 | Budget and alerts exist; teardown date (29 Nov) is in the calendar | Azure portal, calendar |
 | 18 | If email intake ships: a test email with a PDF reaches the Buyer queue on the hosted app, bad attachments are skipped, the key is in Key Vault only, and the audit entry shows sender, subject and time. If not, it appears nowhere in the app or slides | Test email, Key Vault, audit viewer |
-| 19 | Prabudeva has reviewed and approved the package | His OK |
+| 19 | The author has reviewed and approved the package | Sign-off |
 
 ## 9.1 Gate resource lists and teardown
 
-| Gate | Resources created after his OK |
+| Step | Resources created after approval |
 |---|---|
-| G1, Sat 21 Nov 14:00 | Budget with alerts (first); Azure OpenAI (gpt-4o-mini and text-embedding-3-small deployments); Document Intelligence F0 |
-| G2, Sun 22 Nov 10:00 | Resource group for production; Container Apps environment and three apps; Postgres Flexible Server B1ms; storage account; Key Vault; Application Insights and Log Analytics; managed identity; registry (GHCR, or ACR Basic). **If email intake ships:** Logic App (Consumption) and its Outlook.com API connection |
+| G1 (AI services) | Budget with alerts (first); Azure OpenAI (gpt-4o-mini and text-embedding-3-small deployments); Document Intelligence F0 |
+| G2 (hosting) | Resource group for production; Container Apps environment and three apps; Postgres Flexible Server B1ms; storage account; Key Vault; Application Insights and Log Analytics; managed identity; registry (GHCR, or ACR Basic). **If email intake ships:** Logic App (Consumption) and its Outlook.com API connection |
 
-**Teardown on Sunday 29 November:** the teardown script deletes the resource groups, which removes everything above, including the Logic App and its Outlook.com connection (and with it the stored mailbox sign-in) and the Key Vault that holds the intake key. The demo mailbox itself is closed by Prabudeva or kept empty; it holds no personal mail either way. A zero-cost check follows on Wednesday 2 December.
+**Teardown on Sunday 29 November:** the teardown script deletes the resource groups, which removes everything above, including the Logic App and its Outlook.com connection (and with it the stored mailbox sign-in) and the Key Vault that holds the intake key. The demo mailbox itself is closed or kept empty; it holds no personal mail either way. A zero-cost check follows on Wednesday 2 December.
 
 # 10. Definition of Ready and Definition of Done
 
@@ -377,14 +376,13 @@ flowchart LR
 | R-01 | Coding-agent quota runs out | Medium | Delay | Runs budgeted per day; fix-ups take priority; scope is cut rather than the deadline moved |
 | R-02 | A big run comes back incomplete or breaks earlier work | Medium | Delay | Narrow owned folders, the full suite runs on every pull request, one follow-up then split; the unfinished part is cut |
 | R-03 | Parallel runs conflict on shared files | Medium | Rework | Whole schema in R01; each run owns its folders; rebase before merge |
-| R-04 | gpt-4o-mini cannot be deployed in UAE North on the demo subscription, or quota is zero | Medium | Gate G1 slips | Checked before G1 on Saturday morning; fallback is another small model or another region recorded as a residency exception, with the cost re-checked |
-| R-05 | Gate approvals come late | Low | Delay | Gates are fixed times with a short ready-to-approve message; the build continues on replay while waiting |
+| R-04 | gpt-4o-mini cannot be deployed in UAE North on the demo subscription, or quota is zero | Medium | AI step slips | Checked before the AI step; fallback is another small model or another region recorded as a residency exception, with the cost re-checked |
+| R-05 | Approvals come late | Low | Delay | Each approval has a short ready-to-approve message; the build continues on replay while waiting |
 | R-06 | Container Apps or Postgres provisioning fails in UAE North | Low | Hosting slips | Infrastructure tested with what-if on Friday; fallback region chosen in advance; the video and local run as backup |
 | R-07 | Replay fixtures differ from live model output | Medium | Late bugs | Live run on Saturday evening leaves Sunday for fixes |
 | R-08 | Bug bash finds more than can be fixed by Sunday 18:00 | Medium | Smaller scope | Fix before ship: blocking bugs fixed, the affected feature cut if it cannot be fixed |
 | R-09 | Video and slides take longer than planned | Medium | Monday pressure | Started Sunday evening from the automated demo script; slide outline drafted on Saturday |
-| R-10 | Prabudeva is unavailable Monday morning (exam) | Certain | – | Nothing is scheduled for him before 14:00 Monday |
-| R-11 | Email intake: the Outlook.com connector needs Prabudeva's one-time sign-in to the demo mailbox at G2, and consent or sign-in may fail or expire | Medium | Stretch dropped | Mailbox created Saturday evening; sign-in done at G2 together with the approval; if it fails, the Logic App is not deployed and email intake moves to after-demo, with no effect on the core |
+| R-11 | Email intake: the Outlook.com connector needs a one-time sign-in to the demo mailbox at deployment, and consent or sign-in may fail or expire | Medium | Stretch dropped | Sign-in done at deployment; if it fails, the Logic App is not deployed and email intake moves to after-demo, with no effect on the core |
 | R-12 | Email intake takes time away from the core | Medium | Delay | Starts only when R01–R11 are merged and bug bash 1 is clean; hard cut-off Sunday 10:00; fix-ups for the core always come first |
 | R-13 | Unwanted mail to the demo mailbox | Low | Noise | Attachment type and size filter, optional sender allowlist, rate limit, same file checks as upload; the address is shared only with the panel |
 
@@ -404,9 +402,6 @@ gantt
   R09 Flow screens + R10 Q&A screen   :r9, 2026-11-21 08:00, 6h
   R11 Evaluation + E2E                :r11, 2026-11-21 14:00, 5h
   R13 Email intake (stretch)          :r13, 2026-11-21 19:00, 5h
-  section Gates
-  G1 Azure AI services                :milestone, g1, 2026-11-21 14:00, 0h
-  G2 Hosting + email intake cut-off   :milestone, g2, 2026-11-22 10:00, 0h
   section Test and harden
   Live evaluation + bug bash 1        :t1, 2026-11-21 18:00, 6h
   Deploy + hosted smoke               :t2, 2026-11-22 10:00, 3h
@@ -415,7 +410,7 @@ gantt
   R12 Docs                            :h1, 2026-11-22 13:00, 5h
   Video + slides + checklist          :h2, 2026-11-22 18:00, 5h
   Final checks (no asks)              :h3, 2026-11-23 08:00, 5h
-  Final review with Prabudeva         :h4, 2026-11-23 14:00, 4h
+  Final review                        :h4, 2026-11-23 14:00, 4h
   Release checklist green             :milestone, rel, 2026-11-23 20:00, 0h
 ```
 
@@ -427,9 +422,8 @@ The hosted window continues to Sunday 29 November, when the teardown script remo
 |---|---|---|
 | P3-01 | Are the defaults in section 2 acceptable (hosted 22–29 November plus a recording, mocks for Odoo and Microsoft 365, AED 500 Buyer limit)? | Use them as written |
 | P3-02 | Is the after-demo list in section 3.2 acceptable? | Use it as written |
-| P3-03 | Should the demo video carry Prabudeva's own voice-over, or captions only? | Captions; he can add a voice-over on Monday afternoon if he wants |
 | P3-04 | Repository private until shared on purpose? | Private |
-| P3-05 | Email intake: the address of the demo-only Outlook.com mailbox (Prabudeva creates it) and whether to limit senders to an allowlist | Allowlist on, with Prabudeva's and the panel's addresses added at G2 |
+| P3-05 | Email intake: whether to limit senders to an allowlist | Allowlist on |
 
 # Approval
 

@@ -40,7 +40,7 @@ scripts/
 - **`infra/main.bicep` (Resource-group scope: `rg-pda-<env>-uaen`, Gate G2)**:
   - Connects and provisions all modules for environment `<env>` (default `prod`).
   - Implements the naming convention `<type>-pda-<env>-uaen` per Design 9.2.
-  - Applies mandatory tags: `project=brilliant-pda`, `env=<env>`, `owner=prabudeva`, `expires=2026-11-29`.
+  - Applies mandatory tags: `project=brilliant-pda`, `env=<env>`, `expires=2026-11-29`.
 - **`infra/modules/identity.bicep`**:
   - User-assigned managed identity (`id-pda-<env>-uaen`).
 - **`infra/modules/monitoring.bicep`**:

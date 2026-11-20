@@ -105,7 +105,7 @@ deploy_gate_1() {
   fi
 
   echo "[G1 Step 2] Ensuring AI resource group ${AI_RG} exists..."
-  az group create --name "${AI_RG}" --location "${LOCATION}" --tags project=brilliant-pda owner=prabudeva
+  az group create --name "${AI_RG}" --location "${LOCATION}" --tags project=brilliant-pda
 
   echo "[G1 Step 3] What-if for AI services (Azure OpenAI + Document Intelligence)..."
   az deployment group what-if \
@@ -139,7 +139,7 @@ deploy_gate_2() {
   check_secure_params
 
   echo "[G2 Step 1] Ensuring resource group ${MAIN_RG} exists..."
-  az group create --name "${MAIN_RG}" --location "${LOCATION}" --tags project=brilliant-pda env="${ENV}" owner=prabudeva
+  az group create --name "${MAIN_RG}" --location "${LOCATION}" --tags project=brilliant-pda env="${ENV}"
 
   echo "[G2 Step 2] What-if preview for main infrastructure..."
   az deployment group what-if \
