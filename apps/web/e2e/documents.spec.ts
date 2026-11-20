@@ -14,6 +14,19 @@ async function loginAs(page: any, email: string) { // eslint-disable-line @types
 }
 
 test.describe("Procurement Document Review & Processing Flows (R08)", () => {
+  test.beforeAll(() => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { execSync } = require("child_process");
+      execSync(
+        'docker compose exec -T db psql -U postgres -d postgres -c "TRUNCATE TABLE jobs, documents, extractions, extracted_fields, extracted_lines, chunks, injection_flags, comparisons, matches, qa_logs CASCADE;"',
+        { stdio: "ignore" }
+      );
+    } catch {
+      // Ignore if docker db is not directly accessible
+    }
+  });
+
   test("S1 scenario: Buyer uploads Gulfline quotation, reviews with highlight, corrects a field, and confirms", async ({
     page,
   }) => {

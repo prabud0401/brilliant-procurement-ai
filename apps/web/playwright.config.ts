@@ -1,6 +1,15 @@
 import { defineConfig, devices } from "@playwright/test";
+import path from "path";
 
-const baseURL = process.env.WEB_BASE_URL || "http://localhost:3000";
+try {
+  process.loadEnvFile(path.resolve(__dirname, "../../.env"));
+} catch {
+  // Ignore if .env doesn't exist or already loaded
+}
+
+const baseURL =
+  process.env.WEB_BASE_URL ||
+  (process.env.WEB_PORT ? `http://localhost:${process.env.WEB_PORT}` : "http://localhost:3000");
 
 export default defineConfig({
   testDir: "./e2e",

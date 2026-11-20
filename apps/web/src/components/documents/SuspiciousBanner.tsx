@@ -146,7 +146,7 @@ export const SuspiciousBanner: React.FC<SuspiciousBannerProps> = ({
                   >
                     Acknowledge Suspicious Content
                   </button>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-slate-700 font-medium">
                     Required before this document can be confirmed
                   </span>
                 </div>

@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 from app.audit.service import record as record_audit
 from app.core.database import get_db
 from app.core.errors import ProblemException
+from app.core.middleware import get_current_request_id
 from app.core.models import Document, Job
 from app.core.policy import Principal, get_current_principal
 from app.documents.file_checks import validate_file
@@ -166,7 +167,7 @@ async def upload_document(
     job = Job(
         id=uuid.uuid4(),
         type="extract",
-        payload={"document_id": str(doc.id)},
+        payload={"document_id": str(doc.id), "request_id": get_current_request_id()},
         status="queued",
     )
     db.add(job)
@@ -412,7 +413,7 @@ def retry_document_extract(
     job = Job(
         id=uuid.uuid4(),
         type="extract",
-        payload={"document_id": str(doc.id)},
+        payload={"document_id": str(doc.id), "request_id": get_current_request_id()},
         status="queued",
     )
     db.add(job)
