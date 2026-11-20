@@ -73,7 +73,7 @@ flowchart TD
 
 3. **Background Worker (`services/backend/app/worker_main.py`)**:
    - Executes asynchronous tasks managed via the database job queue (`jobs` table).
-   - Responsible for document OCR extraction, line item parsing, validation rule execution, vector chunking, and embedding generation upon document confirmation.
+   - Responsible for document OCR extraction, line item parsing, validation rule execution, vector chunking, and embedding generation upon document confirmation. Untyped and email-intake documents are auto-classified after OCR and before extraction.
 
 4. **Database & Vector Store (`db`)**:
    - PostgreSQL 16 equipped with the `pgvector` extension.

@@ -14,6 +14,7 @@ from app.ai.cost import calculate_cost_aed, check_daily_budget
 from app.ai.factory import get_document_analyzer, get_llm_client
 from app.ai.normalize import CleanupMetadata, cleanup_extraction_result
 from app.audit.service import record as record_audit
+from app.core.errors import ProblemException
 from app.core.models import (
     Document,
     ExtractedField,
@@ -50,6 +51,7 @@ def run_extraction(session: Session, document_id: uuid.UUID) -> Extraction:
 
     # 3. Document Intelligence OCR analysis
     analyzer = get_document_analyzer()
+    ocr_di_model = "prebuilt-invoice" if document.doc_type == "invoice" else "prebuilt-layout"
     ocr_result = analyzer.analyze(
         file_bytes=file_bytes,
         mime=document.mime,
@@ -104,6 +106,54 @@ def run_extraction(session: Session, document_id: uuid.UUID) -> Extraction:
                 },
             )
 
+    # 4b. Auto-classify untyped documents (US-01 / F04)
+    cls_tokens_in = 0
+    cls_tokens_out = 0
+    if document.doc_type in (None, "other"):
+        first_page_text = ""
+        if ocr_result.pages and ocr_result.pages[0].words:
+            first_page_text = " ".join(w.content for w in ocr_result.pages[0].words)
+        if not first_page_text:
+            first_page_text = ocr_result.content or ""
+
+        try:
+            check_daily_budget(session)
+            llm_client = get_llm_client()
+            if hasattr(llm_client, "classify_with_usage"):
+                label, cls_meta = llm_client.classify_with_usage(first_page_text)
+            else:
+                label = llm_client.classify(first_page_text)
+                cls_meta = getattr(llm_client, "last_usage", None) or {}
+
+            cls_tokens_in = cls_meta.get("tokens_in", 0)
+            cls_tokens_out = cls_meta.get("tokens_out", 0)
+
+            valid_labels = {"quote", "purchase_order", "delivery_note", "invoice"}
+            if label in valid_labels:
+                before_doc_type = document.doc_type
+                document.doc_type = label
+                record_audit(
+                    session=session,
+                    actor=None,
+                    action="document.classified",
+                    entity_type="document",
+                    entity_id=document.id,
+                    before={"doc_type": before_doc_type},
+                    after={"doc_type": document.doc_type},
+                )
+            elif document.doc_type is None:
+                document.doc_type = "other"
+        except ProblemException as pe:
+            if pe.code == "AI_BUDGET_EXCEEDED":
+                raise
+            logger.warning("Auto-classification failed for document %s: %s", document.id, pe)
+            if document.doc_type is None:
+                document.doc_type = "other"
+        except Exception as exc:
+            logger.warning("Auto-classification failed for document %s: %s", document.id, exc)
+            if document.doc_type is None:
+                document.doc_type = "other"
+
     # 5. Structured LLM extraction with response caching (NFR-COST-03)
     prompt_version = "prompts/extract_v1.md"
     cached = get_cached_extraction(document.file_sha256, prompt_version)
@@ -136,11 +186,11 @@ def run_extraction(session: Session, document_id: uuid.UUID) -> Extraction:
             document.doc_type = "invoice"
 
     # 6. Cost and token metering
-    tokens_in = metadata.get("tokens_in", 0)
-    tokens_out = metadata.get("tokens_out", 0)
-    est_cost = calculate_cost_aed(tokens_in, tokens_out)
-    latency_ms = metadata.get("latency_ms", 0)
+    tokens_in = metadata.get("tokens_in", 0) + cls_tokens_in
+    tokens_out = metadata.get("tokens_out", 0) + cls_tokens_out
     llm_model = metadata.get("model", "gpt-4o-mini")
+    est_cost = calculate_cost_aed(tokens_in, tokens_out, model=llm_model)
+    latency_ms = metadata.get("latency_ms", 0)
 
     emit_ai_metric_event(
         task="extraction",
@@ -164,7 +214,7 @@ def run_extraction(session: Session, document_id: uuid.UUID) -> Extraction:
         id=uuid.uuid4(),
         document_id=document.id,
         version=version,
-        di_model="prebuilt-invoice" if document.doc_type == "invoice" else "prebuilt-layout",
+        di_model=ocr_di_model,
         llm_model=llm_model,
         prompt_version=prompt_version,
         raw_ocr_path=raw_ocr_path,

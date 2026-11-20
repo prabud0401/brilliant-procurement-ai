@@ -66,7 +66,7 @@ def test_live_openai_parameters_reasoning_model() -> None:
         mock_openai.chat.completions.create.assert_called_once()
         _, kwargs = mock_openai.chat.completions.create.call_args
         assert kwargs["model"] == "gpt-5-mini"
-        assert kwargs["max_completion_tokens"] == 512
+        assert kwargs["max_completion_tokens"] == 1024
         assert kwargs["reasoning_effort"] == "low"
         assert "temperature" not in kwargs
         assert "max_tokens" not in kwargs
