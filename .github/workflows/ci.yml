@@ -162,3 +162,28 @@ jobs:
 
       - name: Build web Docker image
         run: docker build -t pda-web:ci apps/web
+
+  bicep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on scripts
+        run: shellcheck scripts/*.sh
+
+      - name: Lint and build Bicep templates
+        run: |
+          for file in infra/*.bicep infra/modules/*.bicep; do
+            if [ -f "$file" ]; then
+              echo "Linting $file..."
+              az bicep lint --file "$file"
+              echo "Building $file..."
+              az bicep build --file "$file" --stdout > /dev/null
+            fi
+          done
+
+      - name: Run infrastructure guard test
+        run: python3 infra/tests/check_templates.py
