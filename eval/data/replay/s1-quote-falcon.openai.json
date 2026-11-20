@@ -1,12 +1,12 @@
 {
-  "id": "chatcmpl-EmI4I7hBiI6L6NL8GOMTVctjzjsyq",
+  "id": "chatcmpl-EmJ0ktSWpUyYTWEimMx4suiRa7l1M",
   "choices": [
     {
       "finish_reason": "stop",
       "index": 0,
       "logprobs": null,
       "message": {
-        "content": "{\n  \"doc_type\": \"quote\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Falcon Office Supplies LLC\",\n      \"page\": 1,\n      \"source_text\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE Email: orders@falcon-supplies.fake Phone: +971 2 555 0101\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"TRN: 100000000000001\",\n      \"page\": 1,\n      \"source_text\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE Email: orders@falcon-supplies.fake Phone: +971 2 555 0101\"\n    },\n    \"document_number\": {\n      \"value\": \"Number: Q-8821\",\n      \"page\": 1,\n      \"source_text\": \"QUOTATION\\nNumber: Q-8821 Date: 2026-11-04 Currency: AED\"\n    },\n    \"document_date\": {\n      \"value\": \"Date: 2026-11-04\",\n      \"page\": 1,\n      \"source_text\": \"QUOTATION\\nNumber: Q-8821 Date: 2026-11-04 Currency: AED\"\n    },\n    \"po_number\": {\n      \"value\": \"PR-1001\",\n      \"page\": 1,\n      \"source_text\": \"PR Number: PR-1001\"\n    },\n    \"currency\": {\n      \"value\": \"Currency: AED\",\n      \"page\": 1,\n      \"source_text\": \"QUOTATION\\nNumber: Q-8821 Date: 2026-11-04 Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Payment Terms: Net 30\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 30\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"Subtotal: 28400.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n28400.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"VAT (5%): 1420.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n1420.00 AED\"\n    },\n    \"total\": {\n      \"value\": \"Total Amount: 29820.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n29820.00 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"IT-LAP-14\",\n      \"description\": \"Laptop 14in Intel Core i7 16GB RAM 512GB SSD\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"1950.00\",\n      \"discount\": null,\n      \"vat_rate\": null,\n      \"line_total\": \"19500.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nIT-LAP-14\\nLaptop 14in Intel Core i7 16GB RAM 512GB SSD\\n10\\nEA\\n1950.00\\n19500.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"IT-MON-27\",\n      \"description\": \"Monitor 27in QHD IPS USB-C 75Hz\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"890.00\",\n      \"discount\": null,\n      \"vat_rate\": null,\n      \"line_total\": \"8900.00\",\n      \"page\": 1,\n      \"source_text\": \"2\\nIT-MON-27\\nMonitor 27in QHD IPS USB-C 75Hz\\n10\\nEA\\n890.00\\n8900.00\"\n    }\n  ]\n}",
+        "content": "{\n  \"doc_type\": \"quote\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Falcon Office Supplies LLC\",\n      \"page\": 1,\n      \"source_text\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE Email: orders@falcon-supplies.fake Phone: +971 2 555 0101\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000001\",\n      \"page\": 1,\n      \"source_text\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE Email: orders@falcon-supplies.fake Phone: +971 2 555 0101\"\n    },\n    \"document_number\": {\n      \"value\": \"Q-8821\",\n      \"page\": 1,\n      \"source_text\": \"QUOTATION\\nNumber: Q-8821 Date: 2026-11-04 Currency: AED\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-04\",\n      \"page\": 1,\n      \"source_text\": \"QUOTATION\\nNumber: Q-8821 Date: 2026-11-04 Currency: AED\"\n    },\n    \"po_number\": {\n      \"value\": \"PR-1001\",\n      \"page\": 1,\n      \"source_text\": \"PR Number: PR-1001\"\n    },\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"QUOTATION\\nNumber: Q-8821 Date: 2026-11-04 Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 30\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 30\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"28400.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n28400.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"1420.00\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n1420.00 AED\"\n    },\n    \"total\": {\n      \"value\": \"29820.00\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n29820.00 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"IT-LAP-14\",\n      \"description\": \"Laptop 14in Intel Core i7 16GB RAM 512GB SSD\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"1950.00\",\n      \"discount\": null,\n      \"vat_rate\": \"5%\",\n      \"line_total\": \"19500.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nIT-LAP-14\\nLaptop 14in Intel Core i7 16GB RAM 512GB SSD\\n10\\nEA\\n1950.00\\n19500.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"IT-MON-27\",\n      \"description\": \"Monitor 27in QHD IPS USB-C 75Hz\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"890.00\",\n      \"discount\": null,\n      \"vat_rate\": \"5%\",\n      \"line_total\": \"8900.00\",\n      \"page\": 1,\n      \"source_text\": \"2\\nIT-MON-27\\nMonitor 27in QHD IPS USB-C 75Hz\\n10\\nEA\\n890.00\\n8900.00\"\n    }\n  ]\n}",
         "refusal": null,
         "role": "assistant",
         "annotations": [],
@@ -42,7 +42,7 @@
       }
     }
   ],
-  "created": 1795177906,
+  "created": 1795181530,
   "model": "gpt-5-mini-2025-08-07",
   "object": "chat.completion",
   "metadata": null,
@@ -50,32 +50,32 @@
   "service_tier": "default",
   "system_fingerprint": null,
   "usage": {
-    "completion_tokens": 1279,
-    "prompt_tokens": 1365,
-    "total_tokens": 2644,
+    "completion_tokens": 1123,
+    "prompt_tokens": 1625,
+    "total_tokens": 2748,
     "completion_tokens_details": {
       "accepted_prediction_tokens": 0,
       "audio_tokens": 0,
-      "reasoning_tokens": 384,
+      "reasoning_tokens": 256,
       "rejected_prediction_tokens": 0,
       "text_tokens": null
     },
     "prompt_tokens_details": {
       "audio_tokens": 0,
       "cache_write_tokens": null,
-      "cached_tokens": 1024,
+      "cached_tokens": 1280,
       "image_tokens": null,
       "text_tokens": null
     },
     "latency_checkpoint": {
-      "engine_tbt_ms": 8,
-      "engine_ttft_ms": 36,
-      "engine_ttlt_ms": 10045,
-      "pre_inference_ms": 139,
-      "service_tbt_ms": 8,
-      "service_ttft_ms": 841,
-      "service_ttlt_ms": 10813,
-      "user_visible_ttft_ms": 701
+      "engine_tbt_ms": 7,
+      "engine_ttft_ms": 33,
+      "engine_ttlt_ms": 7908,
+      "pre_inference_ms": 141,
+      "service_tbt_ms": 7,
+      "service_ttft_ms": 832,
+      "service_ttlt_ms": 8681,
+      "user_visible_ttft_ms": 691
     }
   },
   "prompt_filter_results": [
@@ -106,6 +106,6 @@
     }
   ],
   "routing": {
-    "serving_pipereplica": "d20261104051536-8d035801-default-r2-dp0-default"
+    "serving_pipereplica": "d20261104055156-27216c1e-default-r1-dp0-default"
   }
 }

@@ -1,12 +1,12 @@
 {
-  "id": "chatcmpl-EmI6AI7f4qZzN0rv3guKBhSH2MOsd",
+  "id": "chatcmpl-EmJ3lbY5kO20SPwWxaErJts8TwhNc",
   "choices": [
     {
       "finish_reason": "stop",
       "index": 0,
       "logprobs": null,
       "message": {
-        "content": "{\n  \"doc_type\": \"purchase_order\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Desert Build Materials\",\n      \"page\": 1,\n      \"source_text\": \"Desert Build Materials TRN: 100000000000004 Plot 88, Mina Zayed Port Commercial District, Abu Dhabi, UAE\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"TRN: 100000000000004\",\n      \"page\": 1,\n      \"source_text\": \"Desert Build Materials TRN: 100000000000004 Plot 88, Mina Zayed Port Commercial District, Abu Dhabi, UAE\"\n    },\n    \"document_number\": null,\n    \"document_date\": {\n      \"value\": \"Date: 2026-11-05\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0050 Date: 2026-11-05 Currency: AED Payment Terms: Net 60\"\n    },\n    \"po_number\": {\n      \"value\": \"PO-0050\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0050 Date: 2026-11-05 Currency: AED Payment Terms: Net 60\"\n    },\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0050 Date: 2026-11-05 Currency: AED Payment Terms: Net 60\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 60\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0050 Date: 2026-11-05 Currency: AED Payment Terms: Net 60\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"32000.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n32000.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"1600.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n1600.00 AED\"\n    },\n    \"total\": {\n      \"value\": \"33600.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n33600.00 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"MAT-CBL-CAT6\",\n      \"description\": \"Cat6 UTP Solid Bulk Ethernet Cable Roll 305m CMR\",\n      \"qty\": \"100\",\n      \"uom\": \"ROLL\",\n      \"unit_price\": \"320.00\",\n      \"discount\": null,\n      \"vat_rate\": \"5%\",\n      \"line_total\": \"32000.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nMAT-CBL-CAT6\\nCat6 UTP Solid Bulk Ethernet Cable Roll 305m CMR\\n100\\nROLL\\n320.00\\n32000.00\"\n    }\n  ]\n}",
+        "content": "{\n  \"doc_type\": \"purchase_order\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Desert Build Materials\",\n      \"page\": 1,\n      \"source_text\": \"Desert Build Materials TRN: 100000000000004 Plot 88, Mina Zayed Port Commercial District, Abu Dhabi, UAE\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000004\",\n      \"page\": 1,\n      \"source_text\": \"Desert Build Materials TRN: 100000000000004 Plot 88, Mina Zayed Port Commercial District, Abu Dhabi, UAE\"\n    },\n    \"document_number\": {\n      \"value\": \"PO-0050\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0050 Date: 2026-11-05 Currency: AED Payment Terms: Net 60\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-05\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0050 Date: 2026-11-05 Currency: AED Payment Terms: Net 60\"\n    },\n    \"po_number\": null,\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0050 Date: 2026-11-05 Currency: AED Payment Terms: Net 60\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 60\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0050 Date: 2026-11-05 Currency: AED Payment Terms: Net 60\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"32000.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n32000.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"1600.00\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n1600.00 AED\"\n    },\n    \"total\": {\n      \"value\": \"33600.00\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n33600.00 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"MAT-CBL-CAT6\",\n      \"description\": \"Cat6 UTP Solid Bulk Ethernet Cable Roll 305m CMR\",\n      \"qty\": \"100\",\n      \"uom\": \"ROLL\",\n      \"unit_price\": \"320.00\",\n      \"discount\": null,\n      \"vat_rate\": \"5%\",\n      \"line_total\": \"32000.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nMAT-CBL-CAT6\\nCat6 UTP Solid Bulk Ethernet Cable Roll 305m CMR\\n100\\nROLL\\n320.00\\n32000.00\"\n    }\n  ]\n}",
         "refusal": null,
         "role": "assistant",
         "annotations": [],
@@ -42,7 +42,7 @@
       }
     }
   ],
-  "created": 1795178022,
+  "created": 1795181717,
   "model": "gpt-5-mini-2025-08-07",
   "object": "chat.completion",
   "metadata": null,
@@ -50,32 +50,32 @@
   "service_tier": "default",
   "system_fingerprint": null,
   "usage": {
-    "completion_tokens": 1314,
-    "prompt_tokens": 1284,
-    "total_tokens": 2598,
+    "completion_tokens": 1048,
+    "prompt_tokens": 1544,
+    "total_tokens": 2592,
     "completion_tokens_details": {
       "accepted_prediction_tokens": 0,
       "audio_tokens": 0,
-      "reasoning_tokens": 640,
+      "reasoning_tokens": 384,
       "rejected_prediction_tokens": 0,
       "text_tokens": null
     },
     "prompt_tokens_details": {
       "audio_tokens": 0,
       "cache_write_tokens": null,
-      "cached_tokens": 1024,
+      "cached_tokens": 1280,
       "image_tokens": null,
       "text_tokens": null
     },
     "latency_checkpoint": {
       "engine_tbt_ms": 7,
-      "engine_ttft_ms": 37,
-      "engine_ttlt_ms": 9807,
-      "pre_inference_ms": 132,
+      "engine_ttft_ms": 87,
+      "engine_ttlt_ms": 7696,
+      "pre_inference_ms": 237,
       "service_tbt_ms": 7,
-      "service_ttft_ms": 815,
-      "service_ttlt_ms": 10578,
-      "user_visible_ttft_ms": 682
+      "service_ttft_ms": 925,
+      "service_ttlt_ms": 8528,
+      "user_visible_ttft_ms": 688
     }
   },
   "prompt_filter_results": [
@@ -106,6 +106,6 @@
     }
   ],
   "routing": {
-    "serving_pipereplica": "d20261104051536-8d035801-default-r2-dp0-default"
+    "serving_pipereplica": "d20261107054309-0d3573d4-default-r1-dp0-default"
   }
 }

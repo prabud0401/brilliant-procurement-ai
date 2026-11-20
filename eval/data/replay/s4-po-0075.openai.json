@@ -1,12 +1,12 @@
 {
-  "id": "chatcmpl-EmI7wo9uBYk0puP7BjHK1q2LtC5Qo",
+  "id": "chatcmpl-EmJ5ag5On7vDxlDQMxacMjE1ESPmV",
   "choices": [
     {
       "finish_reason": "stop",
       "index": 0,
       "logprobs": null,
       "message": {
-        "content": "{\n  \"doc_type\": \"purchase_order\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE\",\n      \"page\": 1,\n      \"source_text\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000001\",\n      \"page\": 1,\n      \"source_text\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE\"\n    },\n    \"document_number\": {\n      \"value\": \"PO-0075\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0075 Date: 2026-11-04 Currency: AED Payment Terms: Net 30\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-04\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0075 Date: 2026-11-04 Currency: AED Payment Terms: Net 30\"\n    },\n    \"po_number\": {\n      \"value\": \"PO-0075\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0075 Date: 2026-11-04 Currency: AED Payment Terms: Net 30\"\n    },\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0075 Date: 2026-11-04 Currency: AED Payment Terms: Net 30\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 30\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0075 Date: 2026-11-04 Currency: AED Payment Terms: Net 30\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"1475.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n1475.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"73.75 AED\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n73.75 AED\"\n    },\n    \"total\": {\n      \"value\": \"1548.75 AED\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n1548.75 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"OFF-A4P\",\n      \"description\": \"Copy Paper A4 80gsm (Box of 5 reams)\",\n      \"qty\": \"15\",\n      \"uom\": \"BOX\",\n      \"unit_price\": \"75.00\",\n      \"discount\": null,\n      \"vat_rate\": \"5%\",\n      \"line_total\": \"1125.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nOFF-A4P\\nCopy Paper A4 80gsm (Box of 5 reams)\\n15\\nBOX\\n75.00\\n1125.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"OFF-PEN-BLU\",\n      \"description\": \"Ballpoint Pens Medium Blue (Box of 50)\",\n      \"qty\": \"10\",\n      \"uom\": \"BOX\",\n      \"unit_price\": \"35.00\",\n      \"discount\": null,\n      \"vat_rate\": \"5%\",\n      \"line_total\": \"350.00\",\n      \"page\": 1,\n      \"source_text\": \"2\\nOFF-PEN-BLU\\nBallpoint Pens Medium Blue (Box of 50)\\n10\\nBOX\\n35.00\\n350.00\"\n    }\n  ]\n}",
+        "content": "{\n  \"doc_type\": \"purchase_order\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Falcon Office Supplies LLC\",\n      \"page\": 1,\n      \"source_text\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000001\",\n      \"page\": 1,\n      \"source_text\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE\"\n    },\n    \"document_number\": {\n      \"value\": \"PO-0075\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0075 Date: 2026-11-04 Currency: AED Payment Terms: Net 30\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-04\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0075 Date: 2026-11-04 Currency: AED Payment Terms: Net 30\"\n    },\n    \"po_number\": {\n      \"value\": \"PO-0075\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0075 Date: 2026-11-04 Currency: AED Payment Terms: Net 30\"\n    },\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0075 Date: 2026-11-04 Currency: AED Payment Terms: Net 30\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 30\",\n      \"page\": 1,\n      \"source_text\": \"Number: PO-0075 Date: 2026-11-04 Currency: AED Payment Terms: Net 30\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"1475.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n1475.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"73.75\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n73.75 AED\"\n    },\n    \"total\": {\n      \"value\": \"1548.75\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n1548.75 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"OFF-A4P\",\n      \"description\": \"Copy Paper A4 80gsm (Box of 5 reams)\",\n      \"qty\": \"15\",\n      \"uom\": \"BOX\",\n      \"unit_price\": \"75.00\",\n      \"discount\": null,\n      \"vat_rate\": null,\n      \"line_total\": \"1125.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nOFF-A4P\\nCopy Paper A4 80gsm (Box of 5 reams)\\n15\\nBOX\\n75.00\\n1125.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"OFF-PEN-BLU\",\n      \"description\": \"Ballpoint Pens Medium Blue (Box of 50)\",\n      \"qty\": \"10\",\n      \"uom\": \"BOX\",\n      \"unit_price\": \"35.00\",\n      \"discount\": null,\n      \"vat_rate\": null,\n      \"line_total\": \"350.00\",\n      \"page\": 1,\n      \"source_text\": \"2\\nOFF-PEN-BLU\\nBallpoint Pens Medium Blue (Box of 50)\\n10\\nBOX\\n35.00\\n350.00\"\n    }\n  ]\n}",
         "refusal": null,
         "role": "assistant",
         "annotations": [],
@@ -42,7 +42,7 @@
       }
     }
   ],
-  "created": 1795178132,
+  "created": 1795181830,
   "model": "gpt-5-mini-2025-08-07",
   "object": "chat.completion",
   "metadata": null,
@@ -50,32 +50,32 @@
   "service_tier": "default",
   "system_fingerprint": null,
   "usage": {
-    "completion_tokens": 1332,
-    "prompt_tokens": 1321,
-    "total_tokens": 2653,
+    "completion_tokens": 1107,
+    "prompt_tokens": 1581,
+    "total_tokens": 2688,
     "completion_tokens_details": {
       "accepted_prediction_tokens": 0,
       "audio_tokens": 0,
-      "reasoning_tokens": 448,
+      "reasoning_tokens": 256,
       "rejected_prediction_tokens": 0,
       "text_tokens": null
     },
     "prompt_tokens_details": {
       "audio_tokens": 0,
       "cache_write_tokens": null,
-      "cached_tokens": 1024,
+      "cached_tokens": 1280,
       "image_tokens": null,
       "text_tokens": null
     },
     "latency_checkpoint": {
-      "engine_tbt_ms": 7,
-      "engine_ttft_ms": 38,
-      "engine_ttlt_ms": 9022,
-      "pre_inference_ms": 159,
-      "service_tbt_ms": 7,
-      "service_ttft_ms": 831,
-      "service_ttlt_ms": 9810,
-      "user_visible_ttft_ms": 672
+      "engine_tbt_ms": 6,
+      "engine_ttft_ms": 33,
+      "engine_ttlt_ms": 7384,
+      "pre_inference_ms": 169,
+      "service_tbt_ms": 6,
+      "service_ttft_ms": 940,
+      "service_ttlt_ms": 8209,
+      "user_visible_ttft_ms": 771
     }
   },
   "prompt_filter_results": [
@@ -106,6 +106,6 @@
     }
   ],
   "routing": {
-    "serving_pipereplica": "d20261104051536-8d035801-default-r2-dp0-default"
+    "serving_pipereplica": "d20261104055156-27216c1e-default-r1-dp0-default"
   }
 }

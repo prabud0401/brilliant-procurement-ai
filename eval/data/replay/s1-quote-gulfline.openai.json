@@ -1,12 +1,12 @@
 {
-  "id": "chatcmpl-EmI41Mwz2TRutvSVLGe5zxuH2ptSq",
+  "id": "chatcmpl-EmJ0T28WgnxBdANZ4ym8fsjZRXnn9",
   "choices": [
     {
       "finish_reason": "stop",
       "index": 0,
       "logprobs": null,
       "message": {
-        "content": "{\n  \"doc_type\": \"quote\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Gulf Line IT Trading\",\n      \"page\": 1,\n      \"source_text\": \"Gulf Line IT Trading\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"TRN: 100000000000002\",\n      \"page\": 1,\n      \"source_text\": \"TRN: 100000000000002 Office 402, Tamouh Tower, Al Reem Island, Abu Dhabi, UAE Email: sales@gulfline-it.fake Phone: +971 2 555 0102\"\n    },\n    \"document_number\": {\n      \"value\": \"Number: Q-1042\",\n      \"page\": 1,\n      \"source_text\": \"Number: Q-1042\"\n    },\n    \"document_date\": {\n      \"value\": \"Date: 2026-11-03\",\n      \"page\": 1,\n      \"source_text\": \"Date: 2026-11-03\"\n    },\n    \"po_number\": {\n      \"value\": \"PR Number: PR-1001\",\n      \"page\": 1,\n      \"source_text\": \"PR Number: PR-1001\"\n    },\n    \"currency\": {\n      \"value\": \"Currency: AED\",\n      \"page\": 1,\n      \"source_text\": \"Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Payment Terms: Net 30\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 30\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"27500.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n27500.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"1375.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n1375.00 AED\"\n    },\n    \"total\": {\n      \"value\": \"28875.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n28875.00 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"IT-LAP-14\",\n      \"description\": \"Laptop 14in Intel Core i7 16GB RAM 512GB SSD\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"1900.00\",\n      \"discount\": null,\n      \"vat_rate\": null,\n      \"line_total\": \"19000.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nIT-LAP-14\\nLaptop 14in Intel Core i7 16GB RAM 512GB SSD\\n10\\nEA\\n1900.00\\n19000.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"IT-MON-27\",\n      \"description\": \"Monitor 27in QHD IPS USB-C 75Hz\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"850.00\",\n      \"discount\": null,\n      \"vat_rate\": null,\n      \"line_total\": \"8500.00\",\n      \"page\": 1,\n      \"source_text\": \"2\\nIT-MON-27\\nMonitor 27in QHD IPS USB-C 75Hz\\n10\\nEA\\n850.00\\n8500.00\"\n    }\n  ]\n}",
+        "content": "{\n  \"doc_type\": \"quote\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Gulf Line IT Trading\",\n      \"page\": 1,\n      \"source_text\": \"Gulf Line IT Trading\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000002\",\n      \"page\": 1,\n      \"source_text\": \"TRN: 100000000000002 Office 402, Tamouh Tower, Al Reem Island, Abu Dhabi, UAE Email: sales@gulfline-it.fake Phone: +971 2 555 0102\"\n    },\n    \"document_number\": {\n      \"value\": \"Q-1042\",\n      \"page\": 1,\n      \"source_text\": \"Number: Q-1042\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-03\",\n      \"page\": 1,\n      \"source_text\": \"Date: 2026-11-03\"\n    },\n    \"po_number\": {\n      \"value\": \"PR-1001\",\n      \"page\": 1,\n      \"source_text\": \"PR Number: PR-1001\"\n    },\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 30\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 30\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"27500.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n27500.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"1375.00\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n1375.00 AED\"\n    },\n    \"total\": {\n      \"value\": \"28875.00\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n28875.00 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"IT-LAP-14\",\n      \"description\": \"Laptop 14in Intel Core i7 16GB RAM 512GB SSD\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"1900.00\",\n      \"discount\": null,\n      \"vat_rate\": \"5%\",\n      \"line_total\": \"19000.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nIT-LAP-14\\nLaptop 14in Intel Core i7 16GB RAM 512GB SSD\\n10\\nEA\\n1900.00\\n19000.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"IT-MON-27\",\n      \"description\": \"Monitor 27in QHD IPS USB-C 75Hz\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"850.00\",\n      \"discount\": null,\n      \"vat_rate\": \"5%\",\n      \"line_total\": \"8500.00\",\n      \"page\": 1,\n      \"source_text\": \"2\\nIT-MON-27\\nMonitor 27in QHD IPS USB-C 75Hz\\n10\\nEA\\n850.00\\n8500.00\"\n    }\n  ]\n}",
         "refusal": null,
         "role": "assistant",
         "annotations": [],
@@ -42,7 +42,7 @@
       }
     }
   ],
-  "created": 1795177889,
+  "created": 1795181513,
   "model": "gpt-5-mini-2025-08-07",
   "object": "chat.completion",
   "metadata": null,
@@ -50,9 +50,9 @@
   "service_tier": "default",
   "system_fingerprint": null,
   "usage": {
-    "completion_tokens": 1164,
-    "prompt_tokens": 1363,
-    "total_tokens": 2527,
+    "completion_tokens": 1146,
+    "prompt_tokens": 1623,
+    "total_tokens": 2769,
     "completion_tokens_details": {
       "accepted_prediction_tokens": 0,
       "audio_tokens": 0,
@@ -63,19 +63,19 @@
     "prompt_tokens_details": {
       "audio_tokens": 0,
       "cache_write_tokens": null,
-      "cached_tokens": 1024,
+      "cached_tokens": 0,
       "image_tokens": null,
       "text_tokens": null
     },
     "latency_checkpoint": {
-      "engine_tbt_ms": 7,
-      "engine_ttft_ms": 35,
-      "engine_ttlt_ms": 8735,
-      "pre_inference_ms": 148,
-      "service_tbt_ms": 7,
-      "service_ttft_ms": 736,
-      "service_ttlt_ms": 9429,
-      "user_visible_ttft_ms": 587
+      "engine_tbt_ms": 6,
+      "engine_ttft_ms": 68,
+      "engine_ttlt_ms": 7403,
+      "pre_inference_ms": 134,
+      "service_tbt_ms": 6,
+      "service_ttft_ms": 841,
+      "service_ttlt_ms": 8170,
+      "user_visible_ttft_ms": 708
     }
   },
   "prompt_filter_results": [
@@ -106,6 +106,6 @@
     }
   ],
   "routing": {
-    "serving_pipereplica": "d20261104051536-8d035801-default-r2-dp0-default"
+    "serving_pipereplica": "d20261104055156-27216c1e-default-r1-dp0-default"
   }
 }

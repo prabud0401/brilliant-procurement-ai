@@ -1,12 +1,12 @@
 {
-  "id": "chatcmpl-EmI7ffgb9PDvh3bZBnKvBaZyMGixU",
+  "id": "chatcmpl-EmJ5IW5MjFVE6dKvrPpWXBJBgOyHX",
   "choices": [
     {
       "finish_reason": "stop",
       "index": 0,
       "logprobs": null,
       "message": {
-        "content": "{\n  \"doc_type\": \"quote\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Falcon Office Supplies LLC\",\n      \"page\": 1,\n      \"source_text\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"TRN: 100000000000001\",\n      \"page\": 1,\n      \"source_text\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE\"\n    },\n    \"document_number\": {\n      \"value\": \"Q-4110\",\n      \"page\": 1,\n      \"source_text\": \"QUOTATION\\nNumber: Q-4110 Date: 2026-11-03\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-03\",\n      \"page\": 1,\n      \"source_text\": \"QUOTATION\\nNumber: Q-4110 Date: 2026-11-03\"\n    },\n    \"po_number\": {\n      \"value\": \"PR-1004\",\n      \"page\": 1,\n      \"source_text\": \"PR Number: PR-1004\"\n    },\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 30\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 30\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"1475.00 AED\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n1475.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"73.75 AED\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n73.75 AED\"\n    },\n    \"total\": {\n      \"value\": \"1548.75 AED\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n1548.75 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"OFF-A4P\",\n      \"description\": \"Copy Paper A4 80gsm (Box of 5 reams)\",\n      \"qty\": \"15\",\n      \"uom\": \"BOX\",\n      \"unit_price\": \"75.00\",\n      \"discount\": null,\n      \"vat_rate\": null,\n      \"line_total\": \"1125.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nOFF-A4P\\nCopy Paper A4 80gsm (Box of 5 reams)\\n15\\nBOX\\n75.00\\n1125.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"OFF-PEN-BLU\",\n      \"description\": \"Ballpoint Pens Medium Blue (Box of 50)\",\n      \"qty\": \"10\",\n      \"uom\": \"BOX\",\n      \"unit_price\": \"35.00\",\n      \"discount\": null,\n      \"vat_rate\": null,\n      \"line_total\": \"350.00\",\n      \"page\": 1,\n      \"source_text\": \"2\\nOFF-PEN-BLU\\nBallpoint Pens Medium Blue (Box of 50)\\n10\\nBOX\\n35.00\\n350.00\"\n    }\n  ]\n}",
+        "content": "{\n  \"doc_type\": \"quote\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Falcon Office Supplies LLC\",\n      \"page\": 1,\n      \"source_text\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000001\",\n      \"page\": 1,\n      \"source_text\": \"Falcon Office Supplies LLC TRN: 100000000000001 Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE\"\n    },\n    \"document_number\": {\n      \"value\": \"Q-4110\",\n      \"page\": 1,\n      \"source_text\": \"QUOTATION\\nNumber: Q-4110 Date: 2026-11-03\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-03\",\n      \"page\": 1,\n      \"source_text\": \"QUOTATION\\nNumber: Q-4110 Date: 2026-11-03\"\n    },\n    \"po_number\": {\n      \"value\": \"PR-1004\",\n      \"page\": 1,\n      \"source_text\": \"PR Number: PR-1004\"\n    },\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 30\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 30\"\n    },\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"1475.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n1475.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"73.75\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n73.75 AED\"\n    },\n    \"total\": {\n      \"value\": \"1548.75\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n1548.75 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"OFF-A4P\",\n      \"description\": \"Copy Paper A4 80gsm (Box of 5 reams)\",\n      \"qty\": \"15\",\n      \"uom\": \"BOX\",\n      \"unit_price\": \"75.00\",\n      \"discount\": null,\n      \"vat_rate\": \"5%\",\n      \"line_total\": \"1125.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nOFF-A4P\\nCopy Paper A4 80gsm (Box of 5 reams)\\n15\\nBOX\\n75.00\\n1125.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"OFF-PEN-BLU\",\n      \"description\": \"Ballpoint Pens Medium Blue (Box of 50)\",\n      \"qty\": \"10\",\n      \"uom\": \"BOX\",\n      \"unit_price\": \"35.00\",\n      \"discount\": null,\n      \"vat_rate\": \"5%\",\n      \"line_total\": \"350.00\",\n      \"page\": 1,\n      \"source_text\": \"2\\nOFF-PEN-BLU\\nBallpoint Pens Medium Blue (Box of 50)\\n10\\nBOX\\n35.00\\n350.00\"\n    }\n  ]\n}",
         "refusal": null,
         "role": "assistant",
         "annotations": [],
@@ -42,7 +42,7 @@
       }
     }
   ],
-  "created": 1795178115,
+  "created": 1795181812,
   "model": "gpt-5-mini-2025-08-07",
   "object": "chat.completion",
   "metadata": null,
@@ -50,32 +50,32 @@
   "service_tier": "default",
   "system_fingerprint": null,
   "usage": {
-    "completion_tokens": 1239,
-    "prompt_tokens": 1336,
-    "total_tokens": 2575,
+    "completion_tokens": 1042,
+    "prompt_tokens": 1596,
+    "total_tokens": 2638,
     "completion_tokens_details": {
       "accepted_prediction_tokens": 0,
       "audio_tokens": 0,
-      "reasoning_tokens": 448,
+      "reasoning_tokens": 256,
       "rejected_prediction_tokens": 0,
       "text_tokens": null
     },
     "prompt_tokens_details": {
       "audio_tokens": 0,
       "cache_write_tokens": null,
-      "cached_tokens": 1024,
+      "cached_tokens": 1280,
       "image_tokens": null,
       "text_tokens": null
     },
     "latency_checkpoint": {
-      "engine_tbt_ms": 7,
-      "engine_ttft_ms": 31,
-      "engine_ttlt_ms": 8637,
-      "pre_inference_ms": 120,
-      "service_tbt_ms": 7,
-      "service_ttft_ms": 724,
-      "service_ttlt_ms": 9299,
-      "user_visible_ttft_ms": 604
+      "engine_tbt_ms": 8,
+      "engine_ttft_ms": 37,
+      "engine_ttlt_ms": 9043,
+      "pre_inference_ms": 132,
+      "service_tbt_ms": 8,
+      "service_ttft_ms": 694,
+      "service_ttlt_ms": 9696,
+      "user_visible_ttft_ms": 562
     }
   },
   "prompt_filter_results": [
@@ -106,6 +106,6 @@
     }
   ],
   "routing": {
-    "serving_pipereplica": "d20261104051536-8d035801-default-r2-dp0-default"
+    "serving_pipereplica": "d20261107054309-0d3573d4-default-r1-dp0-default"
   }
 }
