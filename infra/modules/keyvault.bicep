@@ -62,7 +62,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     tenantId: subscription().tenantId
     enableRbacAuthorization: true
     enableSoftDelete: true
-    enablePurgeProtection: false // OFF so teardown is clean
+    // enablePurgeProtection omitted: Azure rejects an explicit false; leaving it unset keeps purge protection OFF so teardown is clean
     publicNetworkAccess: 'Enabled'
   }
 }
