@@ -287,7 +287,7 @@ flowchart TD
 
 - Every state change writes an audit record in the **same database transaction** via `app.audit.service.record()`.
 - Records are chained using SHA-256:
-  $$\text{hash}_n = \text{SHA256}(\text{hash}_{n-1} \mathbin{\Vert} \text{sequence\_id}_n \mathbin{\Vert} \text{action}_n \mathbin{\Vert} \text{actor\_id}_n \mathbin{\Vert} \text{payload}_n)$$
+  `hash_n = SHA256(hash_{n-1} || sequence_id_n || action_n || actor_id_n || payload_n)`
 - Database permissions revoke `UPDATE` and `DELETE` on the `audit_log` table, backed by a PostgreSQL trigger raising exceptions on any mutation attempt.
 - The administrator can trigger on-demand cryptographic verification (`POST /api/v1/audit/verify`) to detect historical record tampering.
 

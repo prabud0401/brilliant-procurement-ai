@@ -28,7 +28,7 @@ This release implements all 19 Must-have user stories and the stretch email inta
 ### 2.2 Quote Comparison & Procurement Flow
 - **US-08 (Side-by-Side Matrix):** Comparative evaluation grid for 2 to 5 competing quotations linked to a purchase request.
 - **US-09 (Deterministic Scoring & Explanation):** Multi-criteria weighted scoring algorithm (60% price, 20% delivery speed, 10% payment terms, 10% warranty). AI synthesizes a plain-language summary verified by a deterministic faithfulness checker against source facts JSON.
-- **US-10 (Decision & Purchase Order Creation):** Buyer selects winning vendor or enters a mandatory override justification ($\ge$ 10 characters). Automatically generates a structured Purchase Order.
+- **US-10 (Decision & Purchase Order Creation):** Buyer selects winning vendor or enters a mandatory override justification (≥ 10 characters). Automatically generates a structured Purchase Order.
 
 ### 2.3 Three-Way Matching & Exceptions
 - **US-13 (Line-Level Match):** Automated three-way reconciliation across Purchase Order, Delivery Note, and Vendor Invoice with configurable price and quantity tolerances.
@@ -39,9 +39,10 @@ This release implements all 19 Must-have user stories and the stretch email inta
 - **US-17 (Cited Q&A):** Natural-language conversational interface answering queries grounded exclusively in confirmed procurement documents with document and page citations.
 - **US-18 (Grounded Retrieval & Refusal):** Hybrid search combining pgvector semantic search and PostgreSQL full-text search with Reciprocal Rank Fusion. Implements a relevance floor (0.50) that gracefully refuses unanswerable or out-of-scope queries.
 - **US-19 (Scoping & Privacy):** Q&A document chunk retrieval is strictly partitioned by user departmental role and visibility.
+- **US-20 (Deep-Link Citation Page Anchors):** Interactive citation links in Q&A answers open the cited document and navigate directly to the referenced page in the split-screen viewer.
 
 ### 2.5 Approvals & Governance
-- **US-21 (Approval Routing):** Multi-tier approval routing based on financial thresholds: Tier 1 ($\le$ AED 5,000), Tier 2 (AED 5,000.01 – 50,000), and Tier 3 (> AED 50,000).
+- **US-21 (Approval Routing):** Multi-tier approval routing based on financial thresholds: Tier 1 (≤ AED 5,000), Tier 2 (AED 5,000.01 – 50,000), and Tier 3 (> AED 50,000).
 - **US-22 (One-Screen Approval Bundle):** Comprehensive summary screen for approvers displaying line items, budget check, selected quote, and comparison facts.
 - **US-23 (Segregation of Duties):** Strict business rule enforcement: requesters cannot approve their own requests; buyers cannot approve purchase orders they generated; system administrators cannot approve financial commitments.
 - **US-24 (Append-Only Cryptographic Audit Log):** Tamper-evident audit trail with SHA-256 hash chaining. Database triggers prevent update and deletion. Includes in-app hash chain verification and CSV export.
@@ -78,7 +79,6 @@ The following capabilities are scheduled for post-demo enterprise hardening per 
 | **US-11** | Adjustable category scoring weights | Category-specific weighting profiles configured via Admin UI |
 | **US-12** | Gap flags (expired quotes, currency, missing TRN) | Enhanced pre-review gap warning banners |
 | **US-16** | Complex partial delivery matching | Multi-delivery note rollup and line item consolidation |
-| **US-20** | Deep-link citation page anchors | Interactive PDF viewer page jumping from Q&A citation clicks |
 | **US-26** | Teams notifications via Power Automate | Webhook dispatch to Power Automate flow on pending approvals |
 | **US-27** | Synchronize approved PO to Odoo ERP | Direct writeback of approved purchase orders to Odoo backend |
 | **US-28** | Microsoft Entra ID Single Sign-On | OpenID Connect integration for corporate tenant login |
