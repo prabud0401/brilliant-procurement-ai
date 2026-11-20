@@ -214,22 +214,56 @@ test.describe("Procurement Document Review & Processing Flows (R08)", () => {
     // Sign in as Buyer
     await loginAs(page, "buyer1@demo-holdings.example");
     await page.goto("/documents");
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator("h1")).toContainText(/Procurement Documents/i);
 
-    const reviewLink = page.locator('a:has-text("Review"), a:has-text("View")').first();
-    if (await reviewLink.isVisible()) {
-      await reviewLink.click();
-      await page.waitForLoadState("networkidle");
+    // 1. Scan the first listed document (deterministic wait)
+    const firstReviewLink = page.locator('a:has-text("Review"), a:has-text("View")').first();
+    await expect(firstReviewLink).toBeVisible({ timeout: 15000 });
+    await firstReviewLink.click();
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator('[data-testid="extraction-review-panel"]')).toBeVisible({ timeout: 20000 });
 
-      // Run Axe accessibility scan
-      const accessibilityScanResults = await new AxeBuilder({ page })
-        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-        .analyze();
+    // Run Axe accessibility scan on first document
+    const scanResultsDoc1 = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+      .analyze();
 
-      const seriousOrCriticalViolations = accessibilityScanResults.violations.filter(
-        (v) => v.impact === "serious" || v.impact === "critical"
-      );
+    const seriousOrCriticalViolationsDoc1 = scanResultsDoc1.violations.filter(
+      (v) => v.impact === "serious" || v.impact === "critical"
+    );
+    expect(seriousOrCriticalViolationsDoc1).toEqual([]);
 
-      expect(seriousOrCriticalViolations).toEqual([]);
-    }
+    // 2. Also open a document that has a below-high-confidence field (showing a "(Review)" marker)
+    await page.goto("/documents");
+    await page.waitForLoadState("networkidle");
+
+    // Locate the row for the S7 injected invoice (flagged as Suspicious) or Invoice type seeded by earlier tests
+    const suspiciousRow = page.locator("tbody tr", { has: page.locator("text=Suspicious") });
+    const invoiceRow = page.locator("tbody tr", { has: page.locator("text=Invoice") });
+    const belowHighDocRow = (await suspiciousRow.count()) > 0
+      ? suspiciousRow.first()
+      : (await invoiceRow.count()) > 0
+      ? invoiceRow.first()
+      : page.locator("tbody tr").last();
+
+    const secondReviewLink = belowHighDocRow.locator('a:has-text("Review"), a:has-text("View")');
+    await expect(secondReviewLink).toBeVisible({ timeout: 15000 });
+    await secondReviewLink.click();
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator('[data-testid="extraction-review-panel"]')).toBeVisible({ timeout: 20000 });
+
+    // Verify at least one below-high-confidence "(Review)" marker is displayed on the screen
+    await expect(page.locator("text=(Review)").first()).toBeVisible({ timeout: 15000 });
+
+    // Run Axe accessibility scan on document with below-high-confidence fields
+    const scanResultsDoc2 = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+      .analyze();
+
+    const seriousOrCriticalViolationsDoc2 = scanResultsDoc2.violations.filter(
+      (v) => v.impact === "serious" || v.impact === "critical"
+    );
+    expect(seriousOrCriticalViolationsDoc2).toEqual([]);
   });
 });
