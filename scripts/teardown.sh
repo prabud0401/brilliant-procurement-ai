@@ -4,7 +4,7 @@ set -euo pipefail
 # scripts/teardown.sh
 # One-command teardown for Brilliant Procurement AI hosted demo infrastructure.
 # Deletes resource groups, purges soft-deleted Key Vault and Cognitive Services accounts,
-# and verifies that no lingering resources tagged project=brilliant-pda remain.
+# and verifies that no lingering resources tagged project=brilliant-demo remain.
 
 usage() {
   echo "Usage: $0 <env> [--yes]"
@@ -34,8 +34,8 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-MAIN_RG="rg-pda-${ENV}-uaen"
-AI_RG="rg-pda-ai-uaen"
+MAIN_RG="${MAIN_RG:-rg-brilliant-demo-${ENV}}"
+AI_RG="${AI_RG:-rg-brilliant-demo}"
 KV_NAME="kv-pda-${ENV}-uaen"
 LOCATION="uaenorth"
 
@@ -90,7 +90,7 @@ fi
 
 # 4. Purge soft-deleted Cognitive Services accounts
 echo "Checking for soft-deleted Cognitive Services accounts..."
-DELETED_COG_ACCOUNTS=$(az cognitiveservices account list-deleted --query "[?contains(name, 'pda')].name" -o tsv 2>/dev/null || true)
+DELETED_COG_ACCOUNTS=$(az cognitiveservices account list-deleted --query "[?contains(name, 'pda') || contains(name, 'brilliant-demo')].name" -o tsv 2>/dev/null || true)
 if [ -n "${DELETED_COG_ACCOUNTS}" ]; then
   for cog in ${DELETED_COG_ACCOUNTS}; do
     echo "Purging soft-deleted Cognitive Services account: ${cog} in ${LOCATION}..."
@@ -99,17 +99,17 @@ if [ -n "${DELETED_COG_ACCOUNTS}" ]; then
   done
 fi
 
-# 5. List anything still tagged project=brilliant-pda
+# 5. List anything still tagged project=brilliant-demo
 echo "=========================================================="
-echo "Checking for any remaining resources tagged project=brilliant-pda..."
+echo "Checking for any remaining resources tagged project=brilliant-demo..."
 echo "=========================================================="
-REMAINING=$(az resource list --tag project=brilliant-pda --output table 2>/dev/null || true)
+REMAINING=$(az resource list --tag project=brilliant-demo --output table 2>/dev/null || true)
 
 if [ -n "${REMAINING}" ] && [ "${REMAINING}" != "[]" ]; then
   echo "Remaining tagged resources found:"
   echo "${REMAINING}"
 else
-  echo "Clean! No lingering resources tagged project=brilliant-pda found."
+  echo "Clean! No lingering resources tagged project=brilliant-demo found."
 fi
 
 echo "Teardown complete for environment '${ENV}'."

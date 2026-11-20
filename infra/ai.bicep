@@ -6,7 +6,7 @@ param location string = 'uaenorth'
 
 @description('Resource tags')
 param tags object = {
-  project: 'brilliant-pda'
+  project: 'brilliant-demo'
   env: env
   expires: '2026-11-29'
 }
@@ -18,10 +18,10 @@ param openAiAccountName string = 'oai-pda-ai-uaen'
 param documentIntelligenceAccountName string = 'di-pda-ai-uaen'
 
 @description('Chat model name')
-param chatModelName string = 'gpt-4o-mini'
+param chatModelName string = 'gpt-5-mini'
 
 @description('Chat model version')
-param chatModelVersion string = '2024-07-18'
+param chatModelVersion string = '2025-08-07'
 
 @description('Chat deployment SKU (GlobalStandard or Standard)')
 param chatDeploymentSku string = 'GlobalStandard'
@@ -65,7 +65,7 @@ resource openAiAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   }
 }
 
-// Chat deployment (gpt-4o-mini)
+// Chat deployment (gpt-5-mini)
 resource chatDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: openAiAccount
   name: chatModelName
