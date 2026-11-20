@@ -1,4 +1,4 @@
-.PHONY: env up down logs migrate seed datagen lint fmt test test-int qa-reindex web-lint web-test web-e2e
+.PHONY: env up down logs migrate seed datagen lint fmt test test-int qa-reindex web-lint web-test web-e2e infra-check
 
 SHELL := /bin/bash
 
@@ -72,3 +72,13 @@ web-test:
 
 web-e2e:
 	cd apps/web && WEB_BASE_URL=$${WEB_BASE_URL:-http://localhost:3000} npm run e2e
+
+infra-check:
+	@for file in infra/*.bicep infra/modules/*.bicep; do \
+		echo "Linting $$file..."; \
+		az bicep lint --file "$$file"; \
+		echo "Building $$file..."; \
+		az bicep build --file "$$file" --stdout > /dev/null; \
+	done
+	python3 infra/tests/check_templates.py
+	shellcheck scripts/*.sh

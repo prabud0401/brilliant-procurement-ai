@@ -9,13 +9,15 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
+from app.core.middleware import request_id_ctx
 from app.core.models import Job
+from app.observability import setup_observability
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] [worker] %(message)s",
-)
+# Initialize observability (OpenTelemetry, correlation, log redaction)
+setup_observability("worker")
+
 logger = logging.getLogger("worker")
+logger.setLevel(logging.INFO)
 
 worker_id = f"worker-{socket.gethostname()}-{uuid.uuid4().hex[:6]}"
 running = True
@@ -55,7 +57,12 @@ def process_single_job(session: Session) -> bool:
     job.attempts += 1
     session.flush()
 
-    logger.info("Claimed job %s (type=%s)", job.id, job.type)
+    req_id: str | None = None
+    if job.payload and isinstance(job.payload, dict):
+        req_id = job.payload.get("request_id")
+    token = request_id_ctx.set(req_id or uuid.uuid4().hex)
+
+    logger.info("Claimed job %s (type=%s, request_id=%s)", job.id, job.type, req_id or "")
 
     try:
         if job.type == "ping":
@@ -78,6 +85,8 @@ def process_single_job(session: Session) -> bool:
         logger.exception("Error processing job %s: %s", job.id, exc)
         job.status = "failed"
         job.last_error = str(exc)
+    finally:
+        request_id_ctx.reset(token)
 
     session.commit()
     return True

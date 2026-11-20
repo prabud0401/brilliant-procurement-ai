@@ -14,6 +14,7 @@ import {
   HelpCircle,
   Shield,
   Settings,
+  BarChart3,
 } from "lucide-react";
 import { getVisibleNavItems } from "@/lib/navigation";
 import type { UserRole } from "@/lib/types";
@@ -33,6 +34,8 @@ const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   HelpCircle,
   Shield,
   Settings,
+  BarChart: BarChart3,
+  BarChart3,
 };
 
 export const Navigation: React.FC<NavigationProps> = ({ userRoles }) => {

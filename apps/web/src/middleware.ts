@@ -7,6 +7,8 @@ const PUBLIC_PATHS = [
   "/api/auth/login",
   "/api/v1/auth/login",
   "/favicon.ico",
+  "/healthz",
+  "/readyz",
 ];
 
 export function middleware(request: NextRequest) {

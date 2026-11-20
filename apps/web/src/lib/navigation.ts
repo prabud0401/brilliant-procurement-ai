@@ -88,7 +88,7 @@ export const NAV_CONFIG: NavItem[] = [
     href: "/qa",
     iconName: "HelpCircle",
     allowedRoles: ["requester", "buyer", "manager"],
-    enabled: false, // Activated in R10
+    enabled: true, // Activated in R10
     description: "AI-assisted Q&A across procurement documents with citations",
   },
   {
@@ -108,6 +108,15 @@ export const NAV_CONFIG: NavItem[] = [
     allowedRoles: ["admin"],
     enabled: true, // Activated in R09
     description: "System configuration, user management, and tolerances",
+  },
+  {
+    id: "admin-metrics",
+    label: "Metrics",
+    href: "/admin/metrics",
+    iconName: "BarChart",
+    allowedRoles: ["admin"],
+    enabled: true, // Activated in R10
+    description: "System observability and procurement business metrics",
   },
 ];
 

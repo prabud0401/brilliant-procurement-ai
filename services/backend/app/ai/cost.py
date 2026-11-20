@@ -25,6 +25,37 @@ def calculate_cost_aed(tokens_in: int, tokens_out: int) -> Decimal:
     return cost.quantize(Decimal("0.0001"))
 
 
+def record_ai_call_metrics(
+    task: str,
+    tokens_in: int = 0,
+    tokens_out: int = 0,
+    model: str | None = None,
+    prompt_version: str | None = None,
+    latency_ms: int | float | None = None,
+    refusal_flag: bool = False,
+    injection_flag: bool = False,
+) -> Decimal:
+    """Calculate cost and emit an AI metric event per NFR-OBS-02."""
+    cost = calculate_cost_aed(tokens_in, tokens_out)
+    try:
+        from app.observability.ai_events import emit_ai_metric_event
+
+        emit_ai_metric_event(
+            task=task,
+            model=model,
+            prompt_version=prompt_version,
+            latency_ms=latency_ms,
+            tokens_in=tokens_in,
+            tokens_out=tokens_out,
+            estimated_cost=cost,
+            refusal_flag=refusal_flag,
+            injection_flag=injection_flag,
+        )
+    except Exception:
+        pass
+    return cost
+
+
 def get_daily_budget_aed(session: Session) -> Decimal:
     """Retrieve daily AI budget in AED from settings table or fallback to config."""
     db_setting = session.execute(
