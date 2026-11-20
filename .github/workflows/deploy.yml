@@ -1,0 +1,182 @@
+name: Deploy
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - deploy
+          - teardown
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'deploy'
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image (api and worker)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: services/backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/backend:latest
+
+      - name: Build and push web image
+        uses: docker/build-push-action@v5
+        with:
+          context: apps/web
+          file: apps/web/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/web:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/web:latest
+
+      - name: Azure login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Ensure target resource group exists
+        run: |
+          az group create \
+            --name rg-pda-prod-uaen \
+            --location uaenorth \
+            --tags project=brilliant-pda env=prod owner=prabudeva expires=2026-11-29
+
+      - name: Preview infrastructure changes (what-if)
+        run: |
+          az deployment group what-if \
+            --resource-group rg-pda-prod-uaen \
+            --template-file infra/main.bicep \
+            --parameters \
+              env=prod \
+              location=uaenorth \
+              jwtSecret="${{ secrets.JWT_SECRET }}" \
+              postgresAdminPassword="${{ secrets.POSTGRES_ADMIN_PASSWORD }}" \
+              appDbPassword="${{ secrets.APP_DB_PASSWORD }}" \
+              demoUserPassword="${{ secrets.DEMO_USER_PASSWORD }}" \
+              containerRegistryServer="ghcr.io" \
+              containerRegistryUsername="${{ github.actor }}" \
+              containerRegistryPassword="${{ secrets.GITHUB_TOKEN }}" \
+              webImage="ghcr.io/${{ github.repository }}/web:${{ github.sha }}" \
+              apiImage="ghcr.io/${{ github.repository }}/backend:${{ github.sha }}" \
+              workerImage="ghcr.io/${{ github.repository }}/backend:${{ github.sha }}"
+
+      - name: Deploy infrastructure (create)
+        run: |
+          az deployment group create \
+            --name "deploy-${{ github.sha }}" \
+            --resource-group rg-pda-prod-uaen \
+            --template-file infra/main.bicep \
+            --parameters \
+              env=prod \
+              location=uaenorth \
+              jwtSecret="${{ secrets.JWT_SECRET }}" \
+              postgresAdminPassword="${{ secrets.POSTGRES_ADMIN_PASSWORD }}" \
+              appDbPassword="${{ secrets.APP_DB_PASSWORD }}" \
+              demoUserPassword="${{ secrets.DEMO_USER_PASSWORD }}" \
+              containerRegistryServer="ghcr.io" \
+              containerRegistryUsername="${{ github.actor }}" \
+              containerRegistryPassword="${{ secrets.GITHUB_TOKEN }}" \
+              webImage="ghcr.io/${{ github.repository }}/web:${{ github.sha }}" \
+              apiImage="ghcr.io/${{ github.repository }}/backend:${{ github.sha }}" \
+              workerImage="ghcr.io/${{ github.repository }}/backend:${{ github.sha }}"
+
+      - name: Start database migration job and wait for completion
+        run: |
+          echo "Starting migrate job..."
+          az containerapp job start \
+            --name migrate \
+            --resource-group rg-pda-prod-uaen
+
+          echo "Waiting for migration job execution to complete..."
+          for i in $(seq 1 30); do
+            STATUS=$(az containerapp job execution list \
+              --name migrate \
+              --resource-group rg-pda-prod-uaen \
+              --query "[0].properties.status" -o tsv 2>/dev/null || echo "Running")
+            echo "Migration job status ($i/30): $STATUS"
+            if [ "$STATUS" = "Succeeded" ]; then
+              echo "Migration job completed successfully."
+              break
+            elif [ "$STATUS" = "Failed" ]; then
+              echo "Migration job failed!"
+              exit 1
+            fi
+            sleep 10
+          done
+
+      - name: Smoke test deployed endpoints
+        run: |
+          WEB_FQDN=$(az containerapp show \
+            --name ca-web-pda-prod-uaen \
+            --resource-group rg-pda-prod-uaen \
+            --query properties.configuration.ingress.fqdn -o tsv)
+          WEB_URL="https://${WEB_FQDN}"
+
+          echo "Running smoke test on ${WEB_URL}/healthz..."
+          curl -fsS "${WEB_URL}/healthz"
+          echo "Health check succeeded."
+
+          echo "Running smoke test on ${WEB_URL}/api/v1/me (expecting 401 Unauthorized)..."
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${WEB_URL}/api/v1/me" || true)
+          if [ "$STATUS_CODE" != "401" ]; then
+            echo "Smoke test failed: expected 401 Unauthorized from /api/v1/me, received $STATUS_CODE"
+            exit 1
+          fi
+          echo "Smoke test passed: /api/v1/me returned 401 Unauthorized as expected without auth token."
+
+  teardown:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'teardown'
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run teardown script
+        run: |
+          chmod +x scripts/teardown.sh
+          scripts/teardown.sh prod --yes
