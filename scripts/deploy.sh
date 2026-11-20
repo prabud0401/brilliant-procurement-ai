@@ -159,7 +159,10 @@ deploy_gate_2() {
       aiProvider="${AI_PROVIDER:-live}" \
       azureOpenAiEndpoint="${AZURE_OPENAI_ENDPOINT:-}" \
       azureOpenAiDeployment="${AZURE_OPENAI_DEPLOYMENT:-gpt-5-mini}" \
-      azureDocIntelEndpoint="${AZURE_DOCINTEL_ENDPOINT:-}"
+      azureDocIntelEndpoint="${AZURE_DOCINTEL_ENDPOINT:-}" \
+      webImage="${WEB_IMAGE:-ghcr.io/prabud0401/brilliant-procurement-ai/web:latest}" \
+      apiImage="${BACKEND_IMAGE:-ghcr.io/prabud0401/brilliant-procurement-ai/backend:latest}" \
+      workerImage="${BACKEND_IMAGE:-ghcr.io/prabud0401/brilliant-procurement-ai/backend:latest}"
 
   if [ "$AUTO_CONFIRM" != "true" ]; then
     read -r -p "Proceed with main stack deployment? (y/N): " CONFIRM_MAIN
@@ -187,7 +190,10 @@ deploy_gate_2() {
       aiProvider="${AI_PROVIDER:-live}" \
       azureOpenAiEndpoint="${AZURE_OPENAI_ENDPOINT:-}" \
       azureOpenAiDeployment="${AZURE_OPENAI_DEPLOYMENT:-gpt-5-mini}" \
-      azureDocIntelEndpoint="${AZURE_DOCINTEL_ENDPOINT:-}"
+      azureDocIntelEndpoint="${AZURE_DOCINTEL_ENDPOINT:-}" \
+      webImage="${WEB_IMAGE:-ghcr.io/prabud0401/brilliant-procurement-ai/web:latest}" \
+      apiImage="${BACKEND_IMAGE:-ghcr.io/prabud0401/brilliant-procurement-ai/backend:latest}" \
+      workerImage="${BACKEND_IMAGE:-ghcr.io/prabud0401/brilliant-procurement-ai/backend:latest}"
 
   echo "[G2 Step 4] Triggering database migration and seed job..."
   az containerapp job start --name migrate --resource-group "${MAIN_RG}"
