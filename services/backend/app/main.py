@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.admin.router import router as admin_router
 from app.approvals.router import router as approvals_router
 from app.audit.router import router as audit_router
 from app.audit.service import record as record_audit
@@ -37,6 +38,7 @@ from app.metrics.router import router as metrics_router
 from app.observability import setup_observability
 from app.orders.router import po_router, pr_router
 from app.qa.router import router as qa_router
+from app.reference.router import router as reference_router
 from app.settings_api.router import router as settings_router
 
 # Initialize observability (OpenTelemetry, correlation, log redaction)
@@ -229,6 +231,8 @@ api_v1.include_router(matches_router)
 api_v1.include_router(exceptions_router)
 api_v1.include_router(settings_router)
 api_v1.include_router(qa_router)
+api_v1.include_router(reference_router)
+api_v1.include_router(admin_router)
 api_v1.include_router(metrics_router)
 
 

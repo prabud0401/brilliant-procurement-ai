@@ -1,8 +1,21 @@
 import { test, expect } from "@playwright/test";
 import path from "path";
+import fs from "fs";
+import { execSync } from "child_process";
 import AxeBuilder from "@axe-core/playwright";
 
 const DEMO_PASSWORD = process.env.DEMO_USER_PASSWORD || "demo_password_123";
+
+function cleanE2E(): void {
+  let curr = process.cwd();
+  while (!fs.existsSync(path.join(curr, "Makefile")) && path.dirname(curr) !== curr) {
+    curr = path.dirname(curr);
+  }
+  execSync(
+    `cd "${curr}/services/backend" && uv run --env-file ../../.env python -m tools.setup_e2e_fixtures clean-e2e`,
+    { encoding: "utf8" }
+  );
+}
 
 // Helper to sign in with email and demo password
 async function loginAs(page: any, email: string) { // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -15,18 +28,8 @@ async function loginAs(page: any, email: string) { // eslint-disable-line @types
 
 test.describe("Procurement Document Review & Processing Flows (R08)", () => {
   test.beforeAll(() => {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { execSync } = require("child_process");
-      execSync(
-        'docker compose exec -T db psql -U postgres -d postgres -c "TRUNCATE TABLE jobs, documents, extractions, extracted_fields, extracted_lines, chunks, injection_flags, comparisons, matches, qa_logs CASCADE;"',
-        { stdio: "ignore" }
-      );
-    } catch {
-      // Ignore if docker db is not directly accessible
-    }
+    cleanE2E();
   });
-
   test("S1 scenario: Buyer uploads Gulfline quotation, reviews with highlight, corrects a field, and confirms", async ({
     page,
   }) => {

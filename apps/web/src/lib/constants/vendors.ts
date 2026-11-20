@@ -1,105 +1,85 @@
-export interface SeededVendor {
+export interface Vendor {
   id: string;
-  odoo_id: number;
+  odoo_id?: number | null;
   name: string;
-  trn: string;
+  trn?: string | null;
   payment_terms_days: number;
-  lead_time_days: number;
-  address: string;
-  contact_email: string;
-  contact_phone: string;
-  category: string;
+  lead_time_days?: number;
+  address?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  category?: string;
   notes?: string;
 }
 
-export const SEEDED_VENDORS: SeededVendor[] = [
-  {
-    id: "02ccc52b-65a0-5878-807e-419178e7b553",
-    odoo_id: 1,
-    name: "Falcon Office Supplies LLC",
-    trn: "100000000000001",
-    payment_terms_days: 30,
-    lead_time_days: 3,
-    address: "Warehouse 14, Sector M-9, Mussafah Industrial Area, Abu Dhabi, UAE",
-    contact_email: "orders@falcon-supplies.fake",
-    contact_phone: "+971 2 555 0101",
-    category: "Office Supplies",
-  },
-  {
-    id: "5cba38c7-118b-5996-a309-80ce9ddf0b49",
-    odoo_id: 2,
-    name: "Gulf Line IT Trading",
-    trn: "100000000000002",
-    payment_terms_days: 30,
-    lead_time_days: 5,
-    address: "Office 402, Tamouh Tower, Al Reem Island, Abu Dhabi, UAE",
-    contact_email: "sales@gulfline-it.fake",
-    contact_phone: "+971 2 555 0102",
-    category: "IT Equipment",
-  },
-  {
-    id: "96a97c87-f84b-5d76-9a2e-e8bd45a4824d",
-    odoo_id: 3,
-    name: "Oasis Facility Services",
-    trn: "100000000000003",
-    payment_terms_days: 45,
-    lead_time_days: 7,
-    address: "Building 7, ICAD 1, Musaffah South, Abu Dhabi, UAE",
-    contact_email: "contracts@oasis-facilities.fake",
-    contact_phone: "+971 2 555 0103",
-    category: "Facility Services",
-  },
-  {
-    id: "264c4c72-f254-5463-b3d4-6558b3a242bc",
-    odoo_id: 4,
-    name: "Desert Build Materials",
-    trn: "100000000000004",
-    payment_terms_days: 60,
-    lead_time_days: 10,
-    address: "Plot 88, Mina Zayed Port Commercial District, Abu Dhabi, UAE",
-    contact_email: "sales@desertbuild.fake",
-    contact_phone: "+971 2 555 0104",
-    category: "Site Materials",
-  },
-  {
-    id: "53ce6b6e-02ae-57b8-aa27-b03d44464786",
-    odoo_id: 5,
-    name: "Corniche Electrical Co.",
-    trn: "100000000000005",
-    payment_terms_days: 30,
-    lead_time_days: 4,
-    address: "Ground Floor, Corniche Towers, Al Danah, Abu Dhabi, UAE",
-    contact_email: "info@corniche-electrical.fake",
-    contact_phone: "+971 2 555 0105",
-    category: "Electrical & IT Supplies",
-  },
-  {
-    id: "22a12d13-2eb6-5150-af3c-2e6b721261ff",
-    odoo_id: 6,
-    name: "Sandstone Furniture LLC",
-    trn: "100000000000006",
-    payment_terms_days: 45,
-    lead_time_days: 14,
-    address: "Showroom 3, Airport Road, Al Rawdah, Abu Dhabi, UAE",
-    contact_email: "orders@sandstone-furniture.fake",
-    contact_phone: "+971 2 555 0106",
-    category: "Office Furniture",
-  },
-];
+export type SeededVendor = Vendor;
 
-export function getVendorById(id: string | null | undefined): SeededVendor | undefined {
-  if (!id) return undefined;
-  return SEEDED_VENDORS.find((v) => v.id.toLowerCase() === id.toLowerCase());
+export interface Product {
+  id: string;
+  odoo_id?: number | null;
+  code: string;
+  name: string;
+  uom: string;
 }
 
-export function getVendorByName(name: string | null | undefined): SeededVendor | undefined {
+const _vendorCache: Map<string, Vendor> = new Map();
+
+export function setCachedVendors(vendors: Vendor[]): void {
+  for (const v of vendors) {
+    _vendorCache.set(v.id.toLowerCase(), v);
+  }
+}
+
+export function getVendorById(id: string | null | undefined): Vendor | undefined {
+  if (!id) return undefined;
+  const cached = _vendorCache.get(id.toLowerCase());
+  if (cached) return cached;
+  // If not yet populated by API, return a stub indicating a vendor is linked
+  return {
+    id,
+    name: "Vendor",
+    payment_terms_days: 30,
+    trn: "100000000000001",
+  };
+}
+
+export function getVendorByName(name: string | null | undefined): Vendor | undefined {
   if (!name) return undefined;
   const target = name.trim().toLowerCase();
-  return SEEDED_VENDORS.find((v) => v.name.toLowerCase() === target);
+  for (const v of _vendorCache.values()) {
+    if (v.name.toLowerCase() === target) return v;
+  }
+  return undefined;
 }
 
-export function getVendorByTrn(trn: string | null | undefined): SeededVendor | undefined {
-  if (!trn) return undefined;
-  const cleaned = trn.replace(/\D/g, "");
-  return SEEDED_VENDORS.find((v) => v.trn === cleaned);
+export async function fetchVendors(search?: string): Promise<Vendor[]> {
+  const params = new URLSearchParams();
+  if (search && search.trim()) {
+    params.append("search", search.trim());
+  }
+  const queryStr = params.toString() ? `?${params.toString()}` : "";
+  const res = await fetch(`/api/v1/vendors${queryStr}`, {
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch vendors (HTTP ${res.status})`);
+  }
+  const data = (await res.json()) as Vendor[];
+  setCachedVendors(data);
+  return data;
+}
+
+export async function fetchProducts(search?: string): Promise<Product[]> {
+  const params = new URLSearchParams();
+  if (search && search.trim()) {
+    params.append("search", search.trim());
+  }
+  const queryStr = params.toString() ? `?${params.toString()}` : "";
+  const res = await fetch(`/api/v1/products${queryStr}`, {
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch products (HTTP ${res.status})`);
+  }
+  return res.json();
 }

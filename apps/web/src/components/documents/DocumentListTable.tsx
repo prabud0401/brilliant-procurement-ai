@@ -17,7 +17,7 @@ import {
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { DocumentUploadModal } from "./DocumentUploadModal";
-import { SEEDED_VENDORS } from "@/lib/constants/vendors";
+import { fetchVendors, type Vendor } from "@/lib/constants/vendors";
 import { formatDate } from "@/lib/formatters";
 import type { DocumentSummary, DocumentType, DocumentStatus } from "@/lib/documents/types";
 
@@ -31,8 +31,15 @@ export const DocumentListTable: React.FC<DocumentListTableProps> = ({
   onToast,
 }) => {
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
+  const [vendorsList, setVendorsList] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [uploadModalOpen, setUploadModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetchVendors()
+      .then((data) => setVendorsList(data))
+      .catch(() => {});
+  }, []);
 
   // Filters
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -319,7 +326,7 @@ export const DocumentListTable: React.FC<DocumentListTableProps> = ({
               className="w-full rounded-md border border-slate-300 px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="all">All Vendors</option>
-              {SEEDED_VENDORS.map((v) => (
+              {vendorsList.map((v) => (
                 <option key={v.id} value={v.id}>
                   {v.name}
                 </option>
