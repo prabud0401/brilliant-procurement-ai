@@ -22,6 +22,12 @@ describe("Shared UI Components", () => {
       expect(badge).toHaveTextContent("75%");
       expect(badge).toHaveTextContent("Review");
       expect(badge.className).toContain("bg-amber-50");
+      expect(badge.className).toContain("text-amber-800");
+
+      const marker = screen.getByText("(Review)");
+      expect(marker.className).not.toMatch(/opacity/);
+      expect(marker.className).toContain("text-current");
+      expect(marker.className).not.toContain("text-amber-700");
     });
 
     it("renders low confidence (< 0.60) as Needs Review with red styling", () => {
@@ -30,6 +36,24 @@ describe("Shared UI Components", () => {
       expect(badge).toHaveTextContent("45%");
       expect(badge).toHaveTextContent("Review");
       expect(badge.className).toContain("bg-rose-50");
+      expect(badge.className).toContain("text-rose-700");
+
+      const marker = screen.getByText("(Review)");
+      expect(marker.className).not.toMatch(/opacity/);
+      expect(marker.className).toContain("text-current");
+      expect(marker.className).not.toContain("text-amber-700");
+    });
+
+    it("ensures (Review) marker has no opacity and uses badge text color for medium and low confidence", () => {
+      const { rerender } = render(<ConfidenceBadge confidence={0.70} />);
+      let marker = screen.getByText("(Review)");
+      expect(marker.className).not.toMatch(/opacity/);
+      expect(marker.className).toContain("text-current");
+
+      rerender(<ConfidenceBadge confidence={0.35} />);
+      marker = screen.getByText("(Review)");
+      expect(marker.className).not.toMatch(/opacity/);
+      expect(marker.className).toContain("text-current");
     });
 
     it("renders dash for null or undefined confidence", () => {
