@@ -113,6 +113,55 @@ jobs:
         working-directory: services/backend
         run: uv run pytest -m "integration"
 
+  eval:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci_postgres_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      POSTGRES_PASSWORD: ci_postgres_password
+      APP_DB_PASSWORD: ci_app_user_password
+      DATABASE_URL_MIGRATOR: postgresql+psycopg://postgres:ci_postgres_password@localhost:5432/postgres
+      DATABASE_URL: postgresql+psycopg://app_user:ci_app_user_password@localhost:5432/postgres
+      APP_ENV: test
+      JWT_SECRET: dev-secret-for-ci-testing-purposes-only-32c
+      JWT_ISSUER: brilliant-procurement-ai
+      DEMO_USER_PASSWORD: demo_ci_password_123
+      AI_PROVIDER: replay
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        working-directory: services/backend
+        run: uv sync --frozen
+
+      - name: Run Alembic migrations
+        working-directory: services/backend
+        run: uv run alembic upgrade head
+
+      - name: Run AI Quality evaluation suite (make eval)
+        run: make eval
+
   secrets:
     runs-on: ubuntu-latest
     steps:
