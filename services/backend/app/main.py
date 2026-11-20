@@ -2,10 +2,12 @@ import time
 import uuid
 from collections import defaultdict
 from decimal import Decimal
+from typing import Any
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -30,6 +32,7 @@ from app.core.policy import Principal, get_current_principal
 from app.core.security import create_access_token, verify_password
 from app.documents.router import router as documents_router
 from app.extraction.router import router as extraction_router
+from app.intake.router import router as intake_router
 from app.matching.router import exceptions_router, matches_router
 from app.metrics.router import router as metrics_router
 from app.observability import setup_observability
@@ -73,6 +76,24 @@ app = FastAPI(
 
 # Middleware
 app.add_middleware(RequestIdMiddleware)
+
+
+@app.middleware("http")
+async def block_intake_key_on_other_endpoints(request: Request, call_next: Any) -> Any:
+    """Ensure X-Intake-Key is refused on non-intake endpoints per R13 spec."""
+    if "x-intake-key" in request.headers and not request.url.path.startswith("/api/v1/intake"):
+        return JSONResponse(
+            status_code=401,
+            content={
+                "type": "about:blank",
+                "title": "Unauthorized",
+                "status": 401,
+                "detail": "X-Intake-Key is not valid on this endpoint",
+                "code": "INVALID_AUTH_METHOD",
+            },
+        )
+    return await call_next(request)
+
 
 if settings.CORS_ORIGINS:
     app.add_middleware(
@@ -200,6 +221,7 @@ api_v1 = APIRouter(prefix="/api/v1")
 api_v1.include_router(auth_router)
 api_v1.include_router(audit_router)
 api_v1.include_router(documents_router)
+api_v1.include_router(intake_router)
 api_v1.include_router(extraction_router)
 api_v1.include_router(pr_router)
 api_v1.include_router(po_router)

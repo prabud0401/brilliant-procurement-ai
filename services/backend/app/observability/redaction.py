@@ -14,6 +14,7 @@ EMAIL_PATTERN = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
 IBAN_PATTERN = re.compile(r"\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b")
 TRN_PATTERN = re.compile(r"\b\d{15}\b")
 BEARER_PATTERN = re.compile(r"(?i)\bBearer\s+[A-Za-z0-9\-._~+/]+=*")
+INTAKE_KEY_PATTERN = re.compile(r"(?i)\b(X-Intake-Key|intake_key)\s*[:=]\s*[^\s,]+")
 JWT_PATTERN = re.compile(r"\beyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}\b")
 DATE_PATTERN = re.compile(r"\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b")
 PHONE_PATTERN = re.compile(
@@ -40,9 +41,10 @@ def redact_sensitive_text(text: str, is_dev: bool = False) -> str:
     if not text:
         return text
 
-    # 1. Mask Bearer and JWT tokens
+    # 1. Mask Bearer, JWT, and API keys
     redacted = BEARER_PATTERN.sub("Bearer [REDACTED_TOKEN]", text)
     redacted = JWT_PATTERN.sub("[REDACTED_TOKEN]", redacted)
+    redacted = INTAKE_KEY_PATTERN.sub(r"\1: [REDACTED_KEY]", redacted)
 
     # 2. Mask Emails
     redacted = EMAIL_PATTERN.sub("[REDACTED_EMAIL]", redacted)

@@ -211,15 +211,70 @@ def check_storage_and_app_identities(resources: list[dict[str, Any]]) -> None:
 
 
 def check_secure_params_no_defaults(all_templates: list[dict[str, Any]]) -> None:
+    # intakeKey has a default of '' so deployments with email intake disabled succeed (review finding 1)
+    allowed_defaults = {"intakeKey"}
     for tmpl in all_templates:
         params = tmpl.get("parameters", {})
         for param_name, param_def in params.items():
             param_type = str(param_def.get("type", "")).lower()
-            if "secure" in param_type:
+            if "secure" in param_type and param_name not in allowed_defaults:
                 assert "defaultValue" not in param_def, (
                     f"@secure() parameter '{param_name}' must NOT have a default value, "
                     f"found defaultValue={param_def.get('defaultValue')!r}"
                 )
+
+
+def check_intake_key_default(main_template: dict[str, Any]) -> None:
+    params = main_template.get("parameters", {})
+    assert "intakeKey" in params, "main.bicep missing intakeKey parameter"
+    intake_def = params["intakeKey"]
+    assert intake_def.get("type", "").lower() == "securestring", "intakeKey must be securestring"
+    assert "defaultValue" in intake_def, "intakeKey must have a default value"
+    assert (
+        intake_def["defaultValue"] == ""
+    ), f"intakeKey default must be empty string '', found: {intake_def['defaultValue']!r}"
+
+
+def check_deploy_workflow_passes_intake_key(workflow_path: Path) -> None:
+    content = workflow_path.read_text(encoding="utf-8")
+    assert "intakeKey" in content, "deploy.yml must pass intakeKey parameter"
+    assert "enableEmailIntake" in content, "deploy.yml must pass enableEmailIntake parameter"
+    assert "secrets.INTAKE_KEY" in content, "deploy.yml must pass secrets.INTAKE_KEY"
+    assert "vars.ENABLE_EMAIL_INTAKE" in content, "deploy.yml must pass vars.ENABLE_EMAIL_INTAKE"
+
+
+def check_api_has_intake_key_hash_secret_ref(resources: list[dict[str, Any]]) -> None:
+    found_env = False
+    for r in resources:
+        if r.get("type") == "Microsoft.App/containerApps":
+            containers = r.get("properties", {}).get("template", {}).get("containers", [])
+            for c in containers:
+                if c.get("name") == "api":
+                    for env_entry in c.get("env", []):
+                        if isinstance(env_entry, dict) and env_entry.get("name") == "INTAKE_KEY_HASH":
+                            assert env_entry.get("secretRef") == "intake-key-hash", (
+                                f"INTAKE_KEY_HASH on api container must use secretRef 'intake-key-hash', "
+                                f"got: {env_entry}"
+                            )
+                            found_env = True
+    assert found_env, "Container 'api' must have INTAKE_KEY_HASH with secretRef 'intake-key-hash'"
+
+
+def check_no_plain_intake_key_in_any_template_env(resources: list[dict[str, Any]]) -> None:
+    for r in resources:
+        if r.get("type") == "Microsoft.App/containerApps":
+            containers = r.get("properties", {}).get("template", {}).get("containers", [])
+            for c in containers:
+                for env_entry in c.get("env", []):
+                    if isinstance(env_entry, dict):
+                        var_name = env_entry.get("name", "")
+                        assert var_name != "INTAKE_KEY", (
+                            f"Plain INTAKE_KEY must not be passed as environment variable in container {c.get('name')}"
+                        )
+                        val = str(env_entry.get("value", ""))
+                        assert "intakeKey" not in val, (
+                            f"intakeKey parameter expression must not be exposed in container {c.get('name')} env {var_name}"
+                        )
 
 
 def check_app_env_vars_match_settings(
@@ -333,6 +388,23 @@ def main() -> None:
     # 8. all resources carry the four tags
     check_resource_tags(all_templates)
     print("  ✓ All resources carry the required four tags (project, env, owner, expires)")
+
+    # 9. intakeKey has a default of '' (review finding 1)
+    check_intake_key_default(main_template)
+    print("  ✓ intakeKey has a default of '' in main.bicep")
+
+    # 10. deploy.yml passes intakeKey and enableEmailIntake (review finding 1)
+    deploy_workflow_path = repo_root / ".github/workflows/deploy.yml"
+    check_deploy_workflow_passes_intake_key(deploy_workflow_path)
+    print("  ✓ deploy.yml passes intakeKey and enableEmailIntake")
+
+    # 11. api container has INTAKE_KEY_HASH from a Key Vault secret ref (review finding 2)
+    check_api_has_intake_key_hash_secret_ref(all_resources)
+    print("  ✓ api container has INTAKE_KEY_HASH wired from Key Vault secret ref")
+
+    # 12. no plain intake key in any template env (review finding 2)
+    check_no_plain_intake_key_in_any_template_env(all_resources)
+    print("  ✓ no plain intake key exists in any template container env")
 
     print("\nAll template checks passed successfully!")
 

@@ -152,7 +152,10 @@ deploy_gate_2() {
       postgresAdminPassword="${POSTGRES_ADMIN_PASSWORD}" \
       appDbPassword="${APP_DB_PASSWORD}" \
       demoUserPassword="${DEMO_USER_PASSWORD}" \
-      containerRegistryPassword="${CONTAINER_REGISTRY_PASSWORD:-}"
+      containerRegistryPassword="${CONTAINER_REGISTRY_PASSWORD:-}" \
+      enableEmailIntake="${ENABLE_EMAIL_INTAKE:-false}" \
+      intakeKey="${INTAKE_KEY:-}" \
+      intakeSenderAllowlist="${INTAKE_SENDER_ALLOWLIST:-}"
 
   if [ "$AUTO_CONFIRM" != "true" ]; then
     read -r -p "Proceed with main stack deployment? (y/N): " CONFIRM_MAIN
@@ -173,7 +176,10 @@ deploy_gate_2() {
       postgresAdminPassword="${POSTGRES_ADMIN_PASSWORD}" \
       appDbPassword="${APP_DB_PASSWORD}" \
       demoUserPassword="${DEMO_USER_PASSWORD}" \
-      containerRegistryPassword="${CONTAINER_REGISTRY_PASSWORD:-}"
+      containerRegistryPassword="${CONTAINER_REGISTRY_PASSWORD:-}" \
+      enableEmailIntake="${ENABLE_EMAIL_INTAKE:-false}" \
+      intakeKey="${INTAKE_KEY:-}" \
+      intakeSenderAllowlist="${INTAKE_SENDER_ALLOWLIST:-}"
 
   echo "[G2 Step 4] Triggering database migration and seed job..."
   az containerapp job start --name migrate --resource-group "${MAIN_RG}"

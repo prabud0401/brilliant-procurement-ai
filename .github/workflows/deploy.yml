@@ -99,7 +99,9 @@ jobs:
               containerRegistryPassword="${{ secrets.CONTAINER_REGISTRY_PASSWORD }}" \
               webImage="${{ env.IMAGE_WEB }}" \
               apiImage="${{ env.IMAGE_BACKEND }}" \
-              workerImage="${{ env.IMAGE_BACKEND }}"
+              workerImage="${{ env.IMAGE_BACKEND }}" \
+              enableEmailIntake="${{ vars.ENABLE_EMAIL_INTAKE || 'false' }}" \
+              intakeKey="${{ secrets.INTAKE_KEY }}"
 
       - name: Deploy infrastructure (create)
         run: |
@@ -119,7 +121,9 @@ jobs:
               containerRegistryPassword="${{ secrets.CONTAINER_REGISTRY_PASSWORD }}" \
               webImage="${{ env.IMAGE_WEB }}" \
               apiImage="${{ env.IMAGE_BACKEND }}" \
-              workerImage="${{ env.IMAGE_BACKEND }}"
+              workerImage="${{ env.IMAGE_BACKEND }}" \
+              enableEmailIntake="${{ vars.ENABLE_EMAIL_INTAKE || 'false' }}" \
+              intakeKey="${{ secrets.INTAKE_KEY }}"
 
       - name: Start database migration job and wait for completion
         run: |

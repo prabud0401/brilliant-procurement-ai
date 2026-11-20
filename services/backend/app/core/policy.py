@@ -20,6 +20,7 @@ class Role(str, Enum):
     BUYER = "buyer"
     MANAGER = "manager"
     ADMIN = "admin"
+    INTAKE = "intake"
 
 
 class ScopeRule(str, Enum):
@@ -42,6 +43,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.ALL,
         Role.MANAGER: ScopeRule.NONE,
         Role.ADMIN: ScopeRule.NONE,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # View documents and extraction: GET /documents..., /extraction, /file
     "document.view": {
@@ -49,6 +51,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.ALL,
         Role.MANAGER: ScopeRule.DEPT,
         Role.ADMIN: ScopeRule.METADATA,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # Review and confirm fields, link vendor, clear duplicate:
     # PATCH /fields, /lines; POST /confirm, /vendor, /not-duplicate
@@ -57,6 +60,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.ALL,
         Role.MANAGER: ScopeRule.NONE,
         Role.ADMIN: ScopeRule.NONE,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # SharePoint import: /integrations/sharepoint/*
     "integration.sharepoint": {
@@ -64,6 +68,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.ALL,
         Role.MANAGER: ScopeRule.NONE,
         Role.ADMIN: ScopeRule.NONE,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # Create and edit purchase requests: POST, PATCH /purchase-requests
     "pr.create_edit": {
@@ -71,6 +76,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.ALL,
         Role.MANAGER: ScopeRule.ALL,
         Role.ADMIN: ScopeRule.NONE,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # Submit for approval: POST .../submit
     "pr.submit": {
@@ -78,6 +84,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.ALL,
         Role.MANAGER: ScopeRule.NONE,
         Role.ADMIN: ScopeRule.NONE,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # Comparisons, weights, recommendation, override: /comparisons/* (write)
     "comparison.write": {
@@ -85,6 +92,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.ALL,
         Role.MANAGER: ScopeRule.NONE,
         Role.ADMIN: ScopeRule.NONE,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # View comparison: GET /comparisons/{id}
     "comparison.view": {
@@ -92,6 +100,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.ALL,
         Role.MANAGER: ScopeRule.DEPT,
         Role.ADMIN: ScopeRule.NONE,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # Create PO, push to Odoo: POST /purchase-orders, /push-to-odoo
     "po.create": {
@@ -99,6 +108,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.ALL,
         Role.MANAGER: ScopeRule.NONE,
         Role.ADMIN: ScopeRule.NONE,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # Approve or reject: POST /approvals/{id}/decision
     "approval.decide": {
@@ -106,6 +116,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.TIER_1_NOT_OWN,
         Role.MANAGER: ScopeRule.WITHIN_LIMIT_NOT_OWN,
         Role.ADMIN: ScopeRule.NONE,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # Run match, resolve exceptions: POST /matches, /exceptions/{id}/resolve
     "match.resolve": {
@@ -113,6 +124,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.POLICY,
         Role.MANAGER: ScopeRule.ESCALATED,
         Role.ADMIN: ScopeRule.NONE,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # Q&A: POST /qa/ask
     "qa.ask": {
@@ -120,6 +132,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.ALL,
         Role.MANAGER: ScopeRule.DEPT,
         Role.ADMIN: ScopeRule.NONE,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # View audit: GET /audit
     "audit.view": {
@@ -127,6 +140,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.ALL,
         Role.MANAGER: ScopeRule.DEPT,
         Role.ADMIN: ScopeRule.ALL,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # Export audit: GET /audit/export.csv
     "audit.export": {
@@ -134,6 +148,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.NONE,
         Role.MANAGER: ScopeRule.NONE,
         Role.ADMIN: ScopeRule.ALL,
+        Role.INTAKE: ScopeRule.NONE,
     },
     # Users, thresholds, tolerances, integrations, retention, metrics: /admin/*, PUT /settings/*
     "admin.manage": {
@@ -141,6 +156,7 @@ CAPABILITY_MATRIX: dict[str, dict[str, ScopeRule]] = {
         Role.BUYER: ScopeRule.NONE,
         Role.MANAGER: ScopeRule.NONE,
         Role.ADMIN: ScopeRule.ALL,
+        Role.INTAKE: ScopeRule.NONE,
     },
 }
 

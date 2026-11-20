@@ -41,6 +41,9 @@ param databaseUrlMigrator string
 @description('Optional container registry password (empty if public registry)')
 param containerRegistryPassword string
 
+@description('Optional intake key hash for email intake')
+param intakeKeyHash string = ''
+
 // Built-in role: Key Vault Secrets User (4633458b-17de-408a-b874-0445c86b69e6)
 var keyVaultSecretsUserRoleId = subscriptionResourceId(
   'Microsoft.Authorization/roleDefinitions',
@@ -129,6 +132,14 @@ resource secretRegistryPassword 'Microsoft.KeyVault/vaults/secrets@2023-07-01' =
   name: 'container-registry-password'
   properties: {
     value: containerRegistryPassword
+  }
+}
+
+resource secretIntakeKeyHash 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'intake-key-hash'
+  properties: {
+    value: !empty(intakeKeyHash) ? intakeKeyHash : 'not-configured'
   }
 }
 
