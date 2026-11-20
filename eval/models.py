@@ -30,14 +30,19 @@ class EvaluationReport:
     timestamp: str
     mode: str  # "replay" | "live"
     provider: str  # "replay" | "live"
-    model: str  # "gpt-4o-mini"
+    model: str  # e.g. "gpt-5-mini"
     prompt_version: str  # "v1"
     metrics: list[MetricResult]
     documents_evaluated: int
     questions_evaluated: int
     injection_cases_evaluated: int
     cost_estimate_usd: float | None = None
+    actual_cost_usd: float | None = None
+    tokens_in: int = 0
+    tokens_out: int = 0
     duration_seconds: float = 0.0
+    aborted: bool = False
+    abort_reason: str | None = None
 
     @property
     def passed_metrics(self) -> int:
@@ -49,7 +54,7 @@ class EvaluationReport:
 
     @property
     def all_passed(self) -> bool:
-        return all(m.passed for m in self.metrics)
+        return not self.aborted and (len(self.metrics) > 0 and all(m.passed for m in self.metrics))
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -65,6 +70,12 @@ class EvaluationReport:
                 "all_passed": self.all_passed,
                 "duration_seconds": round(self.duration_seconds, 2),
                 "cost_estimate_usd": self.cost_estimate_usd,
+                "actual_cost_usd": self.actual_cost_usd,
+                "tokens_in": self.tokens_in,
+                "tokens_out": self.tokens_out,
+                "total_tokens": self.tokens_in + self.tokens_out,
+                "aborted": self.aborted,
+                "abort_reason": self.abort_reason,
             },
             "metrics": [m.to_dict() for m in self.metrics],
             "dataset": {
@@ -75,7 +86,7 @@ class EvaluationReport:
         }
 
     def to_markdown(self) -> str:
-        status_banner = "PASSED" if self.all_passed else "FAILED"
+        status_banner = "ABORTED" if self.aborted else ("PASSED" if self.all_passed else "FAILED")
         lines = [
             f"# AI Quality Evaluation Report — {status_banner}",
             "",
@@ -86,8 +97,18 @@ class EvaluationReport:
             f"- **Status:** {self.passed_metrics}/{self.total_metrics} metrics passed",
         ]
 
+        if self.aborted:
+            lines.append(f"- **Abort Reason:** {self.abort_reason}")
+
         if self.cost_estimate_usd is not None:
             lines.append(f"- **Estimated AI Cost:** ${self.cost_estimate_usd:.4f} USD")
+
+        if self.actual_cost_usd is not None:
+            lines.append(
+                f"- **Actual AI Spend:** ${self.actual_cost_usd:.4f} USD "
+                f"(Tokens In: {self.tokens_in}, Tokens Out: {self.tokens_out}, "
+                f"Total Tokens: {self.tokens_in + self.tokens_out})"
+            )
 
         lines.extend(
             [

@@ -31,7 +31,7 @@ flowchart TD
     subgraph AI["AI Module Tier (app/ai)"]
         AI_Factory["AI Provider Factory"]
         DI["Azure Document Intelligence (or Replay/Mock)"]
-        OAI["Azure OpenAI gpt-4o-mini & Embeddings"]
+        OAI["Azure OpenAI Chat (default gpt-5-mini) & Embeddings"]
     end
 
     subgraph Integrations["Integration Adapters (app/integrations)"]
@@ -86,7 +86,7 @@ flowchart TD
 
 6. **AI Module Interface (`services/backend/app/ai`)**:
    - Central abstraction layer isolating all machine learning interactions.
-   - Supports three runtime providers: `mock` (deterministic unit testing), `replay` (high-fidelity offline test fixtures), and `live` (Azure Document Intelligence and Azure OpenAI `gpt-4o-mini`).
+   - Supports three runtime providers: `mock` (deterministic unit testing), `replay` (high-fidelity offline test fixtures), and `live` (Azure Document Intelligence and Azure OpenAI; chat model is configurable, default `gpt-5-mini`).
 
 7. **Integration Adapters (`services/backend/app/integrations`)**:
    - Pluggable interfaces for Odoo ERP, SharePoint, and Power Automate Teams notifications.
@@ -190,7 +190,7 @@ sequenceDiagram
     participant Web as Next.js BFF
     participant API as FastAPI Backend
     participant DB as PostgreSQL (pgvector + tsvector)
-    participant AI as Azure OpenAI (Embeddings + gpt-4o-mini)
+    participant AI as Azure OpenAI (Embeddings + Chat: default gpt-5-mini)
 
     User->>Web: Submit Query (e.g. "What are Gulf Line payment terms?")
     Web->>API: POST /api/v1/qa/ask
@@ -356,7 +356,7 @@ flowchart TB
         end
 
         subgraph RG_AI["Resource Group: rg-pda-ai-uaen (live AI mode only)"]
-            OpenAI["Azure OpenAI Service<br/>oai-pda-ai-uaen<br/>gpt-4o-mini & text-embedding-3-small"]
+            OpenAI["Azure OpenAI Service<br/>oai-pda-ai-uaen<br/>Chat (default gpt-5-mini) & text-embedding-3-small"]
             DocIntel["Azure Document Intelligence<br/>di-pda-ai-uaen<br/>SKU F0"]
         end
 

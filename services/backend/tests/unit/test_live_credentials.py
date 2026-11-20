@@ -23,7 +23,7 @@ def test_create_azure_openai_client_with_api_key() -> None:
         mock_openai.assert_called_once_with(
             azure_endpoint="https://fake.openai.azure.com",
             api_key="secret-key-123",
-            api_version="2024-02-15-preview",
+            api_version="2025-04-01-preview",
         )
 
 
@@ -47,7 +47,7 @@ def test_create_azure_openai_client_with_managed_identity() -> None:
         mock_openai.assert_called_once_with(
             azure_endpoint="https://fake.openai.azure.com",
             azure_ad_token_provider=fake_token_provider,
-            api_version="2024-02-15-preview",
+            api_version="2025-04-01-preview",
         )
 
 

@@ -217,12 +217,20 @@ The system supports swapping between offline replay and live Azure AI services v
    Ensure the following settings are provided:
    ```bash
    AI_PROVIDER=live
-   AZURE_OPENAI_ENDPOINT=https://oai-pda-ai-uaen.openai.azure.com/
-   AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini
+   AZURE_OPENAI_ENDPOINT=https://<resource>.openai.azure.com/
+   AZURE_OPENAI_DEPLOYMENT=gpt-5-mini
    AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3-small
-   AZURE_DOCINTEL_ENDPOINT=https://di-pda-ai-uaen.cognitiveservices.azure.com/
+   AZURE_OPENAI_API_VERSION=2025-04-01-preview
+   AZURE_OPENAI_REASONING_EFFORT=low
+   AZURE_DOCINTEL_ENDPOINT=https://<resource>.cognitiveservices.azure.com/
+   AI_DAILY_BUDGET_AED=7.0
    ```
    In Azure, authentication is handled automatically via User-Assigned Managed Identity (`Cognitive Services User` role). In local environments, `az login` credentials or service principal credentials are used.
+
+   To execute live evaluation and record real fixtures:
+   ```bash
+   cd services/backend && uv run python -m eval.run --mode live --confirm-live --max-cost-usd 3 --record-replay
+   ```
 
 ---
 

@@ -7,7 +7,7 @@ This report documents the performance of the AI components in the Procurement Do
 ## 1. Executive Summary & Verification Mode
 
 - **Evaluation Mode:** `replay` (Offline test mode using recorded ground-truth replay fixtures)
-- **Model Target:** `gpt-4o-mini` (Chat & Synthesis) and `text-embedding-3-small` (Vector Retrieval)
+- **Model Target:** Configurable chat model (default `gpt-5-mini`) and `text-embedding-3-small` (Vector Retrieval)
 - **OCR Engine Target:** Azure Document Intelligence (Form Recognizer)
 - **Execution Latency:** 0.04 seconds (replay pipeline execution)
 - **Overall Result:** **10/10 metrics passed**
@@ -110,10 +110,10 @@ cd services/backend && uv run python -m eval.run --mode replay
 Pending: live evaluation after Azure AI services are enabled
 ```
 
-When Azure OpenAI (`gpt-4o-mini`, `text-embedding-3-small`) and Azure Document Intelligence (`F0`) are provisioned at Gate G1, the live evaluation suite is triggered using:
+When Azure OpenAI (default `gpt-5-mini`, `text-embedding-3-small`) and Azure Document Intelligence (`F0`) are provisioned at Gate G1, the live evaluation suite is triggered using:
 
 ```bash
-cd services/backend && uv run python -m eval.run --mode live --confirm-live --max-cost-usd 0.50
+cd services/backend && uv run python -m eval.run --mode live --confirm-live --max-cost-usd 3 --record-replay
 ```
 
 The live execution will record real token usage, API latency, and true OCR extraction accuracy against the synthetic document dataset.

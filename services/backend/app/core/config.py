@@ -38,13 +38,15 @@ class Settings(BaseSettings):
     INTAKE_RATE_LIMIT_PER_MINUTE: int = 60
 
     AZURE_OPENAI_ENDPOINT: str | None = None
-    AZURE_OPENAI_DEPLOYMENT: str = "gpt-4o-mini"
+    AZURE_OPENAI_DEPLOYMENT: str = "gpt-5-mini"
     AZURE_OPENAI_EMBEDDING_DEPLOYMENT: str = "text-embedding-3-small"
     AZURE_OPENAI_API_KEY: str | None = None
+    AZURE_OPENAI_API_VERSION: str = "2025-04-01-preview"
+    AZURE_OPENAI_REASONING_EFFORT: str = "low"
     AZURE_DOCINTEL_ENDPOINT: str | None = None
     AZURE_DOCINTEL_KEY: str | None = None
 
-    AI_DAILY_BUDGET_AED: float = 50.0
+    AI_DAILY_BUDGET_AED: float = 7.0
     AI_LOW_CONFIDENCE_THRESHOLD: float = 0.80
 
     APPLICATIONINSIGHTS_CONNECTION_STRING: str | None = None

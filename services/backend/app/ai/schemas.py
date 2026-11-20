@@ -34,6 +34,7 @@ class OCRResult(BaseModel):
     pages: list[OCRPage] = Field(default_factory=list)
     documents: list[dict[str, Any]] = Field(default_factory=list)
     tables: list[dict[str, Any]] = Field(default_factory=list)
+    raw_result: dict[str, Any] | None = None
 
 
 class FieldValue(BaseModel):

@@ -54,7 +54,7 @@ flowchart TD
     subgraph AI["AI Module Interface (app/ai)"]
         AI_Provider["AI Provider Interface<br/>(replay / mock / live)"]
         DI["Azure Document Intelligence (or Replay)"]
-        OAI["Azure OpenAI gpt-4o-mini & Embeddings"]
+        OAI["Azure OpenAI Chat (default gpt-5-mini) & Embeddings"]
     end
 
     subgraph Integrations["Adapter Interfaces (app/integrations)"]
@@ -190,7 +190,7 @@ The application abstracts all artificial intelligence operations behind the `app
    - Perfect for local development, CI pipelines, and repeatable evaluation testing.
 
 2. **Live Mode (`AI_PROVIDER=live`):**
-   - Connects to Azure Document Intelligence (`F0` SKU) for layout extraction and Azure OpenAI (`gpt-4o-mini` and `text-embedding-3-small`) for synthesis and semantic retrieval.
+   - Connects to Azure Document Intelligence (`F0` SKU) for layout extraction and Azure OpenAI (configurable chat model, default `gpt-5-mini`, and `text-embedding-3-small`) for synthesis and semantic retrieval.
    - Configured via environment variables (`AZURE_OPENAI_ENDPOINT`, `AZURE_DOCINTEL_ENDPOINT`).
    - Uses Microsoft Entra Managed Identity in Azure deployments.
 

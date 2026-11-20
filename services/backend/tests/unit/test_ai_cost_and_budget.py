@@ -24,9 +24,9 @@ def test_calculate_cost_aed() -> None:
 @pytest.mark.unit
 def test_daily_budget_check_within_budget() -> None:
     session = MagicMock()
-    # Mock budget = 50.0 AED, spent = 10.0 AED
+    # Mock budget = 7.0 AED, spent = 2.0 AED
     session.execute.return_value.scalar_one_or_none.return_value = None
-    session.execute.return_value.scalar_one.return_value = Decimal("10.0000")
+    session.execute.return_value.scalar_one.return_value = Decimal("2.0000")
 
     # Should not raise
     check_daily_budget(session)
