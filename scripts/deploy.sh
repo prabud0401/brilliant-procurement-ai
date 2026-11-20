@@ -148,6 +148,7 @@ deploy_gate_2() {
     --parameters \
       env="${ENV}" \
       location="${LOCATION}" \
+      postgresLocation="${POSTGRES_LOCATION:-${LOCATION}}" \
       jwtSecret="${JWT_SECRET}" \
       postgresAdminPassword="${POSTGRES_ADMIN_PASSWORD}" \
       appDbPassword="${APP_DB_PASSWORD}" \
@@ -179,6 +180,7 @@ deploy_gate_2() {
     --parameters \
       env="${ENV}" \
       location="${LOCATION}" \
+      postgresLocation="${POSTGRES_LOCATION:-${LOCATION}}" \
       jwtSecret="${JWT_SECRET}" \
       postgresAdminPassword="${POSTGRES_ADMIN_PASSWORD}" \
       appDbPassword="${APP_DB_PASSWORD}" \

@@ -6,6 +6,9 @@ param env string = 'prod'
 @description('Azure region for resources')
 param location string = 'uaenorth'
 
+@description('Azure region for PostgreSQL only (demo: northeurope, because Burstable Postgres is not offered to the demo subscription in UAE North; see infra/README.md)')
+param postgresLocation string = location
+
 @description('Resource tags')
 param tags object = {
   project: 'brilliant-demo'
@@ -131,7 +134,7 @@ module database 'modules/database.bicep' = {
   name: 'databaseDeployment'
   params: {
     env: env
-    location: location
+    location: postgresLocation
     tags: tags
     postgresServerName: postgresServerName
     administratorLogin: postgresAdminLogin

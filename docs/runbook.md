@@ -51,6 +51,8 @@ make datagen
 
 ## 2. Production Deployment (Azure UAE North)
 
+> Demo note: PostgreSQL is deployed to North Europe with `POSTGRES_LOCATION=northeurope ./scripts/deploy.sh prod g2` because the demo subscription has no Burstable Postgres SKU in UAE North. Data is synthetic. See `infra/README.md`.
+
 > [!NOTE]
 > Azure deployment commands require an active Azure subscription with permissions to create resource groups, role assignments, and Azure Container Apps.
 

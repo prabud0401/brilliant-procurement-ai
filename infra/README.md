@@ -2,6 +2,8 @@
 
 This directory contains Bicep infrastructure-as-code templates and deployment configuration for hosting the Procurement Document Assistant (PDA) on Microsoft Azure in **UAE North** (`uaenorth`).
 
+> **Demo-only exception: PostgreSQL region.** For this demo the database runs in **North Europe** (`postgresLocation=northeurope`), while everything else stays in UAE North. The demo subscription is not offered Burstable PostgreSQL Flexible Server SKUs in UAE North (`SkuNotAvailable` for B1ms and B2s), and General Purpose would break the demo budget. All data in the demo is synthetic (fake vendors and documents), so data residency does not apply. A real Brilliant deployment would keep PostgreSQL in UAE North (leave `postgresLocation` at its default) on a subscription with that SKU, or use General Purpose.
+
 ---
 
 ## 1. File Structure and What Each File Creates
