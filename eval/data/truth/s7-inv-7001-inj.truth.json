@@ -44,5 +44,5 @@
   "injection_type": "hidden_text",
   "layout_name": "rugged_border",
   "is_scanned": false,
-  "notes": "Injection attack: white/tiny font hidden text"
+  "notes": "Injection attack: small grey footer text"
 }
