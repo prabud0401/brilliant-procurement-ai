@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
+import math
 import re
 from typing import Any
 
 from app.ai.schemas import (
+    AnswerDraft,
+    AnswerSentence,
     ExtractionLineItem,
     ExtractionResult,
     FieldValue,
@@ -13,6 +17,7 @@ from app.ai.schemas import (
     OCRPage,
     OCRResult,
     OCRWord,
+    RetrievedChunk,
 )
 
 
@@ -170,3 +175,140 @@ class MockLlmClient:
             "prompt_version": "prompts/extract_v1.md",
         }
         return result, metadata
+
+
+def compute_deterministic_embedding(text: str) -> list[float]:
+    """Deterministic, normalized hashed bag-of-words + character trigrams into 1536 dims."""
+    dim = 1536
+    v = [0.0] * dim
+    clean_text = text.lower().strip()
+    if not clean_text:
+        return [1.0 / math.sqrt(dim)] * dim
+
+    words = re.findall(r"\w+", clean_text)
+    tokens: list[str] = list(words)
+    for w in words:
+        if len(w) >= 3:
+            for i in range(len(w) - 2):
+                tokens.append(w[i : i + 3])
+
+    if not tokens:
+        tokens = [clean_text]
+
+    for token in tokens:
+        h = int.from_bytes(hashlib.sha256(token.encode("utf-8")).digest(), "big")
+        idx = h % dim
+        sign = 1.0 if ((h >> 16) & 1) == 0 else -1.0
+        v[idx] += sign
+
+    norm = math.sqrt(sum(x * x for x in v))
+    if norm > 0.0:
+        return [round(x / norm, 7) for x in v]
+    return [1.0 / math.sqrt(dim)] * dim
+
+
+class MockEmbedder:
+    """Deterministic offline embedder producing 1536-dimensional normalized vectors."""
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        return [compute_deterministic_embedding(t) for t in texts]
+
+
+class MockAnswerWriter:
+    """Deterministic extractive answer writer for unit tests and offline environments."""
+
+    def answer(self, question: str, chunks: list[RetrievedChunk]) -> AnswerDraft:
+        if not chunks:
+            return AnswerDraft(
+                sentences=[],
+                refused=True,
+                refusal_reason="I could not find this in the documents you have access to",
+                model="mock-qa",
+                prompt_version="prompts/qa_v1.md",
+                tokens_in=10,
+                tokens_out=10,
+                latency_ms=10,
+            )
+
+        stop_words = {
+            "what",
+            "is",
+            "the",
+            "are",
+            "of",
+            "for",
+            "in",
+            "on",
+            "at",
+            "to",
+            "a",
+            "an",
+            "and",
+            "or",
+            "which",
+            "how",
+            "many",
+            "who",
+            "where",
+            "when",
+            "does",
+            "do",
+            "did",
+            "was",
+            "were",
+            "by",
+            "under",
+            "scenario",
+            "quoted",
+            "total",
+            "amount",
+        }
+        q_tokens = {
+            w
+            for w in re.findall(r"[a-zA-Z0-9_\-]+", question.lower())
+            if w not in stop_words and len(w) >= 2
+        }
+
+        candidates: list[tuple[float, str, str]] = []
+        for chunk in chunks:
+            lines = [ln.strip() for ln in chunk.text.split("\n") if ln.strip()]
+            for line in lines:
+                if re.match(r"^\|?[\s\-\|:]+\|?$", line):
+                    continue
+                line_tokens = set(re.findall(r"[a-zA-Z0-9_\-]+", line.lower()))
+                overlap = len(q_tokens.intersection(line_tokens))
+                if overlap > 0:
+                    candidates.append((float(overlap), line, chunk.id))
+
+        if not candidates:
+            return AnswerDraft(
+                sentences=[],
+                refused=True,
+                refusal_reason="I could not find this in the documents you have access to",
+                model="mock-qa",
+                prompt_version="prompts/qa_v1.md",
+                tokens_in=50,
+                tokens_out=10,
+                latency_ms=15,
+            )
+
+        candidates.sort(key=lambda c: c[0], reverse=True)
+        best_score, best_text, best_cid = candidates[0]
+
+        clean_text = best_text.strip("| ").strip()
+        sentence_text = (
+            f"According to the records: {clean_text}."
+            if not clean_text.endswith(".")
+            else clean_text
+        )
+
+        return AnswerDraft(
+            sentences=[AnswerSentence(text=sentence_text, chunk_ids=[best_cid])],
+            refused=False,
+            refusal_reason=None,
+            model="mock-qa",
+            prompt_version="prompts/qa_v1.md",
+            tokens_in=150,
+            tokens_out=40,
+            latency_ms=20,
+        )

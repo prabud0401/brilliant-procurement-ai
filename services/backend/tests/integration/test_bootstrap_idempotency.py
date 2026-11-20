@@ -15,6 +15,11 @@ def test_bootstrap_idempotent_and_roles_login(db_session: Session) -> None:
     test_password = "SecureDemoPassword123!"
 
     # Clean up to guarantee fresh start for idempotency test
+    db_session.execute(text("ALTER TABLE audit_log DISABLE TRIGGER trg_audit_log_no_update_delete"))
+    db_session.execute(text("ALTER TABLE audit_log DISABLE TRIGGER trg_audit_log_no_truncate"))
+    db_session.execute(text("TRUNCATE audit_log RESTART IDENTITY CASCADE"))
+    db_session.execute(text("ALTER TABLE audit_log ENABLE TRIGGER trg_audit_log_no_update_delete"))
+    db_session.execute(text("ALTER TABLE audit_log ENABLE TRIGGER trg_audit_log_no_truncate"))
     db_session.execute(text("DELETE FROM user_roles"))
     db_session.execute(text("DELETE FROM users"))
     db_session.execute(text("DELETE FROM departments"))

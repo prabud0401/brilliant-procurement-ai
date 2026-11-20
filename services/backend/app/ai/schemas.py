@@ -60,3 +60,29 @@ class ExtractionResult(BaseModel):
     doc_type: str
     header: dict[str, FieldValue | None]
     lines: list[ExtractionLineItem] = Field(default_factory=list)
+
+
+class RetrievedChunk(BaseModel):
+    id: str
+    document_id: str
+    document_title: str
+    page: int
+    chunk_no: int
+    text: str
+    score: float = 0.0
+
+
+class AnswerSentence(BaseModel):
+    text: str
+    chunk_ids: list[str] = Field(default_factory=list)
+
+
+class AnswerDraft(BaseModel):
+    sentences: list[AnswerSentence] = Field(default_factory=list)
+    refused: bool = False
+    refusal_reason: str | None = None
+    model: str | None = None
+    prompt_version: str | None = None
+    tokens_in: int | None = None
+    tokens_out: int | None = None
+    latency_ms: int | None = None

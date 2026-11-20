@@ -142,6 +142,8 @@ def ensure_database_migrated(migrator_url: str) -> None:
         with engine.begin() as conn:
             from sqlalchemy import text
 
+            conn.execute(text("DELETE FROM qa_logs"))
+            conn.execute(text("DELETE FROM chunks"))
             conn.execute(text("DELETE FROM extracted_lines"))
             conn.execute(text("DELETE FROM extracted_fields"))
             conn.execute(text("DELETE FROM extractions"))

@@ -20,6 +20,7 @@ dependencies = [
     "pypdf>=7.1.1",
     "openai>=3.55.1",
     "azure-ai-documentintelligence>=1.0.2",
+    "azure-identity>=1.27.0",
 ]
 
 [dependency-groups]

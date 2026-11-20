@@ -26,12 +26,14 @@ def test_api_auth_and_audit_lifecycle(db_session: Session) -> None:
     test_password = "SecureIntegrationPassword123!"
 
     # 1. Clean existing state
+    db_session.execute(text("ALTER TABLE audit_log DISABLE TRIGGER trg_audit_log_no_update_delete"))
+    db_session.execute(text("ALTER TABLE audit_log DISABLE TRIGGER trg_audit_log_no_truncate"))
+    db_session.execute(text("TRUNCATE audit_log RESTART IDENTITY CASCADE"))
+    db_session.execute(text("ALTER TABLE audit_log ENABLE TRIGGER trg_audit_log_no_update_delete"))
+    db_session.execute(text("ALTER TABLE audit_log ENABLE TRIGGER trg_audit_log_no_truncate"))
     db_session.execute(text("DELETE FROM user_roles"))
     db_session.execute(text("DELETE FROM users"))
     db_session.execute(text("DELETE FROM departments"))
-    db_session.execute(text("ALTER TABLE audit_log DISABLE TRIGGER trg_audit_log_no_truncate"))
-    db_session.execute(text("TRUNCATE audit_log RESTART IDENTITY"))
-    db_session.execute(text("ALTER TABLE audit_log ENABLE TRIGGER trg_audit_log_no_truncate"))
     db_session.commit()
 
     # 2. Bootstrap demo accounts
