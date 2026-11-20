@@ -64,15 +64,21 @@ def test_di_fixture_structure() -> None:
         assert "pages" in ar and len(ar["pages"]) > 0
         assert "words" in ar["pages"][0]
         assert "lines" in ar["pages"][0]
-        assert "documents" in ar and len(ar["documents"]) > 0
+        # Real fixtures come from prebuilt-invoice (documents with fields) or
+        # prebuilt-layout (pages only, no documents); both are valid.
+        documents = ar.get("documents") or []
+        if documents:
+            fields = documents[0].get("fields", {})
+            assert "VendorName" in fields
+            for fld_val in fields.values():
+                if fld_val.get("confidence", 1.0) < 0.80:
+                    low_conf_found = True
 
-        fields = ar["documents"][0].get("fields", {})
-        assert "VendorName" in fields
-
-        # Check for varied confidence below 0.80
-        for fld_val in fields.values():
-            if fld_val.get("confidence", 1.0) < 0.80:
-                low_conf_found = True
+        # Word-level confidence below 0.80 also exercises the review workflow
+        for page in ar["pages"]:
+            for word in page.get("words", []):
+                if word.get("confidence", 1.0) < 0.80:
+                    low_conf_found = True
 
     assert low_conf_found, (
         "Expected at least one field with confidence < 0.80 to exercise review workflow"

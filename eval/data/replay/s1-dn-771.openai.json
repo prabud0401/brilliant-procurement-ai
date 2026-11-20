@@ -1,21 +1,111 @@
 {
-  "id": "chatcmpl-replay-s1-dn-771",
-  "object": "chat.completion",
-  "created": 1732040000,
-  "model": "gpt-4o-mini",
+  "id": "chatcmpl-EmJ1aIndUD4CHkwPHy0XMzGjXKbkj",
   "choices": [
     {
+      "finish_reason": "stop",
       "index": 0,
+      "logprobs": null,
       "message": {
+        "content": "{\n  \"doc_type\": \"delivery_note\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Gulf Line IT Trading\",\n      \"page\": 1,\n      \"source_text\": \"Gulf Line IT Trading TRN: 100000000000002 Office 402, Tamouh Tower, Al Reem Island, Abu Dhabi, UAE\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000002\",\n      \"page\": 1,\n      \"source_text\": \"Gulf Line IT Trading TRN: 100000000000002 Office 402, Tamouh Tower, Al Reem Island, Abu Dhabi, UAE\"\n    },\n    \"document_number\": {\n      \"value\": \"DN-771\",\n      \"page\": 1,\n      \"source_text\": \"Number: DN-771 Date: 2026-11-09 Currency: AED PO Number: PO-0042\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-09\",\n      \"page\": 1,\n      \"source_text\": \"Number: DN-771 Date: 2026-11-09 Currency: AED PO Number: PO-0042\"\n    },\n    \"po_number\": {\n      \"value\": \"PO-0042\",\n      \"page\": 1,\n      \"source_text\": \"Number: DN-771 Date: 2026-11-09 Currency: AED PO Number: PO-0042\"\n    },\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Number: DN-771 Date: 2026-11-09 Currency: AED PO Number: PO-0042\"\n    },\n    \"payment_terms\": null,\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"0.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n0.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"0.00\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n0.00 AED\"\n    },\n    \"total\": {\n      \"value\": \"0.00\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n0.00 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"IT-LAP-14\",\n      \"description\": \"Laptop 14in Intel Core i7 16GB RAM 512GB SSD\",\n      \"qty\": \"6\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"0.00\",\n      \"discount\": null,\n      \"vat_rate\": null,\n      \"line_total\": \"0.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nIT-LAP-14\\nLaptop 14in Intel Core i7 16GB RAM 512GB SSD\\n6\\nEA\\n0.00\\n0.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"IT-MON-27\",\n      \"description\": \"Monitor 27in QHD IPS USB-C 75Hz\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"0.00\",\n      \"discount\": null,\n      \"vat_rate\": null,\n      \"line_total\": \"0.00\",\n      \"page\": 1,\n      \"source_text\": \"2\\nIT-MON-27\\nMonitor 27in QHD IPS USB-C 75Hz\\n10\\nEA\\n0.00\\n0.00\"\n    }\n  ]\n}",
+        "refusal": null,
         "role": "assistant",
-        "content": "{\n  \"doc_type\": \"delivery_note\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Gulf Line IT Trading\",\n      \"page\": 1,\n      \"source_text\": \"Gulf Line IT Trading\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000002\",\n      \"page\": 1,\n      \"source_text\": \"TRN: 100000000000002\"\n    },\n    \"document_number\": {\n      \"value\": \"DN-771\",\n      \"page\": 1,\n      \"source_text\": \"Number: DN-771\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-09\",\n      \"page\": 1,\n      \"source_text\": \"Date: 2026-11-09\"\n    },\n    \"po_number\": {\n      \"value\": \"PO-0042\",\n      \"page\": 1,\n      \"source_text\": \"PO Number: PO-0042\"\n    },\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Currency: AED\"\n    },\n    \"payment_terms\": null,\n    \"due_date\": null,\n    \"subtotal\": {\n      \"value\": \"0.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal: 0.00\"\n    },\n    \"vat_amount\": {\n      \"value\": \"0.00\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%): 0.00\"\n    },\n    \"total\": {\n      \"value\": \"0.00\",\n      \"page\": 1,\n      \"source_text\": \"Total: 0.00\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"IT-LAP-14\",\n      \"description\": \"Laptop 14in Intel Core i7 16GB RAM 512GB SSD\",\n      \"qty\": \"6\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"0.00\",\n      \"discount\": \"0.00\",\n      \"vat_rate\": \"5\",\n      \"line_total\": \"0.00\",\n      \"page\": 1,\n      \"source_text\": \"1 IT-LAP-14 Laptop 14in Intel Core i7 16GB RAM 512GB SSD 6 EA 0.00 0.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"IT-MON-27\",\n      \"description\": \"Monitor 27in QHD IPS USB-C 75Hz\",\n      \"qty\": \"10\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"0.00\",\n      \"discount\": \"0.00\",\n      \"vat_rate\": \"5\",\n      \"line_total\": \"0.00\",\n      \"page\": 1,\n      \"source_text\": \"2 IT-MON-27 Monitor 27in QHD IPS USB-C 75Hz 10 EA 0.00 0.00\"\n    }\n  ]\n}"
+        "annotations": [],
+        "audio": null,
+        "function_call": null,
+        "tool_calls": null
       },
-      "finish_reason": "stop"
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "protected_material_code": {
+          "detected": false,
+          "filtered": false
+        },
+        "protected_material_text": {
+          "detected": false,
+          "filtered": false
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      }
     }
   ],
+  "created": 1795181582,
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "chat.completion",
+  "metadata": null,
+  "moderation": null,
+  "service_tier": "default",
+  "system_fingerprint": null,
   "usage": {
-    "prompt_tokens": 1250,
-    "completion_tokens": 466,
-    "total_tokens": 1716
+    "completion_tokens": 1122,
+    "prompt_tokens": 1579,
+    "total_tokens": 2701,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 320,
+      "rejected_prediction_tokens": 0,
+      "text_tokens": null
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": null,
+      "cached_tokens": 1280,
+      "image_tokens": null,
+      "text_tokens": null
+    },
+    "latency_checkpoint": {
+      "engine_tbt_ms": 7,
+      "engine_ttft_ms": 37,
+      "engine_ttlt_ms": 8333,
+      "pre_inference_ms": 134,
+      "service_tbt_ms": 7,
+      "service_ttft_ms": 795,
+      "service_ttlt_ms": 9084,
+      "user_visible_ttft_ms": 661
+    }
+  },
+  "prompt_filter_results": [
+    {
+      "prompt_index": 0,
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "jailbreak": {
+          "detected": false,
+          "filtered": false
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      }
+    }
+  ],
+  "routing": {
+    "serving_pipereplica": "d20261104055156-27216c1e-default-r1-dp0-default"
   }
 }

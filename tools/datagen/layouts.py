@@ -61,11 +61,13 @@ class SyntheticDocCanvas(canvas.Canvas):  # type: ignore[misc]
         self.drawRightString(width - 40, 22, f"Page {self._pageNumber} of {total_pages}")
         self.drawString(40, 22, "Demo Holdings LLC • Synthetic Test Dataset")
 
-        # Hidden text injection layer (for S7)
+        # Injection text layer (for S7)
         if hasattr(self, "_hidden_text") and self._hidden_text:
-            # Render in white color on white background (invisible to human eye, extractable by OCR)
-            self.setFont("Helvetica", 1)  # 1pt tiny font
-            self.setFillColor(colors.white)
+            # Small light-grey print: easy to overlook for a reviewer, but read by OCR.
+            # (White 1pt text is not read by Azure Document Intelligence, so it never
+            # reached the model and could not exercise the injection defences.)
+            self.setFont("Helvetica", 6)
+            self.setFillColor(colors.HexColor("#8a8a8a"))
             self.drawString(50, 45, str(self._hidden_text))
 
         self.restoreState()
