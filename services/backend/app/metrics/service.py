@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 
@@ -11,15 +12,19 @@ from sqlalchemy.orm import Session
 from app.ai.cost import calculate_cost_aed, get_daily_budget_aed
 from app.core.models import (
     ApprovalStep,
+    Department,
     Document,
     ExtractedField,
     Extraction,
     Match,
+    PurchaseOrder,
+    PurchaseRequest,
     QALog,
 )
 from app.metrics.schemas import (
     AdminMetricsResponse,
     AITodayMetrics,
+    DepartmentSpendMetric,
     FieldCorrectionRate,
 )
 
@@ -172,6 +177,74 @@ def compute_admin_metrics(session: Session) -> AdminMetricsResponse:
 
     qa_refusal_rate = round(float(refused_qa) / float(total_qa), 4) if total_qa > 0 else 0.0
 
+    # 8. Spend by Department (Operational spend and approval metrics per department)
+    dept_rows = session.execute(select(Department).order_by(Department.name)).scalars().all()
+
+    pr_stats = session.execute(
+        select(
+            PurchaseRequest.department_id,
+            func.count(PurchaseRequest.id),
+            func.coalesce(func.sum(PurchaseRequest.total_aed), Decimal("0.00")),
+        ).group_by(PurchaseRequest.department_id)
+    ).all()
+    pr_map = {row[0]: (int(row[1] or 0), float(row[2] or 0.0)) for row in pr_stats}
+
+    po_stats = session.execute(
+        select(
+            PurchaseOrder.department_id,
+            func.count(PurchaseOrder.id),
+            func.coalesce(func.sum(PurchaseOrder.total), Decimal("0.00")),
+        ).group_by(PurchaseOrder.department_id)
+    ).all()
+    po_map = {row[0]: (int(row[1] or 0), float(row[2] or 0.0)) for row in po_stats}
+
+    pr_pending = session.execute(
+        select(
+            PurchaseRequest.department_id,
+            func.count(ApprovalStep.id),
+        )
+        .select_from(ApprovalStep)
+        .join(PurchaseRequest, ApprovalStep.subject_id == PurchaseRequest.id)
+        .where(ApprovalStep.subject_type == "pr", ApprovalStep.status == "pending")
+        .group_by(PurchaseRequest.department_id)
+    ).all()
+
+    po_pending = session.execute(
+        select(
+            PurchaseOrder.department_id,
+            func.count(ApprovalStep.id),
+        )
+        .select_from(ApprovalStep)
+        .join(PurchaseOrder, ApprovalStep.subject_id == PurchaseOrder.id)
+        .where(ApprovalStep.subject_type == "po", ApprovalStep.status == "pending")
+        .group_by(PurchaseOrder.department_id)
+    ).all()
+
+    pending_map: dict[uuid.UUID, int] = {}
+    for row in pr_pending:
+        if row[0]:
+            pending_map[row[0]] = pending_map.get(row[0], 0) + int(row[1] or 0)
+    for row in po_pending:
+        if row[0]:
+            pending_map[row[0]] = pending_map.get(row[0], 0) + int(row[1] or 0)
+
+    spend_by_dept: list[DepartmentSpendMetric] = []
+    for dept in dept_rows:
+        pr_c, pr_t = pr_map.get(dept.id, (0, 0.0))
+        po_c, po_t = po_map.get(dept.id, (0, 0.0))
+        p_c = pending_map.get(dept.id, 0)
+        spend_by_dept.append(
+            DepartmentSpendMetric(
+                department_id=str(dept.id),
+                department_name=dept.name,
+                purchase_requests_count=pr_c,
+                purchase_requests_total_aed=round(pr_t, 2),
+                purchase_orders_count=po_c,
+                purchase_orders_total_aed=round(po_t, 2),
+                pending_approvals_count=p_c,
+            )
+        )
+
     return AdminMetricsResponse(
         documents_processed=docs_count,
         total_fields=total_fields,
@@ -187,4 +260,5 @@ def compute_admin_metrics(session: Session) -> AdminMetricsResponse:
         qa_refusal_rate=qa_refusal_rate,
         qa_total_questions=total_qa,
         qa_refused_questions=refused_qa,
+        spend_by_department=spend_by_dept,
     )

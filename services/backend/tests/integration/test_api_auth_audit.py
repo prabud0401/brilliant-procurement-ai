@@ -31,6 +31,15 @@ def test_api_auth_and_audit_lifecycle(db_session: Session) -> None:
     db_session.execute(text("TRUNCATE audit_log RESTART IDENTITY CASCADE"))
     db_session.execute(text("ALTER TABLE audit_log ENABLE TRIGGER trg_audit_log_no_update_delete"))
     db_session.execute(text("ALTER TABLE audit_log ENABLE TRIGGER trg_audit_log_no_truncate"))
+    db_session.execute(text("DELETE FROM match_exceptions"))
+    db_session.execute(text("DELETE FROM match_lines"))
+    db_session.execute(text("DELETE FROM matches"))
+    db_session.execute(text("DELETE FROM outbox"))
+    db_session.execute(text("DELETE FROM approval_steps"))
+    db_session.execute(text("DELETE FROM po_lines"))
+    db_session.execute(text("DELETE FROM purchase_orders"))
+    db_session.execute(text("DELETE FROM pr_lines"))
+    db_session.execute(text("DELETE FROM purchase_requests"))
     db_session.execute(text("DELETE FROM user_roles"))
     db_session.execute(text("DELETE FROM users"))
     db_session.execute(text("DELETE FROM departments"))
@@ -38,8 +47,8 @@ def test_api_auth_and_audit_lifecycle(db_session: Session) -> None:
 
     # 2. Bootstrap demo accounts
     boot_res = bootstrap(db_session, password=test_password)
-    assert boot_res["users_created"] == 8
-    assert boot_res["departments_created"] == 3
+    assert boot_res["users_created"] == 15
+    assert boot_res["departments_created"] == 6
 
     user_req_fac = (
         db_session.query(User).filter(User.email == "requester.fac@demo-holdings.example").one()

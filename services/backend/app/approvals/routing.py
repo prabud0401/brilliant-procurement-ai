@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
@@ -114,8 +115,19 @@ def find_eligible_manager(
             if m.department_id == preferred_dept_id:
                 return m
 
-    # Sort by approval_limit_aed ascending to pick the closest sufficient limit
-    managers.sort(key=lambda m: m.approval_limit_aed)
+    # Sort by approval_limit_aed ascending to pick the closest sufficient limit.
+    # Secondary order by created_at then email ensures fallback determinism is preserved.
+    def _manager_sort_key(m: User) -> tuple[Decimal, str, str]:
+        limit = getattr(m, "approval_limit_aed", Decimal("0.00")) or Decimal("0.00")
+        created_at = getattr(m, "created_at", None)
+        if isinstance(created_at, datetime):
+            c_str = created_at.isoformat()
+        else:
+            c_str = "9999-12-31"
+        email = getattr(m, "email", "") or ""
+        return (limit, c_str, email)
+
+    managers.sort(key=_manager_sort_key)
     return managers[0]
 
 

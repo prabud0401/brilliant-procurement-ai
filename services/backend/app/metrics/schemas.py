@@ -22,6 +22,16 @@ class AITodayMetrics(BaseModel):
     budget_utilization_pct: float
 
 
+class DepartmentSpendMetric(BaseModel):
+    department_id: str
+    department_name: str
+    purchase_requests_count: int
+    purchase_requests_total_aed: float
+    purchase_orders_count: int
+    purchase_orders_total_aed: float
+    pending_approvals_count: int
+
+
 class AdminMetricsResponse(BaseModel):
     documents_processed: int
     total_fields: int
@@ -37,3 +47,4 @@ class AdminMetricsResponse(BaseModel):
     qa_refusal_rate: float
     qa_total_questions: int
     qa_refused_questions: int
+    spend_by_department: list[DepartmentSpendMetric] = Field(default_factory=list)

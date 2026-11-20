@@ -11,7 +11,7 @@ from app.core.database import SessionLocal, get_migrator_engine
 from app.core.models import Department, User, UserRole
 from app.core.security import hash_password
 
-DEPARTMENTS = ["Facilities", "IT", "Projects"]
+DEPARTMENTS = ["Facilities", "IT", "Projects", "Finance", "HR", "Operations"]
 
 DEMO_USERS: list[dict[str, Any]] = [
     {
@@ -68,6 +68,55 @@ DEMO_USERS: list[dict[str, Any]] = [
         "display_name": "Aisha Demo-Admin",
         "department": "IT",
         "roles": ["admin"],
+        "approval_limit_aed": Decimal("0.00"),
+    },
+    {
+        "email": "requester.finance@demo-holdings.example",
+        "display_name": "Layla Demo-Requester",
+        "department": "Finance",
+        "roles": ["requester"],
+        "approval_limit_aed": Decimal("0.00"),
+    },
+    {
+        "email": "manager.finance@demo-holdings.example",
+        "display_name": "Hassan Demo-Manager",
+        "department": "Finance",
+        "roles": ["manager"],
+        "approval_limit_aed": Decimal("50000.00"),
+    },
+    {
+        "email": "requester.hr@demo-holdings.example",
+        "display_name": "Noura Demo-Requester",
+        "department": "HR",
+        "roles": ["requester"],
+        "approval_limit_aed": Decimal("0.00"),
+    },
+    {
+        "email": "manager.hr@demo-holdings.example",
+        "display_name": "Zayed Demo-Manager",
+        "department": "HR",
+        "roles": ["manager"],
+        "approval_limit_aed": Decimal("50000.00"),
+    },
+    {
+        "email": "requester.ops@demo-holdings.example",
+        "display_name": "Hamad Demo-Requester",
+        "department": "Operations",
+        "roles": ["requester"],
+        "approval_limit_aed": Decimal("0.00"),
+    },
+    {
+        "email": "manager.ops@demo-holdings.example",
+        "display_name": "Reem Demo-Manager",
+        "department": "Operations",
+        "roles": ["manager"],
+        "approval_limit_aed": Decimal("50000.00"),
+    },
+    {
+        "email": "requester.projects@demo-holdings.example",
+        "display_name": "Salem Demo-Requester",
+        "department": "Projects",
+        "roles": ["requester"],
         "approval_limit_aed": Decimal("0.00"),
     },
 ]
