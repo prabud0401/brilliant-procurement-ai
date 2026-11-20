@@ -28,6 +28,7 @@ const securityHeaders = [
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
       "connect-src 'self'",
+      "worker-src 'self' blob:",
       "frame-ancestors 'none'",
     ].join("; "),
   },
@@ -45,6 +46,13 @@ const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: true,
   poweredByHeader: false,
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      canvas: false,
+    };
+    return config;
+  },
   async headers() {
     return [
       {

@@ -11,7 +11,7 @@ from sqlalchemy.sql.elements import ColumnElement
 
 from app.core.database import get_db
 from app.core.errors import ProblemException
-from app.core.models import AuditLog, Document, PurchaseOrder, PurchaseRequest, User
+from app.core.models import AuditLog, Chunk, Document, PurchaseOrder, PurchaseRequest, User
 from app.core.security import decode_access_token, extract_bearer_token
 
 
@@ -278,6 +278,15 @@ def scope_filter(
             if not principal.department_id:
                 return Document.owner_id == principal.id
             return Document.department_id == principal.department_id
+
+    # Scopes for Chunk
+    if model is Chunk:
+        if scope == ScopeRule.OWN:
+            return Chunk.owner_id == principal.id
+        if scope == ScopeRule.DEPT:
+            if not principal.department_id:
+                return Chunk.owner_id == principal.id
+            return Chunk.department_id == principal.department_id
 
     # Scopes for PurchaseRequest
     if model is PurchaseRequest:

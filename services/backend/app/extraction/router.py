@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from app.audit.service import record as record_audit
 from app.core.database import get_db
 from app.core.errors import ProblemException
-from app.core.models import Document, ExtractedField, ExtractedLine, Extraction, Vendor
+from app.core.models import Document, ExtractedField, ExtractedLine, Extraction, Job, Vendor
 from app.core.policy import Principal, get_current_principal, require
 
 router = APIRouter(prefix="/documents", tags=["extraction"])
@@ -449,6 +449,15 @@ def confirm_document(
     before_status = doc.status
     doc.status = "confirmed"
     doc.updated_at = datetime.now(timezone.utc)
+
+    # Enqueue embedding job per design 3.1 & 6.6
+    embed_job = Job(
+        id=uuid.uuid4(),
+        type="embed_document",
+        payload={"document_id": str(doc.id)},
+        status="queued",
+    )
+    db.add(embed_job)
 
     record_audit(
         session=db,

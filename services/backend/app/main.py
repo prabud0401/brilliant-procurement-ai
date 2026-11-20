@@ -31,6 +31,7 @@ from app.documents.router import router as documents_router
 from app.extraction.router import router as extraction_router
 from app.matching.router import exceptions_router, matches_router
 from app.orders.router import po_router, pr_router
+from app.qa.router import router as qa_router
 from app.settings_api.router import router as settings_router
 
 # Simple in-memory IP rate limiter for login
@@ -200,6 +201,7 @@ api_v1.include_router(comparisons_router)
 api_v1.include_router(matches_router)
 api_v1.include_router(exceptions_router)
 api_v1.include_router(settings_router)
+api_v1.include_router(qa_router)
 
 
 @api_v1.get("/me", response_model=MeResponse, tags=["auth"])
