@@ -92,8 +92,8 @@ eval-test:
 REPEAT_ARGS ?= --repeat-each 3
 
 e2e-demo:
-	cd apps/web && WEB_BASE_URL=$${WEB_BASE_URL:-http://localhost:3021} npx playwright test e2e/demo/demo-script.spec.ts $(REPEAT_ARGS)
+	cd apps/web && WEB_BASE_URL=$${WEB_BASE_URL:-http://localhost:3000} npx playwright test e2e/demo/demo-script.spec.ts $(REPEAT_ARGS)
 
 smoke:
-	./scripts/smoke.sh $${WEB_BASE_URL:-http://localhost:3021}
+	./scripts/smoke.sh $${WEB_BASE_URL:-http://localhost:3000}
 
