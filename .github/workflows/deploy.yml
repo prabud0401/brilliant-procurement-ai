@@ -80,7 +80,7 @@ jobs:
           az group create \
             --name rg-pda-prod-uaen \
             --location uaenorth \
-            --tags project=brilliant-pda env=prod owner=prabudeva expires=2026-11-29
+            --tags project=brilliant-pda env=prod expires=2026-11-29
 
       - name: Preview infrastructure changes (what-if)
         run: |

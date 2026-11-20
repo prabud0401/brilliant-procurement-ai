@@ -10,7 +10,6 @@ param location string = 'uaenorth'
 param tags object = {
   project: 'brilliant-pda'
   env: env
-  owner: 'prabudeva'
   expires: '2026-11-29'
 }
 
