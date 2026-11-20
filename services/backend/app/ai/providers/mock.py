@@ -35,14 +35,27 @@ class MockDocumentAnalyzer:
     ) -> OCRResult:
         # Generate basic OCR text from file bytes if printable, else default synthetic text
         text_content = ""
-        try:
-            # Try to see if there is plain text in stream (e.g. from dummy test file)
-            decoded = file_bytes.decode("utf-8", errors="ignore")
-            lines = [line.strip() for line in decoded.splitlines() if line.strip()]
-            if lines:
-                text_content = "\n".join(lines)
-        except Exception:
-            pass
+        if file_bytes.startswith(b"%PDF"):
+            try:
+                import io
+
+                import pypdf
+
+                reader = pypdf.PdfReader(io.BytesIO(file_bytes))
+                pages_text = [p.extract_text() or "" for p in reader.pages]
+                text_content = "\n".join(t for t in pages_text if t)
+            except Exception:
+                pass
+
+        if not text_content:
+            try:
+                # Try to see if there is plain text in stream (e.g. from dummy test file)
+                decoded = file_bytes.decode("utf-8", errors="ignore")
+                lines = [line.strip() for line in decoded.splitlines() if line.strip()]
+                if lines:
+                    text_content = "\n".join(lines)
+            except Exception:
+                pass
 
         if not text_content:
             text_content = (
@@ -83,17 +96,36 @@ class MockDocumentAnalyzer:
 class MockLlmClient:
     """Deterministic in-memory LLM client."""
 
+    def __init__(self) -> None:
+        self.last_usage: dict[str, Any] = {}
+
     def classify(self, first_page_text: str) -> str:
+        label, _ = self.classify_with_usage(first_page_text)
+        return label
+
+    def classify_with_usage(self, first_page_text: str) -> tuple[str, dict[str, Any]]:
         text_lower = first_page_text.lower()
-        if "invoice" in text_lower:
-            return "invoice"
-        if "quotation" in text_lower or "quote" in text_lower:
-            return "quote"
-        if "delivery note" in text_lower or "delivery" in text_lower:
-            return "delivery_note"
-        if "purchase order" in text_lower:
-            return "purchase_order"
-        return "quote"
+        if "tax invoice" in text_lower or "invoice" in text_lower:
+            label = "invoice"
+        elif "delivery note" in text_lower or re.search(r"\b(delivery[ _-]note|dn)\b", text_lower):
+            label = "delivery_note"
+        elif "purchase order" in text_lower or re.search(
+            r"\b(purchase[ _-]order|po)\b", text_lower
+        ):
+            label = "purchase_order"
+        elif "quotation" in text_lower or "quote" in text_lower:
+            label = "quote"
+        else:
+            label = "other"
+
+        metadata = {
+            "tokens_in": 50,
+            "tokens_out": 10,
+            "latency_ms": 10,
+            "model": "mock-llm",
+        }
+        self.last_usage = metadata
+        return label, metadata
 
     def extract(
         self,

@@ -215,6 +215,7 @@ class ReplayLlmClient:
 
     def __init__(self, replay_dir: Path | str | None = None) -> None:
         self._replay_dir = Path(replay_dir) if replay_dir is not None else None
+        self.last_usage: dict[str, Any] = {}
 
     @property
     def replay_dir(self) -> Path:
@@ -227,16 +228,32 @@ class ReplayLlmClient:
         return get_replay_dir()
 
     def classify(self, first_page_text: str) -> str:
+        label, _ = self.classify_with_usage(first_page_text)
+        return label
+
+    def classify_with_usage(self, first_page_text: str) -> tuple[str, dict[str, Any]]:
         text_lower = first_page_text.lower()
-        if "invoice" in text_lower:
-            return "invoice"
-        if "quotation" in text_lower or "quote" in text_lower:
-            return "quote"
-        if "delivery note" in text_lower or "delivery" in text_lower:
-            return "delivery_note"
-        if "purchase order" in text_lower:
-            return "purchase_order"
-        return "quote"
+        if "tax invoice" in text_lower or "invoice" in text_lower:
+            label = "invoice"
+        elif "delivery note" in text_lower or re.search(r"\b(delivery[ _-]note|dn)\b", text_lower):
+            label = "delivery_note"
+        elif "purchase order" in text_lower or re.search(
+            r"\b(purchase[ _-]order|po)\b", text_lower
+        ):
+            label = "purchase_order"
+        elif "quotation" in text_lower or "quote" in text_lower:
+            label = "quote"
+        else:
+            label = "other"
+
+        metadata = {
+            "tokens_in": 50,
+            "tokens_out": 10,
+            "latency_ms": 10,
+            "model": "gpt-4o-mini",
+        }
+        self.last_usage = metadata
+        return label, metadata
 
     def extract(
         self,

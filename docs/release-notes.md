@@ -20,7 +20,7 @@ The **Procurement Document Assistant (PDA)** is an AI-assisted procurement and i
 This release implements all 19 Must-have user stories and the stretch email intake integration:
 
 ### 2.1 Document Ingestion & AI Extraction
-- **US-01 (File Validation):** Secure file upload supporting PDF, PNG, and JPEG up to 10 MB. Implements MIME type inspection, SHA-256 duplicate detection, and page count checks.
+- **US-01 (File Validation):** Secure file upload supporting PDF, PNG, and JPEG up to 10 MB. Implements MIME type inspection, SHA-256 duplicate detection, and page count checks. Untyped and email-intake documents are auto-classified after OCR and before extraction.
 - **US-02 (Extraction Pipeline):** Automated extraction of vendor names, TRNs, document numbers, line items, quantities, unit prices, subtotal, VAT, and total amounts with bounding-box coordinates and confidence scores.
 - **US-03 (Human-in-the-Loop Review):** Split-screen review interface displaying the original document with interactive canvas bounding-box overlays alongside editable extracted fields. Open items must be resolved before confirmation.
 - **US-04 (Procurement Validation Rules):** Automated checks for line-item sum reconciliation, UAE 5% VAT calculations, valid UAE TRN format, and logical date sequencing.
