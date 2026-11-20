@@ -20,6 +20,12 @@ This report documents the performance of the AI components in the Procurement Do
 
 > **How to read these numbers.** Replay mode feeds the real pipeline code (extraction validation, retrieval, refusal logic, injection screening, comparison facts) with recorded AI responses. The replay fixtures are generated from the ground truth, so a 100% replay score proves that the pipeline, the metrics and the plumbing work end to end; it does not measure model quality. The live run (section 5) is the real measure.
 
+### Evaluation Method & Pipeline Improvements (Gate G1 Fixes)
+- **Deterministic Value Cleanup (`app/ai/normalize.py`):** Applied to every extraction result after the model (live and replay paths alike) before storing and scoring. Strips known leading labels (e.g., `Number:`, `Date:`, `TRN:`, `Currency:`, `Subtotal:`, `Total:`), cuts vendor trading names at TRN, address, phone, or email markers, parses amounts and quantities to plain `Decimal` strings (removing currency symbols and commas), maps currencies to ISO codes (`AED`), and standardizes dates to ISO `YYYY-MM-DD`. Any field modified by cleanup or failing parse has its confidence score lowered below the review threshold (`AI_LOW_CONFIDENCE_THRESHOLD`, 0.80).
+- **Calibrated Confidence Scoring:** Fields altered by cleanup, fields whose cleaned value is ungrounded in page/source text, failed parses, and arithmetic mismatches (`subtotal + VAT != total` or line sums) score strictly below 0.80, reserving high confidence exclusively for exact, verified document matches.
+- **Q&A Scorer Alignment (AIQ-06):** Updated the evaluation scorer so numerical values in expected answers are strictly required and matched across equivalent representations (e.g., `10`, `10.00`, `10 units`, `28,875.00`, `AED 28,875`), while auxiliary unit words (`units`, `pcs`, `items`) are not required. Wrong numerical values strictly fail.
+- **Failure Diagnostics in Evaluation Reports:** Live runs log structured per-item failure breakdowns for header fields (expected vs. got) and Q&A questions (expected vs. answer text) directly into `report.json` to enable rapid diagnosis without re-running.
+
 ## 2. Evaluation Dataset & Scope
 
 The evaluation harness evaluates a focused benchmark suite matching the reduced evaluation dataset per Sprint Plan Section 3.2:

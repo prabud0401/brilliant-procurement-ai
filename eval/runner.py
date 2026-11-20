@@ -17,6 +17,7 @@ from app.ai.factory import (
     get_embedder,
     get_llm_client,
 )
+from app.ai.normalize import CleanupMetadata, cleanup_extraction_result
 from app.ai.providers.replay import (
     ReplayAnswerWriter,
     ReplayDocumentAnalyzer,
@@ -46,6 +47,7 @@ from eval.metrics import (
     compute_aiq09,
     compute_aiq10,
     normalize_number,
+    score_qa_answer,
 )
 from eval.models import EvaluationReport, MetricResult
 
@@ -310,6 +312,9 @@ class EvaluationRunner:
             )
 
             ext_result, ext_meta = llm.extract(ocr_result, doc_type_norm, doc_id=doc_id)
+            cleanup_meta = ext_meta.get("cleanup")
+            if cleanup_meta is None:
+                ext_result, cleanup_meta = cleanup_extraction_result(ext_result)
 
             if self.mode == "live":
                 tin = ext_meta.get("tokens_in", 0)
@@ -351,6 +356,9 @@ class EvaluationRunner:
                     source_text=source_text,
                     page=first_page,
                     is_invoice=(d["doc_type"] == "invoice"),
+                    was_cleaned=cleanup_meta.was_cleaned(fname),
+                    parse_failed=cleanup_meta.parse_failed(fname),
+                    has_arithmetic_mismatch=cleanup_meta.has_arithmetic_mismatch(fname),
                 )
 
                 field_eval_record = {
@@ -461,16 +469,17 @@ class EvaluationRunner:
             if is_answerable:
                 # Answer correctness (AIQ-06)
                 full_text = " ".join(s.text for s in draft.sentences)
-                key_terms = [t.lower() for t in expected_answer.split() if len(t) > 2]
-                matched_terms = [t for t in key_terms if t in full_text.lower()]
-                is_correct = (
-                    not was_refused and len(matched_terms) >= min(len(key_terms), 2)
-                ) or expected_answer.lower() in full_text.lower()
+                is_correct = score_qa_answer(
+                    expected_answer=expected_answer,
+                    actual_answer=full_text,
+                    was_refused=was_refused,
+                )
 
                 answerable_eval.append(
                     {
                         "question_id": qid,
                         "question": q_text,
+                        "expected_answer": expected_answer,
                         "is_correct": is_correct,
                         "answer_text": full_text,
                     }
@@ -599,6 +608,36 @@ class EvaluationRunner:
         duration = time.time() - start_time
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
+        # Per-item failure details for diagnosis
+        header_failures = [
+            {
+                "doc_id": item["doc_id"],
+                "field_name": item["field_name"],
+                "expected": item["truth_value"],
+                "got": item["extracted_value"],
+                "is_scanned": item.get("is_scanned", False),
+            }
+            for item in confidence_fields_eval
+            if not item["is_correct"]
+        ]
+        qa_failures = [
+            {
+                "question_id": item["question_id"],
+                "question": item["question"],
+                "expected": item.get("expected_answer", ""),
+                "got": item["answer_text"],
+            }
+            for item in answerable_eval
+            if not item["is_correct"]
+        ]
+
+        failure_details: dict[str, Any] | None = None
+        if self.mode == "live" or header_failures or qa_failures:
+            failure_details = {
+                "header_failures": header_failures,
+                "qa_failures": qa_failures,
+            }
+
         report = EvaluationReport(
             timestamp=timestamp,
             mode=self.mode,
@@ -614,6 +653,7 @@ class EvaluationRunner:
             tokens_in=cost_meter.tokens_in if self.mode == "live" else 0,
             tokens_out=cost_meter.tokens_out if self.mode == "live" else 0,
             duration_seconds=duration,
+            failure_details=failure_details,
         )
 
         return report

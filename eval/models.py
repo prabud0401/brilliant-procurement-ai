@@ -43,6 +43,7 @@ class EvaluationReport:
     duration_seconds: float = 0.0
     aborted: bool = False
     abort_reason: str | None = None
+    failure_details: dict[str, Any] | None = None
 
     @property
     def passed_metrics(self) -> int:
@@ -83,6 +84,7 @@ class EvaluationReport:
                 "questions_count": self.questions_evaluated,
                 "injection_cases_count": self.injection_cases_evaluated,
             },
+            "failure_details": self.failure_details,
         }
 
     def to_markdown(self) -> str:

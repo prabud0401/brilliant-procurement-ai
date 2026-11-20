@@ -9,6 +9,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from app.ai.normalize import cleanup_extraction_result
 from app.ai.providers.mock import MockAnswerWriter, MockEmbedder
 from app.ai.schemas import (
     AnswerDraft,
@@ -259,6 +260,7 @@ class ReplayLlmClient:
 
         content_raw = data["choices"][0]["message"]["content"]
         result = ExtractionResult.model_validate_json(content_raw)
+        result, cleanup_meta = cleanup_extraction_result(result)
 
         usage = data.get("usage", {})
         metadata = {
@@ -267,6 +269,7 @@ class ReplayLlmClient:
             "latency_ms": 180,
             "model": data.get("model", "gpt-4o-mini"),
             "prompt_version": "prompts/extract_v1.md",
+            "cleanup": cleanup_meta,
         }
         return result, metadata
 
