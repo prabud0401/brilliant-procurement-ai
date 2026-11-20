@@ -270,7 +270,7 @@ def normalize_classification_label(choice: str) -> str:
         return "purchase_order"
     if re.search(r"\b(delivery[ _-]note|dn)\b", cleaned):
         return "delivery_note"
-    if re.search(r"\b(invoice)\b", cleaned):
+    if re.search(r"\b(tax[ _-]invoice|invoice)\b", cleaned):
         return "invoice"
     if re.search(r"\b(quote|quotation)\b", cleaned):
         return "quote"
@@ -285,8 +285,9 @@ class LiveLlmClient:
         self.endpoint = settings.AZURE_OPENAI_ENDPOINT
         self.key = settings.AZURE_OPENAI_API_KEY
         self.deployment = settings.AZURE_OPENAI_DEPLOYMENT
+        self.last_usage: dict[str, Any] = {}
 
-    def classify(self, first_page_text: str) -> str:
+    def classify_with_usage(self, first_page_text: str) -> tuple[str, dict[str, Any]]:
         if not self.endpoint:
             raise ProblemException(
                 status_code=503,
@@ -303,12 +304,14 @@ class LiveLlmClient:
             "Return only the label.\n\n"
             f"<document>\n{first_page_text[:2000]}\n</document>"
         )
+        start_time = time.time()
         response = client.chat.completions.create(
             model=self.deployment,
             messages=[{"role": "user", "content": prompt}],
-            max_completion_tokens=512,
+            max_completion_tokens=1024,
             reasoning_effort=settings.AZURE_OPENAI_REASONING_EFFORT,
         )
+        latency_ms = int((time.time() - start_time) * 1000)
 
         if not response.choices:
             raise ProblemException(
@@ -336,7 +339,22 @@ class LiveLlmClient:
                 detail="Azure OpenAI returned an empty classification response.",
             )
 
-        return normalize_classification_label(choice)
+        label = normalize_classification_label(choice)
+        usage = response.usage
+        tokens_in = usage.prompt_tokens if usage else 0
+        tokens_out = usage.completion_tokens if usage else 0
+        metadata = {
+            "tokens_in": tokens_in,
+            "tokens_out": tokens_out,
+            "latency_ms": latency_ms,
+            "model": self.deployment,
+        }
+        self.last_usage = metadata
+        return label, metadata
+
+    def classify(self, first_page_text: str) -> str:
+        label, _ = self.classify_with_usage(first_page_text)
+        return label
 
     def extract(
         self,

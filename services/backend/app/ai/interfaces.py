@@ -31,6 +31,10 @@ class LlmClient(Protocol):
         """Classify document type (quote, purchase_order, delivery_note, invoice, other)."""
         ...
 
+    def classify_with_usage(self, first_page_text: str) -> tuple[str, dict[str, Any]]:
+        """Classify document type and return (label, usage_metadata)."""
+        ...
+
     def extract(
         self,
         ocr_result: OCRResult,
