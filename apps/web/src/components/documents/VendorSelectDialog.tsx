@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { Building2, X, Check } from "lucide-react";
-import { SEEDED_VENDORS, type SeededVendor } from "@/lib/constants/vendors";
+import React, { useState, useEffect } from "react";
+import { Building2, X, Check, Loader2 } from "lucide-react";
+import { fetchVendors, type Vendor } from "@/lib/constants/vendors";
 
 export interface VendorSelectDialogProps {
   isOpen: boolean;
@@ -17,10 +17,24 @@ export const VendorSelectDialog: React.FC<VendorSelectDialogProps> = ({
   onClose,
   onSave,
 }) => {
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [loadingVendors, setLoadingVendors] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<string | null>(currentVendorId);
   const [isNewVendor, setIsNewVendor] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedId(currentVendorId);
+      setIsNewVendor(false);
+      setLoadingVendors(true);
+      fetchVendors()
+        .then((data) => setVendors(data))
+        .catch((err) => setError(err instanceof Error ? err.message : "Failed to load vendors"))
+        .finally(() => setLoadingVendors(false));
+    }
+  }, [isOpen, currentVendorId]);
 
   if (!isOpen) return null;
 
@@ -77,41 +91,52 @@ export const VendorSelectDialog: React.FC<VendorSelectDialogProps> = ({
 
         <form onSubmit={handleSubmit}>
           <div className="max-h-72 overflow-y-auto space-y-2 border rounded-md p-2 divide-y divide-slate-100">
-            {SEEDED_VENDORS.map((vendor: SeededVendor) => {
-              const isChecked = !isNewVendor && selectedId === vendor.id;
-              return (
-                <label
-                  key={vendor.id}
-                  className={`flex items-start gap-3 p-2.5 rounded cursor-pointer transition-colors ${
-                    isChecked ? "bg-blue-50/70 border border-blue-200" : "hover:bg-slate-50"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="vendor"
-                    value={vendor.id}
-                    checked={isChecked}
-                    onChange={() => {
-                      setSelectedId(vendor.id);
-                      setIsNewVendor(false);
-                    }}
-                    className="mt-1 h-4 w-4 text-blue-600 border-slate-300 focus:ring-blue-500"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-slate-900">{vendor.name}</span>
-                      <span className="text-[10px] font-mono text-slate-500">TRN: {vendor.trn}</span>
+            {loadingVendors ? (
+              <div className="flex items-center justify-center py-8 text-xs text-slate-500 gap-2">
+                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                <span>Loading Odoo vendors...</span>
+              </div>
+            ) : (
+              vendors.map((vendor: Vendor) => {
+                const isChecked = !isNewVendor && selectedId === vendor.id;
+                return (
+                  <label
+                    key={vendor.id}
+                    className={`flex items-start gap-3 p-2.5 rounded cursor-pointer transition-colors ${
+                      isChecked ? "bg-blue-50/70 border border-blue-200" : "hover:bg-slate-50"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="vendor"
+                      value={vendor.id}
+                      checked={isChecked}
+                      onChange={() => {
+                        setSelectedId(vendor.id);
+                        setIsNewVendor(false);
+                      }}
+                      className="mt-1 h-4 w-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-slate-900">{vendor.name}</span>
+                        {vendor.trn && (
+                          <span className="text-[10px] font-mono text-slate-500">TRN: {vendor.trn}</span>
+                        )}
+                      </div>
+                      {vendor.address && (
+                        <p className="text-[11px] text-slate-500 truncate mt-0.5">{vendor.address}</p>
+                      )}
+                      <div className="mt-1 flex gap-3 text-[10px] text-slate-600">
+                        <span>Terms: {vendor.payment_terms_days} days</span>
+                        {vendor.lead_time_days && <span>Lead time: {vendor.lead_time_days} days</span>}
+                        {vendor.category && <span className="font-medium text-blue-700">{vendor.category}</span>}
+                      </div>
                     </div>
-                    <p className="text-[11px] text-slate-500 truncate mt-0.5">{vendor.address}</p>
-                    <div className="mt-1 flex gap-3 text-[10px] text-slate-600">
-                      <span>Terms: {vendor.payment_terms_days} days</span>
-                      <span>Lead time: {vendor.lead_time_days} days</span>
-                      <span className="font-medium text-blue-700">{vendor.category}</span>
-                    </div>
-                  </div>
-                </label>
-              );
-            })}
+                  </label>
+                );
+              })
+            )}
 
             {/* Option for New Vendor */}
             <label

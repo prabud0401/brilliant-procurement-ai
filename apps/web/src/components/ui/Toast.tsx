@@ -5,6 +5,63 @@ import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from "lucide-react"
 
 export type ToastType = "success" | "error" | "info" | "warning";
 
+export interface ToastState {
+  type: ToastType;
+  title: string;
+  message?: string;
+}
+
+export interface StandaloneToastProps {
+  type: ToastType;
+  title: string;
+  message?: string;
+  onClose: () => void;
+}
+
+export const Toast: React.FC<StandaloneToastProps> = ({
+  type,
+  title,
+  message,
+  onClose,
+}) => {
+  let bgColor = "bg-white border-slate-200 text-slate-800";
+  let icon = <Info className="h-5 w-5 text-blue-500" />;
+
+  if (type === "success") {
+    bgColor = "bg-white border-emerald-200 text-slate-800";
+    icon = <CheckCircle2 className="h-5 w-5 text-emerald-500" />;
+  } else if (type === "error") {
+    bgColor = "bg-white border-rose-200 text-slate-800";
+    icon = <AlertCircle className="h-5 w-5 text-rose-500" />;
+  } else if (type === "warning") {
+    bgColor = "bg-white border-amber-200 text-slate-800";
+    icon = <AlertTriangle className="h-5 w-5 text-amber-500" />;
+  }
+
+  return (
+    <div
+      role="alert"
+      className={`fixed bottom-4 right-4 z-50 flex max-w-sm items-start gap-3 rounded-lg border p-4 shadow-xl ${bgColor}`}
+    >
+      <div className="flex-shrink-0 pt-0.5">{icon}</div>
+      <div className="flex-1">
+        <p className="text-sm font-semibold text-slate-900">{title}</p>
+        {message && (
+          <p className="mt-1 text-xs text-slate-600 leading-normal">{message}</p>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={onClose}
+        className="inline-flex rounded-md p-1 text-slate-400 hover:text-slate-600"
+        aria-label="Dismiss notification"
+      >
+        <X className="h-4 w-4" aria-hidden="true" />
+      </button>
+    </div>
+  );
+};
+
 export interface ToastItem {
   id: string;
   type: ToastType;

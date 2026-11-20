@@ -24,6 +24,8 @@ export interface DocumentSummary {
   created_at: string;
   duplicate_of: string | null;
   suspicious: boolean;
+  pr_id?: string | null;
+  vendor_id?: string | null;
 }
 
 export interface DocumentResponse {
