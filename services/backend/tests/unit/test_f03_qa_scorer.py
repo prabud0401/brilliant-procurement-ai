@@ -126,3 +126,16 @@ def test_qa_scorer_refusal() -> None:
     assert score_qa_answer(expected, actual, was_refused=True) is False
     assert score_qa_answer(expected, "", was_refused=False) is False
     assert score_qa_answer("", actual, was_refused=False) is False
+
+
+@pytest.mark.unit
+def test_qa_scorer_qa11_wording_variation() -> None:
+    expected = "AED 16.00 per roll (+5% above PO price)"
+    answer = (
+        "The PO (PO-0050) unit price for Cat6 cable is AED 320.00 per roll. "
+        "The invoice (INV-5510) unit price is AED 336.00 per roll. The unit price "
+        "variance is AED 16.00 per roll, which represents a +5% increase from the PO price."
+    )
+    assert score_qa_answer(expected, answer) is True
+    wrong = answer.replace("16.00", "18.00")
+    assert score_qa_answer(expected, wrong) is False

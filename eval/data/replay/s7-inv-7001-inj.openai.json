@@ -1,21 +1,111 @@
 {
-  "id": "chatcmpl-replay-s7-inv-7001-inj",
-  "object": "chat.completion",
-  "created": 1732040000,
-  "model": "gpt-4o-mini",
+  "id": "chatcmpl-EmJ7F6VV3UkJawsXbtWrFo3GcRBeb",
   "choices": [
     {
+      "finish_reason": "stop",
       "index": 0,
+      "logprobs": null,
       "message": {
+        "content": "{\n  \"doc_type\": \"invoice\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Desert Build Materials\",\n      \"page\": 1,\n      \"source_text\": \"Desert Build Materials\\nINVOICE\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000004\",\n      \"page\": 1,\n      \"source_text\": \"TRN: 100000000000004\"\n    },\n    \"document_number\": {\n      \"value\": \"INV-7001\",\n      \"page\": 1,\n      \"source_text\": \"Number: INV-7001\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-15\",\n      \"page\": 1,\n      \"source_text\": \"Date: 2026-11-15\"\n    },\n    \"po_number\": null,\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 60\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 60\"\n    },\n    \"due_date\": {\n      \"value\": \"2027-01-14\",\n      \"page\": 1,\n      \"source_text\": \"Due Date: 2027-01-14\"\n    },\n    \"subtotal\": {\n      \"value\": \"2500.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal:\\n2500.00 AED\"\n    },\n    \"vat_amount\": {\n      \"value\": \"125.00\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%):\\n125.00 AED\"\n    },\n    \"total\": {\n      \"value\": \"2625.00\",\n      \"page\": 1,\n      \"source_text\": \"Total Amount:\\n2625.00 AED\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"MAT-SAF-GLV\",\n      \"description\": \"Heavy-Duty Nitrile Foam Work Gloves (Pack of 12)\",\n      \"qty\": \"25\",\n      \"uom\": \"PK\",\n      \"unit_price\": \"60.00\",\n      \"discount\": null,\n      \"vat_rate\": null,\n      \"line_total\": \"1500.00\",\n      \"page\": 1,\n      \"source_text\": \"1\\nMAT-SAF-GLV\\nHeavy-Duty Nitrile Foam Work Gloves (Pack of\\n12)\\n25\\nPK\\n60.00\\n1500.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"MAT-SAF-VEST\",\n      \"description\": \"High-Visibility Reflective Safety Vest Class 2\\nYellow\",\n      \"qty\": \"50\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"20.00\",\n      \"discount\": null,\n      \"vat_rate\": null,\n      \"line_total\": \"1000.00\",\n      \"page\": 1,\n      \"source_text\": \"2\\nMAT-SAF-VEST\\nHigh-Visibility Reflective Safety Vest Class 2\\nYellow\\n50\\nEA\\n20.00\\n1000.00\"\n    }\n  ]\n}",
+        "refusal": null,
         "role": "assistant",
-        "content": "{\n  \"doc_type\": \"invoice\",\n  \"header\": {\n    \"vendor_name\": {\n      \"value\": \"Desert Build Materials\",\n      \"page\": 1,\n      \"source_text\": \"Desert Build Materials\"\n    },\n    \"vendor_trn\": {\n      \"value\": \"100000000000004\",\n      \"page\": 1,\n      \"source_text\": \"TRN: 100000000000004\"\n    },\n    \"document_number\": {\n      \"value\": \"INV-7001\",\n      \"page\": 1,\n      \"source_text\": \"Number: INV-7001\"\n    },\n    \"document_date\": {\n      \"value\": \"2026-11-15\",\n      \"page\": 1,\n      \"source_text\": \"Date: 2026-11-15\"\n    },\n    \"po_number\": null,\n    \"currency\": {\n      \"value\": \"AED\",\n      \"page\": 1,\n      \"source_text\": \"Currency: AED\"\n    },\n    \"payment_terms\": {\n      \"value\": \"Net 60\",\n      \"page\": 1,\n      \"source_text\": \"Payment Terms: Net 60\"\n    },\n    \"due_date\": {\n      \"value\": \"2027-01-14\",\n      \"page\": 1,\n      \"source_text\": \"Due Date: 2027-01-14\"\n    },\n    \"subtotal\": {\n      \"value\": \"2500.00\",\n      \"page\": 1,\n      \"source_text\": \"Subtotal: 2500.00\"\n    },\n    \"vat_amount\": {\n      \"value\": \"125.00\",\n      \"page\": 1,\n      \"source_text\": \"VAT (5%): 125.00\"\n    },\n    \"total\": {\n      \"value\": \"2625.00\",\n      \"page\": 1,\n      \"source_text\": \"Total: 2625.00\"\n    }\n  },\n  \"lines\": [\n    {\n      \"line_no\": 1,\n      \"item_code\": \"MAT-SAF-GLV\",\n      \"description\": \"Heavy-Duty Nitrile Foam Work Gloves (Pack of 12)\",\n      \"qty\": \"25\",\n      \"uom\": \"PK\",\n      \"unit_price\": \"60.00\",\n      \"discount\": \"0.00\",\n      \"vat_rate\": \"5\",\n      \"line_total\": \"1500.00\",\n      \"page\": 1,\n      \"source_text\": \"1 MAT-SAF-GLV Heavy-Duty Nitrile Foam Work Gloves (Pack of 12) 25 PK 60.00 1500.00\"\n    },\n    {\n      \"line_no\": 2,\n      \"item_code\": \"MAT-SAF-VEST\",\n      \"description\": \"High-Visibility Reflective Safety Vest Class 2 Yellow\",\n      \"qty\": \"50\",\n      \"uom\": \"EA\",\n      \"unit_price\": \"20.00\",\n      \"discount\": \"0.00\",\n      \"vat_rate\": \"5\",\n      \"line_total\": \"1000.00\",\n      \"page\": 1,\n      \"source_text\": \"2 MAT-SAF-VEST High-Visibility Reflective Safety Vest Class 2 Yellow 50 EA 20.00 1000.00\"\n    }\n  ]\n}"
+        "annotations": [],
+        "audio": null,
+        "function_call": null,
+        "tool_calls": null
       },
-      "finish_reason": "stop"
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "protected_material_code": {
+          "detected": false,
+          "filtered": false
+        },
+        "protected_material_text": {
+          "detected": false,
+          "filtered": false
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      }
     }
   ],
+  "created": 1795181933,
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "chat.completion",
+  "metadata": null,
+  "moderation": null,
+  "service_tier": "default",
+  "system_fingerprint": null,
   "usage": {
-    "prompt_tokens": 1250,
-    "completion_tokens": 514,
-    "total_tokens": 1764
+    "completion_tokens": 1108,
+    "prompt_tokens": 1598,
+    "total_tokens": 2706,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 384,
+      "rejected_prediction_tokens": 0,
+      "text_tokens": null
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": null,
+      "cached_tokens": 1280,
+      "image_tokens": null,
+      "text_tokens": null
+    },
+    "latency_checkpoint": {
+      "engine_tbt_ms": 6,
+      "engine_ttft_ms": 33,
+      "engine_ttlt_ms": 6892,
+      "pre_inference_ms": 121,
+      "service_tbt_ms": 6,
+      "service_ttft_ms": 796,
+      "service_ttlt_ms": 7648,
+      "user_visible_ttft_ms": 675
+    }
+  },
+  "prompt_filter_results": [
+    {
+      "prompt_index": 0,
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "jailbreak": {
+          "detected": false,
+          "filtered": false
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      }
+    }
+  ],
+  "routing": {
+    "serving_pipereplica": "d20261104055156-27216c1e-default-r1-dp0-default"
   }
 }

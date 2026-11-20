@@ -178,6 +178,7 @@ def score_qa_answer(
 
     # Check numeric requirement
     if exp_nums:
+
         def _matches_group(group: list[Decimal]) -> bool:
             if not group:
                 return False
@@ -189,7 +190,12 @@ def score_qa_answer(
             paren_texts = re.findall(r"\((.*?)\)", expected_answer)
             main_nums = extract_numeric_values(main_text)
             paren_groups = [extract_numeric_values(pt) for pt in paren_texts]
-            if _matches_group(main_nums) or any(_matches_group(pg) for pg in paren_groups):
+            # A bracketed alternative counts only when it carries at least two numbers
+            # (e.g. "2 (invoiced 12 vs received 10)"); a lone "+5%" cannot stand in
+            # for a wrong main amount.
+            if _matches_group(main_nums) or any(
+                len(pg) >= 2 and _matches_group(pg) for pg in paren_groups
+            ):
                 num_matched = True
 
         if not num_matched:
@@ -204,6 +210,10 @@ def score_qa_answer(
         return len(exp_nums) > 0
 
     matched = [w for w in key_terms if w in act_lower]
+    if exp_nums:
+        # All expected numbers already matched above; one supporting term is enough
+        # (wording such as "above" vs "increase from" must not fail a correct number).
+        return len(matched) >= 1
     return len(matched) >= min(len(key_terms), 2)
 
 

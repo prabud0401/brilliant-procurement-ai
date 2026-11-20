@@ -1,4 +1,4 @@
-.PHONY: env up down logs migrate seed datagen lint fmt test test-int qa-reindex web-lint web-test web-e2e infra-check eval eval-test e2e-demo smoke
+.PHONY: env up down logs migrate seed datagen datagen-replay lint fmt test test-int qa-reindex web-lint web-test web-e2e infra-check eval eval-test e2e-demo smoke
 
 SHELL := /bin/bash
 
@@ -50,6 +50,11 @@ qa-reindex:
 	cd services/backend && uv run python -m app.qa.reindex
 
 datagen:
+	cd services/backend && uv run python -m tools.datagen && uv run python -m tools.datagen --check
+
+# Overwrites eval/data/replay with synthetic fixtures built from ground truth
+# (the committed fixtures are recorded from a live model run).
+datagen-replay:
 	cd services/backend && uv run python -m tools.datagen --replay --check
 
 lint:

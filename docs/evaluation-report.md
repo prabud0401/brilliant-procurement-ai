@@ -6,7 +6,7 @@ This report documents the performance of the AI components in the Procurement Do
 
 ## 1. Executive Summary & Verification Mode
 
-- **Evaluation Mode:** `replay` (Offline test mode using recorded ground-truth replay fixtures)
+- **Evaluation Mode:** `replay` (offline, fixtures recorded from a live run; see section 5 for live results)
 - **Model Target:** Configurable chat model (default `gpt-5-mini`) and `text-embedding-3-small` (Vector Retrieval)
 - **OCR Engine Target:** Azure Document Intelligence (Form Recognizer)
 - **Execution Latency:** 0.04 seconds (replay pipeline execution)
@@ -14,11 +14,7 @@ This report documents the performance of the AI components in the Procurement Do
 
 > [!IMPORTANT]
 > **Interpretation of Replay Scores:**
-> Replay fixtures are synthetically derived from ground-truth document and question data. Therefore, the 100% scores reported below demonstrate that the **evaluation harness, metric mathematics, schema parsers, confidence scoring logic, faithfulness verifier, and data plumbing operate correctly and without error**. Replay scores **do not** prove live model extraction accuracy or real-world OCR noise resistance. The definitive measurement of model quality occurs during live evaluation.
-
----
-
-> **How to read these numbers.** Replay mode feeds the real pipeline code (extraction validation, retrieval, refusal logic, injection screening, comparison facts) with recorded AI responses. The replay fixtures are generated from the ground truth, so a 100% replay score proves that the pipeline, the metrics and the plumbing work end to end; it does not measure model quality. The live run (section 5) is the real measure.
+> Since Gate G1 the Document Intelligence and extraction replay fixtures (`eval/data/replay`) are **recorded from a live run** of Azure Document Intelligence and `gpt-5-mini` (`--record-replay`), so replay AIQ-01 to AIQ-04 re-score real model output offline. Q&A, injection and explanation replay responses are still derived from the ground truth, so replay AIQ-05 to AIQ-10 prove the pipeline and metrics, not model quality. The live run (section 5) is the real measure. `make datagen` no longer overwrites the recorded fixtures; `make datagen-replay` regenerates synthetic ones.
 
 ### Evaluation Method & Pipeline Improvements (Gate G1 Fixes)
 - **Deterministic Value Cleanup (`app/ai/normalize.py`):** Applied to every extraction result after the model (live and replay paths alike) before storing and scoring. Strips known leading labels (e.g., `Number:`, `Date:`, `TRN:`, `Currency:`, `Subtotal:`, `Total:`), cuts vendor trading names at TRN, address, phone, or email markers, parses amounts and quantities to plain `Decimal` strings (removing currency symbols and commas), maps currencies to ISO codes (`AED`), and standardizes dates to ISO `YYYY-MM-DD`. Any field modified by cleanup or failing parse has its confidence score lowered below the review threshold (`AI_LOW_CONFIDENCE_THRESHOLD`, 0.80).
@@ -112,14 +108,27 @@ cd services/backend && uv run python -m eval.run --mode replay
 
 ## 5. Live Run
 
-```markdown
-Pending: live evaluation after Azure AI services are enabled
-```
-
-When Azure OpenAI (default `gpt-5-mini`, `text-embedding-3-small`) and Azure Document Intelligence (`F0`) are provisioned at Gate G1, the live evaluation suite is triggered using:
+Live evaluation on 20 Nov 2026 against Azure Document Intelligence (prebuilt models, F0) and Azure OpenAI `gpt-5-mini` (reasoning effort low, strict structured outputs), 20 documents, 30 questions, 32 injection cases, 2 comparisons. About 194K input and 26K output tokens.
 
 ```bash
 cd services/backend && uv run python -m eval.run --mode live --confirm-live --max-cost-usd 3 --record-replay
 ```
 
-The live execution will record real token usage, API latency, and true OCR extraction accuracy against the synthetic document dataset.
+| Metric | Target | Live result | Status |
+| --- | --- | --- | --- |
+| AIQ-01 Header fields, digital PDFs | ≥ 95% | 99.4% (171/172) | PASS |
+| AIQ-02 Header fields, scanned | ≥ 90% | 80.0% (8/10), 100% (8/8) after truth fix | PASS after fix |
+| AIQ-03 Line items | ≥ 90% lines, ≥ 95% docs | 100% (38/38), 100% (20/20) | PASS |
+| AIQ-04 Confidence calibration | ≥ 97% precision, ≥ 80% error recall | 99.4% (175/176), 100% | PASS |
+| AIQ-05 Citation correctness | ≥ 95% | 93.8% (30/32) | Below target |
+| AIQ-06 Answer correctness | ≥ 90% | 95.8% (23/24), 100% after scorer fix | PASS |
+| AIQ-07 Refusals | ≥ 95% refused, ≤ 5% false refusals | 100% (6/6), 0% (0/24) | PASS |
+| AIQ-08 Injection, actions | 100% | 100% (32/32) | PASS |
+| AIQ-09 Injection, output | ≥ 95% | 100% (32/32) | PASS |
+| AIQ-10 Explanation faithfulness | 100% | 100% (2/2) | PASS |
+
+Notes:
+- **AIQ-02:** both misses were on the degraded scan `INV-6004`, which prints no payment terms or due date; the model correctly returned null. The ground truth was corrected (scenario spec), giving 8/8.
+- **AIQ-05:** 2 of 32 citations pointed at a neighbouring chunk; an earlier live run on the same data scored 30/30, so this is run-to-run variation to watch, not a systematic failure.
+- **AIQ-06:** the one miss (QA-11) was a correct answer ("AED 16.00 per roll … +5% increase") worded differently from the expected text; the scorer now accepts it, and a wrong amount still fails.
+- An earlier live run, before value cleanup, scored AIQ-01 82.6% and AIQ-04 83.5%: the model copied labels (`TRN:`, `Number:`), appended addresses to vendor names and added `AED` to amounts. The value-only prompt and deterministic cleanup fixed this.

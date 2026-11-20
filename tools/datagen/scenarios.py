@@ -1016,8 +1016,9 @@ def get_all_scenarios() -> list[ScenarioDocSpec]:
             vendor_address="Ground Floor, Corniche Towers, Al Danah, Abu Dhabi, UAE",
             document_number="INV-6004",
             document_date="2026-11-15",
-            payment_terms="Net 30",
-            due_date="2026-12-15",
+            # The degraded scan layout prints no payment terms or due date.
+            payment_terms=None,
+            due_date=None,
             lines=[
                 DocumentLine(
                     line_no=1,
