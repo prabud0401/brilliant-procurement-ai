@@ -66,7 +66,7 @@ export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
       <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} aria-hidden="true" />
       <span>{showPercentage ? `${percent}%` : label}</span>
       {!isHigh && showPercentage && (
-        <span className="text-[10px] font-normal uppercase tracking-wider text-amber-700 opacity-90">
+        <span className="text-[10px] font-normal uppercase tracking-wider text-current">
           (Review)
         </span>
       )}
