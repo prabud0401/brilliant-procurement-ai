@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Protocol, runtime_checkable
 
-from app.ai.schemas import ExtractionResult, OCRResult
+from app.ai.schemas import AnswerDraft, ExtractionResult, OCRResult, RetrievedChunk
 
 
 @runtime_checkable
@@ -42,4 +42,22 @@ class LlmClient(Protocol):
 
         Returns (ExtractionResult, usage_metadata).
         """
+        ...
+
+
+@runtime_checkable
+class Embedder(Protocol):
+    """Protocol for text embedding generation (1536 dimensions)."""
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        """Generate 1536-dimensional embeddings for given texts."""
+        ...
+
+
+@runtime_checkable
+class AnswerWriter(Protocol):
+    """Protocol for generating grounded Q&A answers from retrieved chunks."""
+
+    def answer(self, question: str, chunks: list[RetrievedChunk]) -> AnswerDraft:
+        """Generate answer draft from retrieved chunks, or refuse."""
         ...

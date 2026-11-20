@@ -66,6 +66,10 @@ def process_single_job(session: Session) -> bool:
             from app.worker.job_runner import handle_extract_job
 
             handle_extract_job(session, job)
+        elif job.type == "embed_document":
+            from app.qa.embed_job import handle_embed_document_job
+
+            handle_embed_document_job(session, job)
         else:
             logger.warning("Unknown job type %s for job %s", job.type, job.id)
             job.status = "failed"

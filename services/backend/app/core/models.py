@@ -635,6 +635,9 @@ class MatchException(Base):
 
 class Chunk(Base):
     __tablename__ = "chunks"
+    __table_args__ = (
+        UniqueConstraint("document_id", "chunk_no", name="uq_chunks_document_chunk_no"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     document_id: Mapped[uuid.UUID] = mapped_column(
@@ -645,6 +648,7 @@ class Chunk(Base):
     text: Mapped[str] = mapped_column(Text, nullable=False)
     embedding: Mapped[list[float] | None] = mapped_column(Vector(1536), nullable=True)
     tsv: Mapped[str | None] = mapped_column(TSVECTOR, nullable=True)
+    content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     owner_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )

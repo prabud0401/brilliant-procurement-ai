@@ -1,4 +1,4 @@
-.PHONY: env up down logs migrate seed datagen lint fmt test test-int web-lint web-test web-e2e
+.PHONY: env up down logs migrate seed datagen lint fmt test test-int qa-reindex web-lint web-test web-e2e
 
 SHELL := /bin/bash
 
@@ -45,6 +45,9 @@ seed:
 		echo "Running seed/load.py..."; \
 		cd services/backend && uv run python -m seed.load; \
 	fi
+
+qa-reindex:
+	cd services/backend && uv run python -m app.qa.reindex
 
 datagen:
 	cd services/backend && uv run python -m tools.datagen --replay --check
