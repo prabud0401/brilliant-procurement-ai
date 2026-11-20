@@ -106,6 +106,237 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Documents
+         * @description List documents with filters and RBAC scope applied in SQL (design 5.4, 7.2).
+         */
+        get: operations["list_documents_api_v1_documents_get"];
+        put?: never;
+        /**
+         * Upload Document
+         * @description Upload a new document (multipart/form-data) per design 3.1, 7.4, US-01.
+         */
+        post: operations["upload_document_api_v1_documents_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Document
+         * @description Get metadata for a single document (design 5.4, 7.2).
+         */
+        get: operations["get_document_api_v1_documents__id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Patch Document
+         * @description PATCH document: update doc_type and re-queue extraction (design 5.4, US-01).
+         */
+        patch: operations["patch_document_api_v1_documents__id__patch"];
+        trace?: never;
+    };
+    "/api/v1/documents/{id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Document File
+         * @description Download document file streamed with Content-Disposition and nosniff headers.
+         */
+        get: operations["get_document_file_api_v1_documents__id__file_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{id}/extract": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retry Document Extract
+         * @description Re-run extraction after failure (design 5.4, NFR-REL-03).
+         */
+        post: operations["retry_document_extract_api_v1_documents__id__extract_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{id}/extraction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Document Extraction
+         * @description Get latest extraction fields and line items for a document.
+         */
+        get: operations["get_document_extraction_api_v1_documents__id__extraction_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{id}/fields/{field_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Extracted Field
+         * @description Buyer corrects or confirms a flagged field (design 5.4, US-03).
+         */
+        patch: operations["update_extracted_field_api_v1_documents__id__fields__field_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/documents/{id}/lines/{line_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Extracted Line
+         * @description Buyer corrects or confirms a line item (design 5.4, US-03).
+         */
+        patch: operations["update_extracted_line_api_v1_documents__id__lines__line_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/documents/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm Document
+         * @description Buyer confirms a reviewed document. Blocked if any field has open flags.
+         */
+        post: operations["confirm_document_api_v1_documents__id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{id}/vendor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Link Document Vendor
+         * @description Buyer links a vendor from master data or flags new vendor (design 5.4, US-05).
+         */
+        post: operations["link_document_vendor_api_v1_documents__id__vendor_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{id}/not-duplicate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Clear Duplicate Flag
+         * @description Buyer clears a duplicate document flag with a recorded reason (design 5.4, US-06).
+         */
+        post: operations["clear_duplicate_flag_api_v1_documents__id__not_duplicate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{id}/acknowledge-suspicious": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Acknowledge Suspicious
+         * @description Buyer acknowledges a "Suspicious content" flag with a recorded reason.
+         *
+         *     The injection flags stay on record; the acknowledgement only lifts the confirm block
+         *     after a person has checked the extracted values against the document (design 7.5).
+         */
+        post: operations["acknowledge_suspicious_api_v1_documents__id__acknowledge_suspicious_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/purchase-requests": {
         parameters: {
             query?: never;
@@ -683,6 +914,17 @@ export interface components {
             /** Error */
             error: string | null;
         };
+        /** Body_upload_document_api_v1_documents_post */
+        Body_upload_document_api_v1_documents_post: {
+            /** File */
+            file: string;
+            /** Doc Type */
+            doc_type?: string | null;
+            /** Pr Id */
+            pr_id?: string | null;
+            /** Po Id */
+            po_id?: string | null;
+        };
         /** ComparisonCreateRequest */
         ComparisonCreateRequest: {
             /**
@@ -785,6 +1027,93 @@ export interface components {
             /** Override Reason */
             override_reason?: string | null;
         };
+        /** DocumentPatchRequest */
+        DocumentPatchRequest: {
+            /** Doc Type */
+            doc_type?: string | null;
+            /** Pr Id */
+            pr_id?: string | null;
+            /** Po Id */
+            po_id?: string | null;
+        };
+        /** DocumentResponse */
+        DocumentResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Owner Id
+             * Format: uuid
+             */
+            owner_id: string;
+            /** Department Id */
+            department_id: string | null;
+            /** Pr Id */
+            pr_id: string | null;
+            /** Po Id */
+            po_id: string | null;
+            /** Vendor Id */
+            vendor_id: string | null;
+            /** Doc Type */
+            doc_type: string;
+            /** Status */
+            status: string;
+            /** File Sha256 */
+            file_sha256: string;
+            /** Mime */
+            mime: string;
+            /** Pages */
+            pages: number;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Source */
+            source: string;
+            /** Duplicate Of */
+            duplicate_of: string | null;
+            /** Duplicate Cleared Reason */
+            duplicate_cleared_reason: string | null;
+            /** Suspicious */
+            suspicious: boolean;
+            /** Suspicious Ack Reason */
+            suspicious_ack_reason?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** DocumentSummary */
+        DocumentSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Doc Type */
+            doc_type: string;
+            /** Status */
+            status: string;
+            /** Pages */
+            pages: number;
+            /** Size Bytes */
+            size_bytes: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Duplicate Of */
+            duplicate_of: string | null;
+            /** Suspicious */
+            suspicious: boolean;
+        };
         /** EarlierDecision */
         EarlierDecision: {
             /**
@@ -821,6 +1150,80 @@ export interface components {
              * @description Mandatory reason for the resolution action
              */
             reason: string;
+        };
+        /** ExtractionResponse */
+        ExtractionResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Document Id
+             * Format: uuid
+             */
+            document_id: string;
+            /** Version */
+            version: number;
+            /** Di Model */
+            di_model: string | null;
+            /** Llm Model */
+            llm_model: string | null;
+            /** Prompt Version */
+            prompt_version: string | null;
+            /** Status */
+            status: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Fields */
+            fields: components["schemas"]["FieldResponse"][];
+            /** Lines */
+            lines: components["schemas"]["LineResponse"][];
+        };
+        /** FieldResponse */
+        FieldResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Value Raw */
+            value_raw: string | null;
+            /** Value Norm */
+            value_norm: {
+                [key: string]: unknown;
+            } | null;
+            /** Confidence */
+            confidence: string | null;
+            /** Page */
+            page: number;
+            /** Bbox */
+            bbox: {
+                [key: string]: unknown;
+            } | null;
+            /** Status */
+            status: string;
+            /** Validation Msg */
+            validation_msg: string | null;
+            /** Confirmed By */
+            confirmed_by: string | null;
+            /** Confirmed At */
+            confirmed_at: string | null;
+        };
+        /** FieldUpdateRequest */
+        FieldUpdateRequest: {
+            /** Value */
+            value?: string | null;
+            /**
+             * Confirm
+             * @default false
+             */
+            confirm: boolean;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -870,6 +1273,66 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** LineResponse */
+        LineResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Line No */
+            line_no: number;
+            /** Item Code */
+            item_code: string | null;
+            /** Description */
+            description: string | null;
+            /** Qty */
+            qty: string | null;
+            /** Uom */
+            uom: string | null;
+            /** Unit Price */
+            unit_price: string | null;
+            /** Discount */
+            discount: string | null;
+            /** Vat Rate */
+            vat_rate: string | null;
+            /** Line Total */
+            line_total: string | null;
+            /** Confidence */
+            confidence: string | null;
+            /** Page */
+            page: number;
+            /** Bbox */
+            bbox: {
+                [key: string]: unknown;
+            } | null;
+            /** Status */
+            status: string;
+        };
+        /** LineUpdateRequest */
+        LineUpdateRequest: {
+            /** Item Code */
+            item_code?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Qty */
+            qty?: number | string | null;
+            /** Uom */
+            uom?: string | null;
+            /** Unit Price */
+            unit_price?: number | string | null;
+            /** Discount */
+            discount?: number | string | null;
+            /** Vat Rate */
+            vat_rate?: number | string | null;
+            /** Line Total */
+            line_total?: number | string | null;
+            /**
+             * Confirm
+             * @default false
+             */
+            confirm: boolean;
         };
         /** LoginRequest */
         LoginRequest: {
@@ -1016,6 +1479,11 @@ export interface components {
             is_demo: boolean;
             /** Active */
             active: boolean;
+        };
+        /** NotDuplicateRequest */
+        NotDuplicateRequest: {
+            /** Reason */
+            reason: string;
         };
         /** POCreateRequest */
         POCreateRequest: {
@@ -1323,6 +1791,16 @@ export interface components {
             /** Context */
             ctx?: Record<string, never>;
         };
+        /** VendorLinkRequest */
+        VendorLinkRequest: {
+            /** Vendor Id */
+            vendor_id?: string | null;
+            /**
+             * New Vendor
+             * @default false
+             */
+            new_vendor: boolean;
+        };
         /** WeightsUpdateRequest */
         WeightsUpdateRequest: {
             /**
@@ -1524,6 +2002,484 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_documents_api_v1_documents_get: {
+        parameters: {
+            query?: {
+                status?: string | null;
+                doc_type?: string | null;
+                vendor_id?: string | null;
+                pr_id?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_document_api_v1_documents_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_document_api_v1_documents_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_document_api_v1_documents__id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_document_api_v1_documents__id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentPatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_document_file_api_v1_documents__id__file_get: {
+        parameters: {
+            query?: {
+                page?: number | null;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retry_document_extract_api_v1_documents__id__extract_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_document_extraction_api_v1_documents__id__extraction_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExtractionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_extracted_field_api_v1_documents__id__fields__field_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+                field_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FieldUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_extracted_line_api_v1_documents__id__lines__line_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+                line_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LineUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LineResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_document_api_v1_documents__id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    link_document_vendor_api_v1_documents__id__vendor_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VendorLinkRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clear_duplicate_flag_api_v1_documents__id__not_duplicate_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotDuplicateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    acknowledge_suspicious_api_v1_documents__id__acknowledge_suspicious_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotDuplicateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */

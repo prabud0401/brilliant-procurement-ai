@@ -62,3 +62,7 @@ export function formatGSTDate(
   const formatted = formatter.format(date);
   return options.includeTime ? `${formatted} GST` : formatted;
 }
+
+export const formatCurrency = formatMoneyAED;
+export const formatDate = formatGSTDate;
+
