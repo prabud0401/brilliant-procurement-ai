@@ -1837,6 +1837,10 @@ export interface components {
             po_line_id?: string | null;
             /** Invoice Line Id */
             invoice_line_id?: string | null;
+            /** Line No */
+            line_no?: number | null;
+            /** Description */
+            description?: string | null;
             /** Ordered Qty */
             ordered_qty?: string | null;
             /** Received Qty */
@@ -3853,6 +3857,7 @@ export interface operations {
     get_exceptions_queue_api_v1_exceptions_get: {
         parameters: {
             query?: {
+                /** @description Filter by status: 'unresolved' (open+escalated), 'open', 'escalated', 'accepted', 'rejected', or 'all' */
                 status?: string | null;
             };
             header?: {

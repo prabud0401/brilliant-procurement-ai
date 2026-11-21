@@ -15,6 +15,8 @@ class MatchLineResponse(BaseModel):
     match_id: uuid.UUID
     po_line_id: uuid.UUID | None = None
     invoice_line_id: uuid.UUID | None = None
+    line_no: int | None = None
+    description: str | None = None
     ordered_qty: Decimal | None = None
     received_qty: Decimal | None = None
     invoiced_qty: Decimal | None = None

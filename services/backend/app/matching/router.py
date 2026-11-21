@@ -42,7 +42,13 @@ def get_match_by_id(
 
 @exceptions_router.get("", response_model=list[MatchExceptionResponse])
 def get_exceptions_queue(
-    status: str | None = Query(None),
+    status: str | None = Query(
+        None,
+        description=(
+            "Filter by status: 'unresolved' (open+escalated), "
+            "'open', 'escalated', 'accepted', 'rejected', or 'all'"
+        ),
+    ),
     principal: Principal = Depends(get_current_principal),
     db: Session = Depends(get_db),
 ) -> list[MatchExceptionResponse]:
