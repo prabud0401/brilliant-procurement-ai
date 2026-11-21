@@ -150,7 +150,7 @@ test.describe("Q&A Screen, Citations, Refusals and Observability (R10)", () => {
     await expect(page.getByText("Match Exception Rate", { exact: true })).toBeVisible();
     await expect(page.getByText("Approval Cycle Time", { exact: true })).toBeVisible();
     await expect(page.getByText("Q&A Refusal Rate", { exact: true })).toBeVisible();
-    await expect(page.getByText("AI Budget & Token Consumption Today", { exact: true })).toBeVisible();
+    await expect(page.getByText("AI Invocations & Token Usage Today", { exact: true })).toBeVisible();
 
     // 2. Admin navigates to /qa -> verify restricted access message
     await page.goto("/qa");
