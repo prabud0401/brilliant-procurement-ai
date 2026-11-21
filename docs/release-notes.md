@@ -47,7 +47,7 @@ This release implements all 19 Must-have user stories and the stretch email inta
 - **US-23 (Segregation of Duties):** Strict business rule enforcement: requesters cannot approve their own requests; buyers cannot approve purchase orders they generated; system administrators cannot approve financial commitments.
 - **US-24 (Append-Only Cryptographic Audit Log):** Tamper-evident audit trail with SHA-256 hash chaining. Database triggers prevent update and deletion. Includes in-app hash chain verification and CSV export.
 - **US-25 (System Administration):** Administrative consoles for user roles, department approval limits, and match tolerance configurations.
-- **US-29 (Prompt-Injection Defence):** Rule-based pre-scanner detecting 32+ injection patterns, XML delimiter isolation, red alert warning banner, and mandatory Buyer acknowledgement before document confirmation.
+- **US-29 (Prompt-Injection Defence):** Rule-based pre-scanner detecting 32+ injection patterns, XML delimiter isolation, red alert warning banner, and mandatory Buyer acknowledgement before document confirmation. Fixed: injection screening also reads the PDF text layer so faint embedded payloads are still flagged when OCR misses them.
 
 ### 2.6 Stretch Feature (R13)
 - **Email Intake via Logic Apps:** Automated ingestion channel connecting a demo Outlook.com mailbox to `POST /api/v1/intake/email` using a shared service key authenticated against Key Vault.
