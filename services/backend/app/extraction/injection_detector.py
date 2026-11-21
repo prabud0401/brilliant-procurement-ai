@@ -4,10 +4,13 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import io
 import logging
 import re
 from dataclasses import dataclass
 from decimal import Decimal
+
+import pypdf
 
 logger = logging.getLogger("extraction.injection_detector")
 
@@ -108,4 +111,15 @@ def scan_text_for_injection(text: str, page: int = 1) -> list[DetectedInjection]
         except Exception:
             pass
 
+    return findings
+
+
+def scan_pdf_for_injection(pdf_bytes: bytes) -> list[DetectedInjection]:
+    """Extract native text layer from PDF bytes and scan for prompt injection."""
+    findings: list[DetectedInjection] = []
+    reader = pypdf.PdfReader(io.BytesIO(pdf_bytes))
+    for page_num, page in enumerate(reader.pages, start=1):
+        page_text = page.extract_text() or ""
+        if page_text:
+            findings.extend(scan_text_for_injection(page_text, page=page_num))
     return findings
