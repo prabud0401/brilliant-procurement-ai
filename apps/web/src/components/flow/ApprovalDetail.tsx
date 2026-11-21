@@ -165,7 +165,7 @@ export const ApprovalDetail: React.FC<ApprovalDetailProps> = ({
           <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 flex items-start gap-2.5" data-testid="sod-warning-banner">
             <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" aria-hidden="true" />
             <div>
-              <strong className="font-semibold">Segregation of Duties Enforced (US-23):</strong>
+              <strong className="font-semibold">Segregation of Duties Enforced:</strong>
               <p className="mt-0.5 text-amber-800">
                 You created this commitment. Under strict company governance, creators are blocked from approving their own spending.
               </p>

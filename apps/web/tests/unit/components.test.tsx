@@ -5,6 +5,7 @@ import { ConfidenceBadge } from "@/components/ui/ConfidenceBadge";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { PdfViewer } from "@/components/documents/PdfViewer";
 
 describe("Shared UI Components", () => {
   describe("ConfidenceBadge", () => {
@@ -138,6 +139,18 @@ describe("Shared UI Components", () => {
       const retryBtn = screen.getByRole("button", { name: /retry/i });
       fireEvent.click(retryBtn);
       expect(handleRetry).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("PdfViewer Loading Placeholder Contrast", () => {
+    it("renders loading placeholder with text-slate-700 (dark enough for WCAG AA >= 4.5:1) and no opacity", () => {
+      render(<PdfViewer documentId="doc-test-123" activePage={1} />);
+
+      const loadingText = screen.getByText("Loading document viewer...");
+      expect(loadingText).toBeInTheDocument();
+      expect(loadingText.className).toContain("text-slate-700");
+      expect(loadingText.className).not.toMatch(/opacity/);
+      expect(loadingText.className).not.toContain("text-slate-500");
     });
   });
 });

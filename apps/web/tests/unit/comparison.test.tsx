@@ -137,4 +137,50 @@ describe("ComparisonView Component", () => {
     });
     expect(confirmBtn).not.toBeDisabled();
   });
+
+  it("shows '5 days' when lead_time_days is 5 and 'Not specified' when null", () => {
+    const compWithLeadTimes: Comparison = {
+      ...mockComparison,
+      quotes: [
+        {
+          ...mockComparison.quotes![0],
+          lead_time_days: 5,
+        },
+        {
+          ...mockComparison.quotes![1],
+          lead_time_days: null,
+        },
+      ],
+    };
+
+    render(
+      <ComparisonView
+        comparison={compWithLeadTimes}
+        userRoles={["buyer"]}
+        onToast={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("5 days")).toBeInTheDocument();
+    expect(screen.getByText("Not specified")).toBeInTheDocument();
+  });
+
+  it("renders customer-facing headings without US-xx identifiers", () => {
+    render(
+      <ComparisonView
+        comparison={mockComparison}
+        userRoles={["buyer"]}
+        onToast={vi.fn()}
+      />
+    );
+
+    // Representative heading checks
+    expect(
+      screen.getByRole("heading", { name: "Side-by-Side Comparison Matrix" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Scoring Weights Configuration" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/US-\d+/)).not.toBeInTheDocument();
+  });
 });

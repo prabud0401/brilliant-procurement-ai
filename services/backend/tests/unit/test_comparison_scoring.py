@@ -3,7 +3,9 @@ from decimal import Decimal
 
 import pytest
 
+from app.comparison.explanation import TemplateExplanationWriter
 from app.comparison.scoring import calculate_scores
+from app.comparison.service import parse_lead_time
 
 
 @pytest.mark.unit
@@ -100,3 +102,46 @@ def test_comparison_scoring_close_call_margin() -> None:
 
     assert result["is_close"] is True
     assert result["margin"] <= 2.0
+
+
+@pytest.mark.unit
+def test_parse_lead_time_helper() -> None:
+    # parses "5 days" / 5 / "14"
+    assert parse_lead_time("5 days") == 5
+    assert parse_lead_time(5) == 5
+    assert parse_lead_time("14") == 14
+    assert parse_lead_time("14 days") == 14
+    assert parse_lead_time("Delivery Lead Time: 5 days") == 5
+
+    # returns None when missing (never a silent 7)
+    assert parse_lead_time(None) is None
+    assert parse_lead_time("") is None
+    assert parse_lead_time("   ") is None
+    assert parse_lead_time("not specified") is None
+    assert parse_lead_time("unspecified") is None
+    assert parse_lead_time("N/A") is None
+    assert parse_lead_time("None") is None
+    assert parse_lead_time(0) is None
+    assert parse_lead_time(-5) is None
+
+
+@pytest.mark.unit
+def test_explanation_writer_unknown_lead_time_not_invented() -> None:
+    writer = TemplateExplanationWriter()
+    facts = {
+        "winner_vendor_id": "v1",
+        "scores": {
+            "v1": {
+                "vendor_name": "Vendor A",
+                "final_score": 90.0,
+                "total_cost": "1000.00",
+                "lead_time_days": None,
+                "payment_terms_days": 30,
+                "completeness_score": 100.0,
+            }
+        },
+    }
+    explanation = writer(facts)
+    assert "not specified" in explanation
+    assert "7 days" not in explanation
+    assert "None days" not in explanation

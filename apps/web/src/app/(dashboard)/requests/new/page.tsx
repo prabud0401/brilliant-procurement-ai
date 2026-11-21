@@ -19,7 +19,7 @@ export default function NewRequestPage() {
       )}
 
       <div>
-        <h1 className="text-xl font-bold text-slate-900">Create Purchase Request (US-21)</h1>
+        <h1 className="text-xl font-bold text-slate-900">Create Purchase Request</h1>
         <p className="mt-1 text-xs text-slate-500">
           Specify procurement requirements and product line items. Totals will be computed live in AED.
         </p>

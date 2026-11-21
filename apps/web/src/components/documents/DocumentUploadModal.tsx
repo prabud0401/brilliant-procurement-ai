@@ -223,7 +223,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
           </div>
           <div>
             <h2 id="upload-modal-title" className="text-base font-bold text-slate-900">
-              Upload Procurement Document (US-01)
+              Upload Procurement Document
             </h2>
             <p className="text-xs text-slate-500">
               Upload PDF or image files (PNG, JPG, TIFF) up to 20 MB.
@@ -237,7 +237,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
             <div className="flex items-start gap-2.5">
               <AlertTriangle className="h-5 w-5 text-amber-700 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-bold text-amber-900">Exact Duplicate Document (US-06)</h4>
+                <h4 className="font-bold text-amber-900">Exact Duplicate Document</h4>
                 <p className="mt-1 leading-relaxed">
                   This document has already been uploaded previously. An exact SHA-256 match exists in the system.
                 </p>

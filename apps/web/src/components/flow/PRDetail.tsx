@@ -257,7 +257,7 @@ export const PRDetail: React.FC<PRDetailProps> = ({ pr: initialPr, userRoles, us
               Linked Quotations ({quotes.length})
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              US-08: At least two confirmed quotes are required to generate an automated side-by-side comparison.
+              At least two confirmed quotes are required to generate an automated side-by-side comparison.
             </p>
           </div>
 

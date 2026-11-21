@@ -31,7 +31,7 @@ export default function ComparisonsPage() {
           <div>
             <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <GitCompare className="h-5 w-5 text-purple-600" />
-              Quote Comparisons & Sourcing Matrices (US-08)
+              Quote Comparisons & Sourcing Matrices
             </h1>
             <p className="mt-1 text-xs text-slate-500">
               Evaluate competitive quotations side-by-side with 60/20/10/10 scoring, AI explanations, and audited override justifications.

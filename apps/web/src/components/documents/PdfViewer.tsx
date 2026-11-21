@@ -268,9 +268,11 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       {/* Main Canvas Viewport Area */}
       <div tabIndex={0} role="region" aria-label="PDF Document Viewer" className="flex-1 overflow-auto p-4 flex justify-center items-start relative">
         {loading && (
-          <div className="my-auto flex flex-col items-center justify-center p-8 text-slate-500">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" />
-            <p className="text-xs">Loading document viewer...</p>
+          <div className="my-auto flex flex-col items-center justify-center p-8 text-slate-700">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" aria-hidden="true" />
+            <p className="text-xs font-medium text-slate-700" data-testid="pdf-loading-placeholder">
+              Loading document viewer...
+            </p>
           </div>
         )}
 

@@ -18,12 +18,12 @@ class TemplateExplanationWriter:
         winner_name = winner_info.get("vendor_name", "the recommended vendor")
         winner_score = winner_info.get("final_score", 0.0)
         total_cost = winner_info.get("total_cost", "0.00")
-        lead_days = winner_info.get("lead_time_days", "N/A")
-        pay_days = winner_info.get("payment_terms_days", "N/A")
+        lead_days = winner_info.get("lead_time_days")
+        pay_days = winner_info.get("payment_terms_days")
         comp = winner_info.get("completeness_score", 100.0)
 
-        lead_str = f"{lead_days} days" if lead_days != "N/A" else "unspecified"
-        pay_str = f"{pay_days} days" if pay_days != "N/A" else "unspecified"
+        lead_str = f"{lead_days} days" if lead_days not in (None, "N/A", "") else "not specified"
+        pay_str = f"{pay_days} days" if pay_days not in (None, "N/A", "") else "not specified"
 
         text = (
             f"Recommended vendor: {winner_name} with an overall score of {winner_score}/100. "

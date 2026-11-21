@@ -134,15 +134,23 @@ describe("MetricsClient Component (NFR-OBS-03, NFR-OBS-05)", () => {
     expect(screen.getByText("8.0%")).toBeInTheDocument();
   });
 
-  it("renders AI Budget and token consumption section", () => {
+  it("renders AI Activity and token consumption section without cost/budget strings", () => {
     renderWithToast(<MetricsClient initialData={mockMetrics} />);
 
     expect(
-      screen.getByText("AI Budget & Token Consumption Today")
+      screen.getByText("AI Invocations & Token Usage Today")
     ).toBeInTheDocument();
-    expect(screen.getByText(/AED 50.00/)).toBeInTheDocument();
+    expect(screen.getByText("AI Invocations Today")).toBeInTheDocument();
+    expect(screen.getByText("18")).toBeInTheDocument();
+    expect(screen.getByText("Total Tokens Today")).toBeInTheDocument();
     expect(screen.getByText("45,000")).toBeInTheDocument();
-    expect(screen.getByText(/0.1% utilized/i)).toBeInTheDocument();
+
+    // Verify AI cost, budget, utilization, and currency are NOT displayed in AI section
+    expect(screen.queryByText(/Daily AI Budget/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Estimated Cost Today/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/utilized/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/AED 50\.00/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/spend cap/i)).not.toBeInTheDocument();
   });
 
   it("renders field correction rates breakdown table", () => {
