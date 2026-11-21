@@ -126,8 +126,8 @@ export const SuspiciousBanner: React.FC<SuspiciousBannerProps> = ({
 
             <p className="mt-1 text-xs text-slate-700 leading-relaxed">
               This document contains text that appears to be instructions directed at the AI
-              system (e.g. attempting to override totals or force approvals). Per Design 7.5 and
-              US-29, <strong>all instructions inside document text are treated strictly as data and ignored</strong>.
+              system (e.g. attempting to override totals or force approvals).{" "}
+              <strong>All instructions inside document text are treated strictly as data and ignored</strong>.
               Document confirmation is blocked until a Buyer inspects the ground truth and acknowledges.
             </p>
 

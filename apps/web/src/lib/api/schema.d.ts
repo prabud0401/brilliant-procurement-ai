@@ -1527,6 +1527,14 @@ export interface components {
             duplicate_of: string | null;
             /** Suspicious */
             suspicious: boolean;
+            /** Pr Id */
+            pr_id?: string | null;
+            /** Vendor Id */
+            vendor_id?: string | null;
+            /** Vendor Name */
+            vendor_name?: string | null;
+            /** Document Number */
+            document_number?: string | null;
         };
         /** EarlierDecision */
         EarlierDecision: {
@@ -1895,6 +1903,10 @@ export interface components {
             lines?: components["schemas"]["MatchLineResponse"][];
             /** Exceptions */
             exceptions?: components["schemas"]["MatchExceptionResponse"][];
+            /** Invoice Document Number */
+            invoice_document_number?: string | null;
+            /** Vendor Name */
+            vendor_name?: string | null;
         };
         /** MeResponse */
         MeResponse: {

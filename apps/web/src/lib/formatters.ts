@@ -95,3 +95,44 @@ export function formatVatRate(
 export const formatCurrency = formatMoneyAED;
 export const formatDate = formatGSTDate;
 
+/**
+ * Formats a document's primary visible title from vendor name and document number.
+ * Returns "Vendor · NUMBER" if both exist, or either if one exists,
+ * or falls back to a formatted document type label (never raw UUID).
+ */
+export function formatDocumentTitle(
+  doc: {
+    vendor_name?: string | null;
+    document_number?: string | null;
+    doc_type?: string | null;
+  },
+  fallback?: string
+): string {
+  const vendor = doc.vendor_name?.trim();
+  const num = doc.document_number?.trim();
+
+  if (vendor && num) {
+    return `${vendor} · ${num}`;
+  }
+  if (vendor) {
+    return vendor;
+  }
+  if (num) {
+    return num;
+  }
+  if (fallback) {
+    return fallback;
+  }
+  if (doc.doc_type) {
+    const labels: Record<string, string> = {
+      quote: "Quotation",
+      purchase_order: "Purchase Order",
+      delivery_note: "Delivery Note",
+      invoice: "Invoice",
+      other: "Document",
+    };
+    return labels[doc.doc_type] || doc.doc_type.replace(/_/g, " ").toUpperCase();
+  }
+  return "Document";
+}
+

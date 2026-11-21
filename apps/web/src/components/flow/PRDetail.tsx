@@ -15,7 +15,7 @@ import {
   Plus,
 } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { formatMoneyAED, formatGSTDate } from "@/lib/formatters";
+import { formatMoneyAED, formatGSTDate, formatDocumentTitle } from "@/lib/formatters";
 import type { PurchaseRequest } from "@/lib/flow/types";
 import type { DocumentSummary } from "@/lib/documents/types";
 
@@ -279,36 +279,43 @@ export const PRDetail: React.FC<PRDetailProps> = ({ pr: initialPr, userRoles, us
           </div>
         ) : (
           <div className="space-y-2">
-            {quotes.map((q) => (
-              <div
-                key={q.id}
-                className="flex items-center justify-between rounded-md border border-slate-200 p-3 hover:bg-slate-50/50"
-              >
-                <div className="flex items-center gap-3">
-                  <FileText className="h-4 w-4 text-purple-600" />
-                  <div>
+            {quotes.map((q) => {
+              const title = formatDocumentTitle(q, "Quotation Document");
+              return (
+                <div
+                  key={q.id}
+                  className="flex items-center justify-between rounded-md border border-slate-200 p-3 hover:bg-slate-50/50"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-4 w-4 text-purple-600 flex-shrink-0" />
+                    <div>
+                      <Link
+                        href={`/documents/${q.id}`}
+                        className="text-xs font-semibold text-blue-600 hover:underline"
+                        title={title}
+                      >
+                        {title}
+                      </Link>
+                      <p className="text-[11px] text-slate-500">
+                        Uploaded {formatGSTDate(q.created_at)}
+                        <span className="font-mono text-[10px] text-slate-400 ml-2" title={q.id}>
+                          ({q.id.slice(0, 8)}...)
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <StatusBadge status={q.status} />
                     <Link
                       href={`/documents/${q.id}`}
-                      className="text-xs font-semibold text-blue-600 hover:underline"
+                      className="rounded border border-slate-200 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-100"
                     >
-                      Quotation Document ({q.id.slice(0, 8)}...)
+                      View Extraction
                     </Link>
-                    <p className="text-[11px] text-slate-500">
-                      Uploaded {formatGSTDate(q.created_at)}
-                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <StatusBadge status={q.status} />
-                  <Link
-                    href={`/documents/${q.id}`}
-                    className="rounded border border-slate-200 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-100"
-                  >
-                    View Extraction
-                  </Link>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -358,8 +365,15 @@ export const PRDetail: React.FC<PRDetailProps> = ({ pr: initialPr, userRoles, us
                       className="mt-1 h-4 w-4 text-purple-600"
                     />
                     <div className="flex-1 text-xs">
-                      <span className="font-semibold text-slate-900">Document {aq.id.slice(0, 8)}...</span>
-                      <p className="text-[11px] text-slate-500">Uploaded {formatGSTDate(aq.created_at)}</p>
+                      <span className="font-semibold text-slate-900">
+                        {formatDocumentTitle(aq, "Quotation Document")}
+                      </span>
+                      <p className="text-[11px] text-slate-500">
+                        Uploaded {formatGSTDate(aq.created_at)}
+                        <span className="font-mono text-[10px] text-slate-400 ml-2" title={aq.id}>
+                          ({aq.id.slice(0, 8)}...)
+                        </span>
+                      </p>
                     </div>
                   </label>
                 ))}

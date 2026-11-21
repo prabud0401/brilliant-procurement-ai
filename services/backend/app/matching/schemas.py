@@ -56,6 +56,8 @@ class MatchResponse(BaseModel):
     created_at: datetime
     lines: list[MatchLineResponse] = Field(default_factory=list)
     exceptions: list[MatchExceptionResponse] = Field(default_factory=list)
+    invoice_document_number: str | None = None
+    vendor_name: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

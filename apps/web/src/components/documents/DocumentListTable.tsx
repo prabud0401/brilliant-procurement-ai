@@ -18,7 +18,7 @@ import { DataTable, type Column } from "@/components/ui/DataTable";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { DocumentUploadModal } from "./DocumentUploadModal";
 import { fetchVendors, type Vendor } from "@/lib/constants/vendors";
-import { formatDate } from "@/lib/formatters";
+import { formatDate, formatDocumentTitle } from "@/lib/formatters";
 import type { DocumentSummary, DocumentType, DocumentStatus } from "@/lib/documents/types";
 
 export interface DocumentListTableProps {
@@ -92,7 +92,9 @@ export const DocumentListTable: React.FC<DocumentListTableProps> = ({
         const q = searchQuery.toLowerCase().trim();
         const matchesId = doc.id.toLowerCase().includes(q);
         const matchesType = doc.doc_type.toLowerCase().includes(q);
-        if (!matchesId && !matchesType) return false;
+        const matchesVendor = doc.vendor_name ? doc.vendor_name.toLowerCase().includes(q) : false;
+        const matchesDocNum = doc.document_number ? doc.document_number.toLowerCase().includes(q) : false;
+        if (!matchesId && !matchesType && !matchesVendor && !matchesDocNum) return false;
       }
       return true;
     });
@@ -113,20 +115,31 @@ export const DocumentListTable: React.FC<DocumentListTableProps> = ({
   const columns: Column<DocumentSummary>[] = [
     {
       key: "id",
-      header: "Document ID",
+      header: "Document",
       sortable: true,
-      render: (row) => (
-        <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-slate-400 flex-shrink-0" />
-          <Link
-            href={`/documents/${row.id}`}
-            className="font-mono text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline truncate max-w-[140px]"
-            title={row.id}
-          >
-            {row.id}
-          </Link>
-        </div>
-      ),
+      render: (row) => {
+        const title = formatDocumentTitle(row, formatDocType(row.doc_type));
+        return (
+          <div className="flex items-center gap-2 min-w-0">
+            <FileText className="h-4 w-4 text-slate-400 flex-shrink-0" />
+            <div className="min-w-0">
+              <Link
+                href={`/documents/${row.id}`}
+                className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline truncate block max-w-[220px]"
+                title={title}
+              >
+                {title}
+              </Link>
+              <span
+                className="font-mono text-[10px] text-slate-400 block truncate max-w-[220px]"
+                title={row.id}
+              >
+                {row.id}
+              </span>
+            </div>
+          </div>
+        );
+      },
     },
     {
       key: "doc_type",
@@ -346,7 +359,7 @@ export const DocumentListTable: React.FC<DocumentListTableProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by ID or type..."
+                placeholder="Search by vendor, document number, ID, or type..."
                 className="w-full rounded-md border border-slate-300 pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>

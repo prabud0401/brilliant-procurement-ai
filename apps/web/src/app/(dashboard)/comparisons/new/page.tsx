@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GitCompare, AlertCircle, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
-import { formatMoneyAED, formatGSTDate } from "@/lib/formatters";
+import { formatMoneyAED, formatGSTDate, formatDocumentTitle } from "@/lib/formatters";
 import type { DocumentSummary } from "@/lib/documents/types";
 import type { PurchaseRequest } from "@/lib/flow/types";
 
@@ -184,7 +184,7 @@ export default function NewComparisonPage() {
                     <div className="flex-1 text-xs">
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-slate-900">
-                          Document ID: {q.id.slice(0, 8)}...
+                          {formatDocumentTitle(q, "Quotation Document")}
                         </span>
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
@@ -196,6 +196,9 @@ export default function NewComparisonPage() {
                       </div>
                       <p className="text-[11px] text-slate-500 mt-0.5">
                         Uploaded {formatGSTDate(q.created_at)}
+                        <span className="font-mono text-[10px] text-slate-400 ml-2" title={q.id}>
+                          ({q.id.slice(0, 8)}...)
+                        </span>
                       </p>
                       {!isConfirmed && (
                         <p className="text-[11px] text-amber-700 mt-1">

@@ -18,6 +18,7 @@ from app.core.models import (
     PurchaseOrder,
     User,
     UserRole,
+    Vendor,
 )
 from app.core.policy import Principal
 from app.matching.engine import execute_three_way_match
@@ -255,7 +256,41 @@ def get_match(db: Session, match_id: uuid.UUID, principal: Principal) -> MatchRe
             detail=f"Match '{match_id}' not found",
         )
 
-    return MatchResponse.model_validate(match)
+    res = MatchResponse.model_validate(match)
+
+    inv_doc = db.query(Document).filter(Document.id == match.invoice_document_id).first()
+    if inv_doc:
+        v_name: str | None = None
+        if inv_doc.vendor_id:
+            vendor = db.query(Vendor).filter(Vendor.id == inv_doc.vendor_id).first()
+            if vendor:
+                v_name = vendor.name
+
+        latest_ext = (
+            db.query(Extraction)
+            .filter(Extraction.document_id == inv_doc.id)
+            .order_by(Extraction.version.desc())
+            .first()
+        )
+        doc_num: str | None = None
+        if latest_ext:
+            fields = {
+                f.name: f.value_raw.strip()
+                for f in latest_ext.fields
+                if f.value_raw and f.value_raw.strip()
+            }
+            if not v_name:
+                v_name = fields.get("vendor_name")
+            doc_num = (
+                fields.get("document_number")
+                or fields.get("po_number")
+                or fields.get("quote_number")
+            )
+
+        res.invoice_document_number = doc_num
+        res.vendor_name = v_name
+
+    return res
 
 
 def list_exceptions(
