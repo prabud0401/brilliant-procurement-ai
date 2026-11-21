@@ -1,3 +1,5 @@
+> This is the from-scratch technical script (it creates new records). For the live five-minute walkthrough that uses the hosted demo data, see [DEMO_SCRIPT.md](./DEMO_SCRIPT.md).
+
 # 5-Minute Technical Assessment Demo Script
 
 This script provides an exact minute-by-minute walkthrough for demonstrating the **Procurement Document Assistant (PDA)**. It mirrors the automated end-to-end Playwright test suite (`apps/web/e2e/demo/demo-script.spec.ts`).
