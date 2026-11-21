@@ -43,7 +43,7 @@ export default function RequestsPage() {
           <div>
             <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <ShoppingCart className="h-5 w-5 text-blue-600" />
-              Purchase Requests (US-21)
+              Purchase Requests
             </h1>
             <p className="mt-1 text-xs text-slate-500">
               Create, review, and track purchase requests and procurement line items across company approval tiers.

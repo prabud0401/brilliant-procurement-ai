@@ -91,7 +91,7 @@ export default function MatchesPage() {
           <div>
             <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <Layers className="h-5 w-5 text-blue-600" />
-              Three-Way Match Automation (US-13)
+              Three-Way Match Automation
             </h1>
             <p className="mt-1 text-xs text-slate-500">
               Deterministic reconciliation of supplier tax invoices against approved purchase orders and delivery notes.
@@ -145,7 +145,7 @@ export default function MatchesPage() {
                 ) : (
                   <>
                     <Play className="h-4 w-4" />
-                    <span>Run Match (US-13)</span>
+                    <span>Run Match</span>
                   </>
                 )}
               </button>

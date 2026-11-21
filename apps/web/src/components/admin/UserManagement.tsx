@@ -152,7 +152,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ currentUserId, o
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
           <Users className="h-5 w-5 text-blue-600" />
-          Users & Delegated Roles (US-25)
+          Users & Delegated Roles
         </h2>
         <p className="mt-1 text-xs text-slate-500">
           Manage system accounts, assign RBAC roles, define financial delegation limits, and manage status. All modifications are logged in the tamper-evident audit trail.

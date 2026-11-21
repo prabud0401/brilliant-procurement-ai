@@ -44,7 +44,7 @@ export default function PurchaseOrdersPage() {
           <div>
             <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <FileCheck className="h-5 w-5 text-blue-600" />
-              Purchase Orders (US-08, US-27)
+              Purchase Orders
             </h1>
             <p className="mt-1 text-xs text-slate-500">
               Manage purchase order drafts created from winning quotations, submit for financial approval, and push to Odoo ERP system of record.

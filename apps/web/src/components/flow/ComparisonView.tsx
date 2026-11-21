@@ -135,7 +135,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
   const handleSaveDecision = async (e: React.FormEvent) => {
     e.preventDefault();
     if (overrideRequired && overrideReason.trim().length < 10) {
-      setDecisionError("US-10: An override reason of at least 10 characters is required when choosing a vendor other than the recommendation.");
+      setDecisionError("An override reason of at least 10 characters is required when choosing a vendor other than the recommendation.");
       return;
     }
 
@@ -266,12 +266,12 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
           </div>
         </div>
 
-        {/* Warnings / Gaps Banner (US-12) */}
+        {/* Warnings / Gaps Banner */}
         {comp.flags && comp.flags.length > 0 && (
           <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 flex items-start gap-2">
             <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
             <div>
-              <strong className="font-semibold">Comparison Flags & Gaps Detected (US-12):</strong>
+              <strong className="font-semibold">Comparison Flags & Gaps Detected:</strong>
               <ul className="mt-1 list-disc list-inside space-y-0.5 text-amber-800">
                 {comp.flags.map((flag, idx) => (
                   <li key={idx}>{flag}</li>
@@ -282,7 +282,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
         )}
       </div>
 
-      {/* AI Recommendation Banner (US-09) */}
+      {/* AI Recommendation Banner */}
       {comp.recommended_vendor_id && (
         <div className="rounded-lg border border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 p-6 shadow-sm" data-testid="recommendation-banner">
           <div className="flex items-start justify-between">
@@ -292,7 +292,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
               </div>
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-purple-700">
-                  Recommended Vendor Selection (US-09)
+                  Recommended Vendor Selection
                 </span>
                 <h2 className="text-lg font-bold text-slate-900" data-testid="recommended-vendor-name">
                   {quotes.find((q) => q.vendor_id === comp.recommended_vendor_id)?.vendor_name ||
@@ -315,12 +315,12 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
             </div>
           )}
 
-          {/* Override Indicator (US-10) */}
+          {/* Override Indicator */}
           {comp.chosen_vendor_id && comp.chosen_vendor_id !== comp.recommended_vendor_id && (
             <div className="mt-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800" data-testid="override-indicator">
               <strong className="font-semibold flex items-center gap-1.5">
                 <ShieldAlert className="h-4 w-4 text-rose-600" />
-                Buyer Override Active (US-10)
+                Buyer Override Active
               </strong>
               <p className="mt-1">
                 Chosen vendor differs from the AI recommendation.
@@ -332,11 +332,11 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
         </div>
       )}
 
-      {/* Side-by-Side Comparison Matrix (US-08) */}
+      {/* Side-by-Side Comparison Matrix */}
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-base font-semibold text-slate-900 mb-4 flex items-center gap-2">
           <GitCompare className="h-4 w-4 text-slate-500" />
-          Side-by-Side Comparison Matrix (US-08)
+          Side-by-Side Comparison Matrix
         </h2>
 
         <div className="overflow-x-auto">
@@ -487,14 +487,14 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
         </div>
       </div>
 
-      {/* Adjust Weights Section (US-11) */}
+      {/* Adjust Weights Section */}
       {isBuyer && (
         <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2">
                 <Sliders className="h-4 w-4 text-blue-600" />
-                Scoring Weights Configuration (US-11)
+                Scoring Weights Configuration
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 Buyer can adjust weights for Cost, Delivery, Payment, and Completeness. Must total exactly 100%.
@@ -579,7 +579,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
         </div>
       )}
 
-      {/* Decision Dialog Modal (US-10) */}
+      {/* Decision Dialog Modal */}
       {decisionModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
@@ -589,7 +589,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
           <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl border border-slate-200">
             <h3 className="text-base font-bold text-slate-900 mb-1 flex items-center gap-2">
               <Award className="h-5 w-5 text-purple-600" />
-              Vendor Selection Decision (US-10)
+              Vendor Selection Decision
             </h3>
             <p className="text-xs text-slate-500 mb-4">
               Select the supplier to award the purchase order. Choosing any vendor other than the system recommendation requires a recorded override reason.
@@ -638,7 +638,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
                           </div>
                           <div className="text-[11px] text-slate-500 flex gap-3 mt-0.5">
                             <span>Total: {formatMoneyAED(q.total_aed)}</span>
-                            <span>Lead: {q.lead_time_days || "—"} days</span>
+                            <span>Lead: {q.lead_time_days ? `${q.lead_time_days} days` : "Not specified"}</span>
                           </div>
                         </div>
                       </label>
@@ -650,7 +650,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
               {overrideRequired && (
                 <div className="rounded-md border border-amber-200 bg-amber-50/70 p-3">
                   <label htmlFor="override-reason-input" className="block font-semibold text-amber-900 mb-1">
-                    Override Justification Reason * (US-10)
+                    Override Justification Reason *
                   </label>
                   <p className="text-[11px] text-amber-700 mb-2">
                     You have chosen a supplier other than the AI recommended vendor. Please enter a justification of at least 10 characters.

@@ -57,4 +57,13 @@ describe("Navigation Configuration & Role Filtering", () => {
     expect(ids).toContain("admin");
     expect(ids).toContain("home");
   });
+
+  it("uses short-form labels to avoid wrapping at 1440px", () => {
+    const labelMap = Object.fromEntries(NAV_CONFIG.map((item) => [item.id, item.label]));
+    expect(labelMap["requests"]).toBe("Requests");
+    expect(labelMap["purchase-orders"]).toBe("Orders");
+    expect(labelMap["matches"]).toBe("Matching");
+    expect(labelMap["qa"]).toBe("Q&A");
+    expect(labelMap["audit"]).toBe("Audit");
+  });
 });

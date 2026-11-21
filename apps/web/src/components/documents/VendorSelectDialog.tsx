@@ -75,7 +75,7 @@ export const VendorSelectDialog: React.FC<VendorSelectDialogProps> = ({
           </div>
           <div>
             <h3 id="vendor-dialog-title" className="text-base font-bold text-slate-900">
-              Link Odoo Vendor Record (US-05)
+              Link Odoo Vendor Record
             </h3>
             <p className="text-xs text-slate-500">
               Select an official vendor from the Odoo master data list or flag as new.

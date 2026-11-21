@@ -245,7 +245,7 @@ export const ExtractionReview: React.FC<ExtractionReviewProps> = ({
             </div>
             <div>
               <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                Odoo Vendor Record (US-05)
+                Odoo Vendor Record
               </span>
               <h2 className="text-sm font-bold text-slate-900">
                 {linkedVendor ? linkedVendor.name : "No Official Vendor Linked"}
@@ -485,7 +485,7 @@ export const ExtractionReview: React.FC<ExtractionReviewProps> = ({
                 Cannot Confirm Document: {openSummary.count} Open Item(s)
               </h2>
               <p className="mt-1 text-xs text-amber-800 leading-relaxed">
-                All low-confidence scores, validation mismatches, duplicate warnings, and security flags must be confirmed or acknowledged before this document can enter downstream comparisons, orders, or matches (US-03).
+                All low-confidence scores, validation mismatches, duplicate warnings, and security flags must be confirmed or acknowledged before this document can enter downstream comparisons, orders, or matches.
               </p>
 
               <ul className="mt-3 space-y-1.5 text-xs text-amber-900 divide-y divide-amber-200/50">

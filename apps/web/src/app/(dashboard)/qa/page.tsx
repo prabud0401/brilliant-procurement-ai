@@ -45,7 +45,7 @@ export default async function QAPage() {
             Q&A Restricted for Administrator Role
           </h2>
           <p className="mx-auto mt-2 max-w-lg text-sm text-slate-600 leading-relaxed">
-            Per security policy (design 7.2, US-19), the Document Q&A feature is reserved for operational
+            Per security policy, the Document Q&A feature is reserved for operational
             procurement roles (Requester, Buyer, and Manager). Administrator accounts do not participate
             in procurement Q&A to prevent accidental access to unredacted business data.
           </p>
