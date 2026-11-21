@@ -14,7 +14,7 @@ import {
   Share2,
 } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { formatMoneyAED, formatGSTDate } from "@/lib/formatters";
+import { formatMoneyAED, formatGSTDate, formatVatRate } from "@/lib/formatters";
 import type { PurchaseOrder } from "@/lib/flow/types";
 
 export interface PODetailProps {
@@ -224,7 +224,7 @@ export const PODetail: React.FC<PODetailProps> = ({ po: initialPo, userRoles, us
                   <td className="px-3 py-2.5 text-right text-slate-700">
                     {formatMoneyAED(line.unit_price)}
                   </td>
-                  <td className="px-3 py-2.5 text-right text-slate-500">{line.vat_rate}%</td>
+                  <td className="px-3 py-2.5 text-right text-slate-500">{formatVatRate(line.vat_rate)}</td>
                   <td className="px-3 py-2.5 text-right font-medium text-slate-900">
                     {formatMoneyAED(line.line_total)}
                   </td>

@@ -31,9 +31,10 @@ This release implements all 19 Must-have user stories and the stretch email inta
 - **US-10 (Decision & Purchase Order Creation):** Buyer selects winning vendor or enters a mandatory override justification (≥ 10 characters). Automatically generates a structured Purchase Order.
 
 ### 2.3 Three-Way Matching & Exceptions
-- **US-13 (Line-Level Match):** Automated three-way reconciliation across Purchase Order, Delivery Note, and Vendor Invoice with configurable price and quantity tolerances.
+- **US-13 (Line-Level Match):** Automated three-way reconciliation across Purchase Order, Delivery Note, and Vendor Invoice with configurable price and quantity tolerances. Displays PO line description fallback and invoice unit price accurately.
 - **US-14 (Exception Queue):** Automated categorization of discrepancies (quantity variance, price discrepancy, missing delivery receipt).
-- **US-15 (Exception Resolution):** Tiered resolution workflow: Buyers can accept minor non-quantity discrepancies up to AED 500.00; over-billed quantities are locked from Buyer acceptance and must be escalated to the department Manager.
+- **US-15 (Exception Resolution):** Tiered resolution workflow: Buyers can accept minor non-quantity discrepancies up to AED 500.00; over-billed quantities are locked from Buyer acceptance and must be escalated to the department Manager. Default queue filter displays all unresolved items (open and escalated).
+- **PO VAT Percentage Display:** Renders fractional VAT rates (e.g. 0.05) formatted as 5% across purchase order details.
 
 ### 2.4 Document Assistant Q&A
 - **US-17 (Cited Q&A):** Natural-language conversational interface answering queries grounded exclusively in confirmed procurement documents with document and page citations.
@@ -47,7 +48,7 @@ This release implements all 19 Must-have user stories and the stretch email inta
 - **US-23 (Segregation of Duties):** Strict business rule enforcement: requesters cannot approve their own requests; buyers cannot approve purchase orders they generated; system administrators cannot approve financial commitments.
 - **US-24 (Append-Only Cryptographic Audit Log):** Tamper-evident audit trail with SHA-256 hash chaining. Database triggers prevent update and deletion. Includes in-app hash chain verification and CSV export.
 - **US-25 (System Administration):** Administrative consoles for user roles, department approval limits, and match tolerance configurations.
-- **US-29 (Prompt-Injection Defence):** Rule-based pre-scanner detecting 32+ injection patterns, XML delimiter isolation, red alert warning banner, and mandatory Buyer acknowledgement before document confirmation.
+- **US-29 (Prompt-Injection Defence):** Rule-based pre-scanner detecting 32+ injection patterns, XML delimiter isolation, red alert warning banner, and mandatory Buyer acknowledgement before document confirmation. Fixed: injection screening also reads the PDF text layer so faint embedded payloads are still flagged when OCR misses them.
 
 ### 2.6 Stretch Feature (R13)
 - **Email Intake via Logic Apps:** Automated ingestion channel connecting a demo Outlook.com mailbox to `POST /api/v1/intake/email` using a shared service key authenticated against Key Vault.

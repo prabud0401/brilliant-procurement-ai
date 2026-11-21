@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatMoneyAED, formatGSTDate } from "@/lib/formatters";
+import { formatMoneyAED, formatGSTDate, formatVatRate } from "@/lib/formatters";
 
 describe("Formatting Utilities for UAE (AED & GST)", () => {
   describe("formatMoneyAED", () => {
@@ -57,6 +57,37 @@ describe("Formatting Utilities for UAE (AED & GST)", () => {
       const formatted = formatGSTDate(utcDate, { includeTime: false });
       expect(formatted).not.toContain("GST");
       expect(formatted).toContain("2026");
+    });
+  });
+
+  describe("formatVatRate", () => {
+    it("formats fractional rates (<= 1) as percentage: 0.05 -> 5%", () => {
+      expect(formatVatRate(0.05)).toBe("5%");
+      expect(formatVatRate("0.05")).toBe("5%");
+      expect(formatVatRate("0.0500")).toBe("5%");
+    });
+
+    it("formats whole number rates as percentage: 5 -> 5%", () => {
+      expect(formatVatRate(5)).toBe("5%");
+      expect(formatVatRate("5")).toBe("5%");
+      expect(formatVatRate("5.00")).toBe("5%");
+    });
+
+    it("supports optional decimals formatting: 0.05 with decimals=2 -> 5.00%", () => {
+      expect(formatVatRate(0.05, { decimals: 2 })).toBe("5.00%");
+      expect(formatVatRate(5, { decimals: 2 })).toBe("5.00%");
+    });
+
+    it("handles zero, null, undefined, empty, and non-numeric gracefully", () => {
+      expect(formatVatRate(0)).toBe("0%");
+      expect(formatVatRate(null)).toBe("0%");
+      expect(formatVatRate(undefined)).toBe("0%");
+      expect(formatVatRate("")).toBe("0%");
+      expect(formatVatRate("invalid")).toBe("0%");
+    });
+
+    it("handles decimal percentages such as 5.5%", () => {
+      expect(formatVatRate(0.055)).toBe("5.5%");
     });
   });
 });

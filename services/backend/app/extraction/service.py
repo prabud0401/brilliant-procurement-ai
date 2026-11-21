@@ -24,11 +24,27 @@ from app.core.models import (
 )
 from app.documents.storage import get_storage
 from app.extraction.confidence import calculate_field_confidence
-from app.extraction.injection_detector import scan_text_for_injection
+from app.extraction.injection_detector import (
+    DetectedInjection,
+    scan_pdf_for_injection,
+    scan_text_for_injection,
+)
 from app.extraction.validation import parse_decimal, validate_extracted_data
 from app.observability.ai_events import emit_ai_metric_event
 
 logger = logging.getLogger("extraction.service")
+
+
+def _is_pdf(document: Document) -> bool:
+    """Check whether the document is a PDF based on mime, filename (if present), or blob_path."""
+    if document.mime and "application/pdf" in document.mime.lower():
+        return True
+    filename = getattr(document, "filename", None)
+    if filename and str(filename).lower().endswith(".pdf"):
+        return True
+    if document.blob_path and document.blob_path.lower().endswith(".pdf"):
+        return True
+    return False
 
 
 def run_extraction(session: Session, document_id: uuid.UUID) -> Extraction:
@@ -70,14 +86,35 @@ def run_extraction(session: Session, document_id: uuid.UUID) -> Extraction:
     except Exception as exc:
         logger.warning("Could not upload raw OCR json: %s", exc)
 
-    # 4. Prompt-injection defence screening (design 7.5, US-29)
-    findings = []
+    # 4. Prompt-injection defence screening (design 7.5, US-29, F29)
+    findings: list[DetectedInjection] = []
     if ocr_result.pages:
         for p in ocr_result.pages:
             page_text = " ".join(w.content for w in p.words)
             findings.extend(scan_text_for_injection(page_text, page=p.page_number))
     if not findings and ocr_result.content:
         findings.extend(scan_text_for_injection(ocr_result.content, page=1))
+
+    # Also scan native PDF text layer (F29: faint embedded payloads missed by OCR)
+    if _is_pdf(document) and document.blob_path:
+        try:
+            pdf_bytes = storage.download(document.blob_path)
+            findings.extend(scan_pdf_for_injection(pdf_bytes))
+        except Exception as exc:
+            logger.warning(
+                "Could not scan native PDF text layer for document %s: %s",
+                document.id,
+                exc,
+            )
+
+    # Union findings with OCR scan (dedupe by snippet_hash)
+    seen_hashes: set[str] = set()
+    deduped_findings: list[DetectedInjection] = []
+    for f in findings:
+        if f.snippet_hash not in seen_hashes:
+            seen_hashes.add(f.snippet_hash)
+            deduped_findings.append(f)
+    findings = deduped_findings
 
     if findings:
         document.suspicious = True
