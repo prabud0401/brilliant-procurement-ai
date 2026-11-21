@@ -63,6 +63,35 @@ export function formatGSTDate(
   return options.includeTime ? `${formatted} GST` : formatted;
 }
 
+/**
+ * Formats a VAT rate for display as a percentage.
+ * Handles decimal format (e.g. 0.05 -> "5%") and whole percentage format (e.g. 5 -> "5%").
+ * If rate <= 1, it is treated as a decimal rate (e.g. 0.05 -> 5%).
+ * An optional decimals option can be passed for fixed decimal formatting (e.g. { decimals: 2 } -> "5.00%").
+ */
+export function formatVatRate(
+  rate: number | string | null | undefined,
+  options: { decimals?: number } = {}
+): string {
+  if (rate === null || rate === undefined || rate === "") {
+    return options.decimals !== undefined ? `${(0).toFixed(options.decimals)}%` : "0%";
+  }
+
+  const num = typeof rate === "number" ? rate : parseFloat(String(rate));
+  if (isNaN(num)) {
+    return options.decimals !== undefined ? `${(0).toFixed(options.decimals)}%` : "0%";
+  }
+
+  const pct = num <= 1 && num > 0 ? num * 100 : num;
+
+  if (options.decimals !== undefined) {
+    return `${pct.toFixed(options.decimals)}%`;
+  }
+
+  const formatted = pct % 1 === 0 ? String(Math.round(pct)) : String(Number(pct.toFixed(2)));
+  return `${formatted}%`;
+}
+
 export const formatCurrency = formatMoneyAED;
 export const formatDate = formatGSTDate;
 

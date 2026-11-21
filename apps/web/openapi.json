@@ -2865,8 +2865,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by status: 'unresolved' (open+escalated), 'open', 'escalated', 'accepted', 'rejected', or 'all'",
               "title": "Status"
-            }
+            },
+            "description": "Filter by status: 'unresolved' (open+escalated), 'open', 'escalated', 'accepted', 'rejected', or 'all'"
           },
           {
             "name": "authorization",
@@ -6703,6 +6705,28 @@
               }
             ],
             "title": "Invoice Line Id"
+          },
+          "line_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line No"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
           },
           "ordered_qty": {
             "anyOf": [

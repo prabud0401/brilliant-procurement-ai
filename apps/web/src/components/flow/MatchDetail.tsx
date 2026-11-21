@@ -129,41 +129,46 @@ export const MatchDetail: React.FC<MatchDetailProps> = ({ match, userRoles }) =>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {match.lines?.map((line, idx) => (
-                <tr key={idx} className="hover:bg-slate-50/50">
-                  <td className="px-3 py-2.5 font-mono text-slate-400">{line.line_no}</td>
-                  <td className="px-3 py-2.5 font-medium text-slate-900">{line.description}</td>
-                  <td className="px-3 py-2.5 text-right text-slate-700">{line.ordered_qty}</td>
-                  <td className="px-3 py-2.5 text-right text-slate-700 font-medium">
-                    {line.received_qty}
-                  </td>
-                  <td className="px-3 py-2.5 text-right text-slate-900 font-bold">
-                    {line.invoiced_qty}
-                  </td>
-                  <td className="px-3 py-2.5 text-right text-slate-600">
-                    {formatMoneyAED(line.po_unit_price)}
-                  </td>
-                  <td className="px-3 py-2.5 text-right text-slate-900 font-medium">
-                    {formatMoneyAED(line.invoice_unit_price)}
-                  </td>
-                  <td className="px-3 py-2.5 text-right font-mono font-semibold">
-                    <span
-                      className={
-                        Number(line.variance_aed) > 0
-                          ? "text-rose-600"
-                          : Number(line.variance_aed) < 0
-                          ? "text-emerald-600"
-                          : "text-slate-700"
-                      }
-                    >
-                      {formatMoneyAED(line.variance_aed)}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2.5 text-center">
-                    <StatusBadge status={line.status} />
-                  </td>
-                </tr>
-              ))}
+              {match.lines?.map((line, idx) => {
+                const invUnitPrice = line.inv_unit_price ?? line.invoice_unit_price;
+                const lineNo = line.line_no ?? idx + 1;
+                const description = line.description || "—";
+                return (
+                  <tr key={line.id || idx} className="hover:bg-slate-50/50" data-testid={`match-line-row-${idx}`}>
+                    <td className="px-3 py-2.5 font-mono text-slate-400">{lineNo}</td>
+                    <td className="px-3 py-2.5 font-medium text-slate-900">{description}</td>
+                    <td className="px-3 py-2.5 text-right text-slate-700">{line.ordered_qty}</td>
+                    <td className="px-3 py-2.5 text-right text-slate-700 font-medium">
+                      {line.received_qty}
+                    </td>
+                    <td className="px-3 py-2.5 text-right text-slate-900 font-bold">
+                      {line.invoiced_qty}
+                    </td>
+                    <td className="px-3 py-2.5 text-right text-slate-600">
+                      {formatMoneyAED(line.po_unit_price)}
+                    </td>
+                    <td className="px-3 py-2.5 text-right text-slate-900 font-medium" data-testid={`inv-unit-price-${idx}`}>
+                      {formatMoneyAED(invUnitPrice)}
+                    </td>
+                    <td className="px-3 py-2.5 text-right font-mono font-semibold">
+                      <span
+                        className={
+                          Number(line.variance_aed) > 0
+                            ? "text-rose-600"
+                            : Number(line.variance_aed) < 0
+                            ? "text-emerald-600"
+                            : "text-slate-700"
+                        }
+                      >
+                        {formatMoneyAED(line.variance_aed)}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      <StatusBadge status={line.status} />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

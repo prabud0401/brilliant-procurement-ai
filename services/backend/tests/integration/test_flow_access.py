@@ -747,6 +747,17 @@ def test_buyer_exception_policy_and_escalation(db_session: Session) -> None:
     assert escalate_resp.status_code == 200
     assert escalate_resp.json()["status"] == "escalated"
 
+    # Verify GET /api/v1/exceptions?status=unresolved returns open + escalated, excludes accepted
+    unresolved_resp = client.get(
+        "/api/v1/exceptions?status=unresolved",
+        headers={"Authorization": f"Bearer {buyer1_token}"},
+    )
+    assert unresolved_resp.status_code == 200
+    unresolved_ids = [e["id"] for e in unresolved_resp.json()]
+    assert str(qty_exc_id) in unresolved_ids  # open
+    assert str(large_exc.id) in unresolved_ids  # escalated
+    assert str(small_exc.id) not in unresolved_ids  # accepted is excluded
+
     # 5. buyer1 cannot decide escalated exception
     buyer_decide_escalated = client.post(
         f"/api/v1/exceptions/{large_exc.id}/resolve",

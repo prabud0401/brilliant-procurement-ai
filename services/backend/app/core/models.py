@@ -588,6 +588,40 @@ class MatchLine(Base):
     )
 
     match: Mapped[Match] = relationship(back_populates="lines")
+    po_line: Mapped[POLine | None] = relationship(
+        "POLine", foreign_keys=[po_line_id], lazy="joined"
+    )
+    invoice_line: Mapped[ExtractedLine | None] = relationship(
+        "ExtractedLine", foreign_keys=[invoice_line_id], lazy="joined"
+    )
+
+    @property
+    def description(self) -> str | None:
+        if getattr(self, "_description", None):
+            return self._description
+        if self.po_line and self.po_line.description:
+            return self.po_line.description
+        if self.invoice_line and self.invoice_line.description:
+            return self.invoice_line.description
+        return None
+
+    @description.setter
+    def description(self, val: str | None) -> None:
+        self._description = val
+
+    @property
+    def line_no(self) -> int | None:
+        if getattr(self, "_line_no", None) is not None:
+            return self._line_no
+        if self.po_line and self.po_line.line_no is not None:
+            return self.po_line.line_no
+        if self.invoice_line and self.invoice_line.line_no is not None:
+            return self.invoice_line.line_no
+        return None
+
+    @line_no.setter
+    def line_no(self, val: int | None) -> None:
+        self._line_no = val
 
 
 class MatchException(Base):

@@ -311,7 +311,11 @@ def list_exceptions(
         return []
 
     if status_filter:
-        query = query.filter(MatchException.status == status_filter.strip().lower())
+        s = status_filter.strip().lower()
+        if s in ("unresolved", "needs_action"):
+            query = query.filter(MatchException.status.in_(["open", "escalated"]))
+        elif s != "all":
+            query = query.filter(MatchException.status == s)
 
     exceptions = query.order_by(MatchException.created_at.desc()).all()
     return [MatchExceptionResponse.model_validate(e) for e in exceptions]

@@ -210,15 +210,17 @@ export interface ApprovalBundle {
 
 export interface MatchLine {
   id?: string;
-  line_no: number;
-  description: string;
-  ordered_qty: number | string;
-  received_qty: number | string;
-  invoiced_qty: number | string;
-  po_unit_price: number | string;
-  invoice_unit_price: number | string;
+  line_no?: number | null;
+  description?: string | null;
+  ordered_qty?: number | string | null;
+  received_qty?: number | string | null;
+  invoiced_qty?: number | string | null;
+  po_unit_price?: number | string | null;
+  inv_unit_price?: number | string | null;
+  invoice_unit_price?: number | string | null;
   variance_aed: number | string;
   status: "matched" | "within_tolerance" | "exception" | string;
+  reason?: string | null;
 }
 
 export interface MatchException {

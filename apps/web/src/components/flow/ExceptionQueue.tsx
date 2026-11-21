@@ -25,7 +25,7 @@ export interface ExceptionQueueProps {
 export const ExceptionQueue: React.FC<ExceptionQueueProps> = ({ userRoles, onToast }) => {
   const [exceptions, setExceptions] = useState<MatchException[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>("open");
+  const [statusFilter, setStatusFilter] = useState<string>("unresolved");
 
   // Action Dialog state
   const [activeException, setActiveException] = useState<MatchException | null>(null);
@@ -143,6 +143,7 @@ export const ExceptionQueue: React.FC<ExceptionQueueProps> = ({ userRoles, onToa
               onChange={(e) => setStatusFilter(e.target.value)}
               className="rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
+              <option value="unresolved">Needs Action (Open & Escalated)</option>
               <option value="open">Open Exceptions</option>
               <option value="escalated">Escalated to Manager</option>
               <option value="accepted">Accepted</option>
