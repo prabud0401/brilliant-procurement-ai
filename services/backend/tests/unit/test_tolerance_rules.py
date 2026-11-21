@@ -1,10 +1,14 @@
 import uuid
 from decimal import Decimal
+from unittest.mock import MagicMock
 
 import pytest
 
-from app.core.models import ExtractedLine, POLine
+from app.core.models import ExtractedLine, MatchLine, POLine
+from app.core.policy import Principal
 from app.matching.engine import execute_three_way_match
+from app.matching.schemas import MatchLineResponse
+from app.matching.service import list_exceptions
 
 
 @pytest.mark.unit
@@ -178,3 +182,107 @@ def test_price_variance_tolerance_within_and_exceeding() -> None:
     price_ex = [e for e in res_exceed["exceptions"] if e["kind"] == "price_variance"]
     assert len(price_ex) == 1
     assert price_ex[0]["amount_impact_aed"] == Decimal("100.00")
+
+
+@pytest.mark.unit
+def test_match_line_description_and_line_no_mapping() -> None:
+    # 1. Populated from PO line when po_line is present
+    po_line = POLine(
+        id=uuid.uuid4(),
+        po_id=uuid.uuid4(),
+        line_no=3,
+        description="Ergonomic Chairs",
+        qty=Decimal("5.00"),
+        uom="unit",
+        unit_price=Decimal("400.00"),
+        vat_rate=Decimal("0.05"),
+    )
+    inv_line = ExtractedLine(
+        id=uuid.uuid4(),
+        extraction_id=uuid.uuid4(),
+        line_no=1,
+        description="Chairs - Invoice description",
+        qty=Decimal("5.00"),
+        unit_price=Decimal("400.00"),
+    )
+
+    ml = MatchLine(
+        id=uuid.uuid4(),
+        match_id=uuid.uuid4(),
+        po_line_id=po_line.id,
+        invoice_line_id=inv_line.id,
+        ordered_qty=Decimal("5.00"),
+        received_qty=Decimal("5.00"),
+        invoiced_qty=Decimal("5.00"),
+        po_unit_price=Decimal("400.00"),
+        inv_unit_price=Decimal("400.00"),
+        variance_aed=Decimal("0.00"),
+        status="matched",
+    )
+    ml.po_line = po_line
+    ml.invoice_line = inv_line
+
+    assert ml.description == "Ergonomic Chairs"
+    assert ml.line_no == 3
+
+    resp = MatchLineResponse.model_validate(ml)
+    assert resp.description == "Ergonomic Chairs"
+    assert resp.line_no == 3
+    assert resp.inv_unit_price == Decimal("400.00")
+
+    # 2. Fallback to invoice line when po_line is absent
+    ml_unmatched = MatchLine(
+        id=uuid.uuid4(),
+        match_id=uuid.uuid4(),
+        po_line_id=None,
+        invoice_line_id=inv_line.id,
+        invoiced_qty=Decimal("5.00"),
+        inv_unit_price=Decimal("400.00"),
+        variance_aed=Decimal("0.00"),
+        status="exception",
+    )
+    ml_unmatched.po_line = None
+    ml_unmatched.invoice_line = inv_line
+
+    assert ml_unmatched.description == "Chairs - Invoice description"
+    assert ml_unmatched.line_no == 1
+
+    resp_unmatched = MatchLineResponse.model_validate(ml_unmatched)
+    assert resp_unmatched.description == "Chairs - Invoice description"
+    assert resp_unmatched.line_no == 1
+    assert resp_unmatched.inv_unit_price == Decimal("400.00")
+
+
+@pytest.mark.unit
+def test_list_exceptions_unresolved_filter() -> None:
+    # Verify that status_filter="unresolved" applies IN ('open', 'escalated')
+    mock_db = MagicMock()
+    mock_query = MagicMock()
+    mock_db.query.return_value = mock_query
+    mock_query.filter.return_value = mock_query
+    mock_query.order_by.return_value = mock_query
+
+    principal = Principal(
+        id=uuid.uuid4(),
+        email="buyer@example.com",
+        display_name="Test Buyer",
+        roles=["buyer"],
+        department_id=None,
+        department_name=None,
+        approval_limit_aed=Decimal("10000.00"),
+    )
+
+    # Call with unresolved
+    list_exceptions(mock_db, principal, status_filter="unresolved")
+
+    # Verify query.filter was called with an IN clause on MatchException.status
+    assert mock_query.filter.called
+    filter_call = mock_query.filter.call_args[0][0]
+    # Check string representation or SQL expression of the binary expression
+    filter_sql = str(filter_call)
+    assert "open" in filter_sql or "status" in filter_sql
+
+    # Also verify "needs_action" synonym
+    mock_query.filter.reset_mock()
+    list_exceptions(mock_db, principal, status_filter="needs_action")
+    assert mock_query.filter.called

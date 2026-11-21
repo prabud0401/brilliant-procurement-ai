@@ -31,9 +31,10 @@ This release implements all 19 Must-have user stories and the stretch email inta
 - **US-10 (Decision & Purchase Order Creation):** Buyer selects winning vendor or enters a mandatory override justification (≥ 10 characters). Automatically generates a structured Purchase Order.
 
 ### 2.3 Three-Way Matching & Exceptions
-- **US-13 (Line-Level Match):** Automated three-way reconciliation across Purchase Order, Delivery Note, and Vendor Invoice with configurable price and quantity tolerances.
+- **US-13 (Line-Level Match):** Automated three-way reconciliation across Purchase Order, Delivery Note, and Vendor Invoice with configurable price and quantity tolerances. Displays PO line description fallback and invoice unit price accurately.
 - **US-14 (Exception Queue):** Automated categorization of discrepancies (quantity variance, price discrepancy, missing delivery receipt).
-- **US-15 (Exception Resolution):** Tiered resolution workflow: Buyers can accept minor non-quantity discrepancies up to AED 500.00; over-billed quantities are locked from Buyer acceptance and must be escalated to the department Manager.
+- **US-15 (Exception Resolution):** Tiered resolution workflow: Buyers can accept minor non-quantity discrepancies up to AED 500.00; over-billed quantities are locked from Buyer acceptance and must be escalated to the department Manager. Default queue filter displays all unresolved items (open and escalated).
+- **PO VAT Percentage Display:** Renders fractional VAT rates (e.g. 0.05) formatted as 5% across purchase order details.
 
 ### 2.4 Document Assistant Q&A
 - **US-17 (Cited Q&A):** Natural-language conversational interface answering queries grounded exclusively in confirmed procurement documents with document and page citations.

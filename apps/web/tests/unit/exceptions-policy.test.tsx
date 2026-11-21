@@ -133,4 +133,62 @@ describe("ExceptionQueue - Buyer & Manager Policy Enforcement (US-15)", () => {
     expect(managerRejectBtn).toBeInTheDocument();
     expect(managerRejectBtn).toBeEnabled();
   });
+
+  it("defaults filter to unresolved and displays both open and escalated exceptions", async () => {
+    let capturedUrl = "";
+    const mixedExceptions: MatchException[] = [
+      {
+        id: "exc-open",
+        match_id: "match-open-01",
+        kind: "price_variance",
+        amount_impact_aed: "200.00",
+        reason: "Open price variance AED 200",
+        status: "open",
+        created_at: "2026-02-15T12:00:00Z",
+      },
+      {
+        id: "exc-escalated",
+        match_id: "match-esc-02",
+        kind: "qty_variance",
+        amount_impact_aed: "1200.00",
+        reason: "Escalated qty variance AED 1200",
+        status: "escalated",
+        created_at: "2026-02-15T12:05:00Z",
+      },
+    ];
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: string) => {
+        capturedUrl = url;
+        return Promise.resolve({
+          ok: true,
+          json: async () => mixedExceptions,
+        });
+      })
+    );
+
+    await act(async () => {
+      render(<ExceptionQueue userRoles={["buyer"]} />);
+    });
+
+    // Verify initial request queries status=unresolved
+    expect(capturedUrl).toContain("/api/v1/exceptions?status=unresolved");
+
+    // Both open and escalated rows are rendered
+    expect(await screen.findByText(/Open price variance AED 200/i)).toBeInTheDocument();
+    expect(screen.getByText(/Escalated qty variance AED 1200/i)).toBeInTheDocument();
+
+    // Verify filter dropdown defaults to unresolved
+    const filterSelect = screen.getByLabelText("Filter:") as HTMLSelectElement;
+    expect(filterSelect.value).toBe("unresolved");
+
+    // Buyer sees open exception buttons (accept / escalate)
+    const openRowAccept = screen.getByTestId("buyer-accept-exception-btn");
+    expect(openRowAccept).toBeInTheDocument();
+
+    // Escalated row is visible to buyer as already escalated, no duplicate escalate button
+    const escalateButtons = screen.getAllByTestId("buyer-escalate-exception-btn");
+    expect(escalateButtons).toHaveLength(1); // Only for open row
+  });
 });
