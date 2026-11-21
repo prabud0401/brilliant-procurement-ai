@@ -39,7 +39,7 @@ export const NAV_CONFIG: NavItem[] = [
   },
   {
     id: "requests",
-    label: "Purchase Requests",
+    label: "Requests",
     href: "/requests",
     iconName: "ShoppingCart",
     allowedRoles: ["requester", "buyer", "manager"],
@@ -57,7 +57,7 @@ export const NAV_CONFIG: NavItem[] = [
   },
   {
     id: "purchase-orders",
-    label: "Purchase Orders",
+    label: "Orders",
     href: "/purchase-orders",
     iconName: "FileCheck",
     allowedRoles: ["requester", "buyer", "manager"],
@@ -75,7 +75,7 @@ export const NAV_CONFIG: NavItem[] = [
   },
   {
     id: "matches",
-    label: "Three-Way Match",
+    label: "Matching",
     href: "/matches",
     iconName: "Layers",
     allowedRoles: ["buyer", "manager"],
@@ -84,7 +84,7 @@ export const NAV_CONFIG: NavItem[] = [
   },
   {
     id: "qa",
-    label: "Document Q&A",
+    label: "Q&A",
     href: "/qa",
     iconName: "HelpCircle",
     allowedRoles: ["requester", "buyer", "manager"],
@@ -93,7 +93,7 @@ export const NAV_CONFIG: NavItem[] = [
   },
   {
     id: "audit",
-    label: "Audit Trail",
+    label: "Audit",
     href: "/audit",
     iconName: "Shield",
     allowedRoles: ["requester", "buyer", "manager", "admin"],

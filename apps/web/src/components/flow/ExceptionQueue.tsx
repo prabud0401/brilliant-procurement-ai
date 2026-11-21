@@ -126,7 +126,7 @@ export const ExceptionQueue: React.FC<ExceptionQueueProps> = ({ userRoles, onToa
           <div>
             <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-600" />
-              Three-Way Match Exception Queue (US-15)
+              Three-Way Match Exception Queue
             </h1>
             <p className="mt-1 text-xs text-slate-500">
               Exceptions identified during three-way invoice reconciliation. Buyer can accept within AED 500 policy (excluding over-billing) or escalate to Manager.

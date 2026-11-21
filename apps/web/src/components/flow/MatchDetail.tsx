@@ -55,7 +55,7 @@ export const MatchDetail: React.FC<MatchDetailProps> = ({ match, userRoles }) =>
           <div>
             <div className="flex items-center gap-3">
               <span className="font-mono text-xs uppercase bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">
-                Three-Way Match (US-13)
+                Three-Way Match
               </span>
               <StatusBadge status={match.overall_status} />
             </div>
@@ -179,7 +179,7 @@ export const MatchDetail: React.FC<MatchDetailProps> = ({ match, userRoles }) =>
         <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-6 text-xs text-slate-600">
           <h3 className="font-bold text-slate-900 mb-2 flex items-center gap-1.5">
             <Info className="h-4 w-4 text-blue-600" />
-            Applied Tolerances Snapshot (US-14)
+            Applied Tolerances Snapshot
           </h3>
           <p className="text-slate-500 mb-3">
             Matches are evaluated against company tolerances captured at the time the match was run.

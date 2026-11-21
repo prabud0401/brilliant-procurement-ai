@@ -43,7 +43,7 @@ export default async function AdminMetricsPage() {
           </h2>
           <p className="mx-auto mt-2 max-w-lg text-sm text-slate-600 leading-relaxed">
             The System Observability & Business Metrics dashboard requires Administrator role
-            permissions (design 7.2, US-19). Your account does not hold the admin privilege.
+            permissions. Your account does not hold the admin privilege.
           </p>
         </div>
       </div>

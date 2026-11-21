@@ -119,7 +119,7 @@ export default function AuditPage() {
           <div>
             <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <Shield className="h-5 w-5 text-blue-600" />
-              Audit Trail & Integrity Log (US-24)
+              Audit Trail & Integrity Log
             </h1>
             <p className="mt-1 text-xs text-slate-500">
               Cryptographically chained SHA-256 tamper-evident record of all procurement events, field corrections, approvals, and policy updates.

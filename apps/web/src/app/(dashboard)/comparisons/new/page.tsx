@@ -69,7 +69,7 @@ export default function NewComparisonPage() {
   const handleCreateComparison = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedQuoteIds.length < 2) {
-      setErrorMsg("US-08: At least two confirmed quotes are required to generate a comparison.");
+      setErrorMsg("At least two confirmed quotes are required to generate a comparison.");
       return;
     }
 
@@ -108,7 +108,7 @@ export default function NewComparisonPage() {
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
           <GitCompare className="h-5 w-5 text-purple-600" />
-          Create Quote Comparison (US-08)
+          Create Quote Comparison
         </h1>
         <p className="mt-1 text-xs text-slate-500">
           Select a purchase request and choose at least two confirmed quotation documents to compare side by side.
@@ -149,7 +149,7 @@ export default function NewComparisonPage() {
               2. Select Confirmed Quotes (Selected: {selectedQuoteIds.length})
             </h2>
             <span className="text-[11px] text-slate-500 font-medium">
-              US-08: Minimum 2 confirmed quotes required
+              Minimum 2 confirmed quotes required
             </span>
           </div>
 

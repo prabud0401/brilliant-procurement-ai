@@ -27,9 +27,19 @@ export default function ApprovalsInboxPage() {
 
   if (forbidden) {
     return (
-      <div className="rounded-lg border border-rose-200 bg-rose-50 p-6 text-center text-xs text-rose-700" data-testid="approvals-access-denied">
-        <h1 className="text-sm font-bold text-rose-900 mb-1">Access Denied (403 Forbidden)</h1>
-        <p>Business role (Buyer or Manager) required to access approvals inbox.</p>
+      <div
+        className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm"
+        data-testid="approvals-access-denied"
+      >
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 mb-3">
+          <ShieldCheck className="h-6 w-6" aria-hidden="true" />
+        </div>
+        <h1 className="text-base font-bold text-slate-900 mb-1.5">
+          Segregation of Duties Enforced
+        </h1>
+        <p className="mx-auto max-w-md text-xs text-slate-600 leading-relaxed">
+          System administrators cannot approve financial commitments. Under segregation of duties governance, only operational business roles (Buyer or Manager) can review and authorize procurement commitments.
+        </p>
       </div>
     );
   }
@@ -39,7 +49,7 @@ export default function ApprovalsInboxPage() {
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
           <CheckSquare className="h-5 w-5 text-blue-600" />
-          Pending Approvals Inbox (US-21, US-22)
+          Pending Approvals Inbox
         </h1>
         <p className="mt-1 text-xs text-slate-500">
           Commitments requiring your review and authorization. Only steps you are authorized and delegated to decide appear here. Segregation of duties is automatically verified.

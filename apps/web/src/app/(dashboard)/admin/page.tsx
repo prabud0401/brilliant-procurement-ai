@@ -57,7 +57,7 @@ export default function AdminPage() {
           <div>
             <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <Settings className="h-5 w-5 text-slate-700" />
-              System Administration (US-25)
+              System Administration
             </h1>
             <p className="mt-1 text-xs text-slate-500">
               Manage accounts and delegated roles, configure approval tiers and matching tolerances, and inspect ERP adapters.

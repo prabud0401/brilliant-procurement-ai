@@ -10,7 +10,6 @@ import {
   Sparkles,
   HelpCircle,
   TrendingUp,
-  Coins,
   ShieldCheck,
   Building2,
 } from "lucide-react";
@@ -132,7 +131,7 @@ export function MetricsClient({
             </span>
           </div>
           <p className="mt-1 text-sm text-slate-500">
-            Real-time pipeline metrics, AI budget consumption, and compliance telemetry per NFR-OBS-03 / design 9.1.
+            Real-time pipeline metrics, AI activity, and compliance telemetry per NFR-OBS-03 / design 9.1.
           </p>
         </div>
 
@@ -283,59 +282,25 @@ export function MetricsClient({
         </div>
       </div>
 
-      {/* AI Budget & Metering Section */}
+      {/* AI Activity & Token Consumption Section */}
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-2xs">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-              <Coins className="h-5 w-5" />
+              <Sparkles className="h-5 w-5" />
             </div>
             <div>
               <h2 className="text-lg font-bold tracking-tight text-slate-900">
-                AI Budget & Token Consumption Today
+                AI Invocations & Token Usage Today
               </h2>
               <p className="text-xs text-slate-500">
-                Tracking LLM and Document Intelligence usage against the daily spend cap (UTC).
+                Tracking LLM and Document Intelligence usage and token throughput (UTC).
               </p>
             </div>
           </div>
-
-          <div className="text-right">
-            <span className="text-xs text-slate-500 font-medium">Daily AI Budget: </span>
-            <span className="text-sm font-bold text-slate-900">
-              AED {ai?.daily_budget_aed.toFixed(2) ?? "50.00"}
-            </span>
-          </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4">
-          {/* Spend progress */}
-          <div className="md:col-span-2 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="font-medium text-slate-700">Estimated Cost Today</span>
-              <span className="font-bold text-slate-900">
-                AED {ai?.estimated_cost_aed.toFixed(4) ?? "0.0000"} / {ai?.daily_budget_aed.toFixed(2)} AED
-              </span>
-            </div>
-            {/* Progress bar */}
-            <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
-              <div
-                className={`h-full transition-all duration-500 ${
-                  (ai?.budget_utilization_pct ?? 0) > 90
-                    ? "bg-rose-500"
-                    : (ai?.budget_utilization_pct ?? 0) > 70
-                    ? "bg-amber-500"
-                    : "bg-blue-600"
-                }`}
-                style={{ width: `${Math.min(ai?.budget_utilization_pct ?? 0, 100)}%` }}
-              />
-            </div>
-            <div className="flex justify-between text-xs text-slate-500">
-              <span>{ai?.budget_utilization_pct.toFixed(1) ?? "0.0"}% utilized</span>
-              <span>Enforces HTTP 429 when budget limit is reached</span>
-            </div>
-          </div>
-
+        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* AI Calls today */}
           <div className="rounded-lg bg-slate-50 p-4 border border-slate-100">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">

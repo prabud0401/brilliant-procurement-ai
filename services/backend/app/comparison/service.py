@@ -1,4 +1,5 @@
 import difflib
+import re
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -52,6 +53,49 @@ def _get_doc_field(db: Session, doc_id: uuid.UUID, field_name: str) -> str | Non
     if not field:
         return None
     return field.value_raw
+
+
+def parse_lead_time(val: Any) -> int | None:
+    """Parse lead time in days from an extracted field value.
+
+    Handles integers, floats, and strings such as '5 days', '14 days', '5', '14'.
+    Returns None if missing, unparseable, or non-positive. Never invents a default.
+    """
+    if val is None:
+        return None
+    if isinstance(val, (int, float)):
+        try:
+            int_val = int(val)
+            return int_val if int_val > 0 else None
+        except (ValueError, OverflowError):
+            return None
+    if isinstance(val, str):
+        cleaned = val.strip()
+        if not cleaned or cleaned.lower() in (
+            "none",
+            "null",
+            "n/a",
+            "not specified",
+            "unspecified",
+            "unknown",
+        ):
+            return None
+        match = re.search(r"\b(\d+)\b", cleaned)
+        if match:
+            parsed = int(match.group(1))
+            return parsed if parsed > 0 else None
+    return None
+
+
+def get_doc_lead_time(db: Session, doc_id: uuid.UUID) -> int | None:
+    """Read lead time in days from extracted fields for a quote document."""
+    for field_name in ("lead_time_days", "delivery_lead_time", "lead_time", "delivery_time"):
+        raw_val = _get_doc_field(db, doc_id, field_name)
+        if raw_val is not None:
+            parsed = parse_lead_time(raw_val)
+            if parsed is not None:
+                return parsed
+    return None
 
 
 def create_comparison(
@@ -281,8 +325,7 @@ def get_comparison(
 
         total_val = _get_doc_field(db, cq.document_id, "total")
         total_aed = Decimal(str(total_val)) if total_val else Decimal("0.00")
-        lead_val = _get_doc_field(db, cq.document_id, "lead_time_days")
-        lead_time = int(lead_val) if lead_val and lead_val.isdigit() else None
+        lead_time = get_doc_lead_time(db, cq.document_id)
         pay_val = _get_doc_field(db, cq.document_id, "payment_terms_days")
         pay_terms = (
             int(pay_val)
@@ -558,8 +601,7 @@ def compute_recommendation(
         total_val = _get_doc_field(db, cq.document_id, "total")
         total_cost = Decimal(str(total_val)) if total_val else Decimal("0.00")
 
-        lead_val = _get_doc_field(db, cq.document_id, "lead_time_days")
-        lead_time = int(lead_val) if lead_val and lead_val.isdigit() else 7
+        lead_time = get_doc_lead_time(db, cq.document_id)
 
         pay_val = _get_doc_field(db, cq.document_id, "payment_terms_days")
         pay_terms = (

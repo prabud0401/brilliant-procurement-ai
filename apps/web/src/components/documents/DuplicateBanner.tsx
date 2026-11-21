@@ -108,7 +108,7 @@ export const DuplicateBanner: React.FC<DuplicateBannerProps> = ({
               >
                 {isCleared
                   ? "Duplicate Warning Cleared"
-                  : "Possible Duplicate Document Flagged (US-06)"}
+                  : "Possible Duplicate Document Flagged"}
               </h2>
 
               {isCleared ? (
@@ -132,7 +132,7 @@ export const DuplicateBanner: React.FC<DuplicateBannerProps> = ({
               >
                 {doc.duplicate_of}
               </Link>
-              ). Per US-06, a Buyer must confirm it is not a duplicate before confirmation or matching.
+              ). A Buyer must confirm it is not a duplicate before confirmation or matching.
             </p>
 
             {isCleared ? (
