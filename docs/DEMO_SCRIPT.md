@@ -38,7 +38,7 @@ Mention, but you do not need to sign in as all of them:
 ## 0:35–1:15 — Upload and extraction
 
 1. Click **Documents**.
-2. Point to **Upload Document** (quotation, purchase order, delivery note or invoice). Say that this is how new paperwork enters the demo today. Email intake is available later but is switched off for this walkthrough.
+2. Point to **Upload Document** (quotation, purchase order, delivery note or invoice). Say that this is how new paperwork enters the demo today. Email intake is built but switched off for this demo, so uploads are used instead.
 3. Do not upload a new file now (extraction would overrun the five minutes).
 4. In the list, open **Gulf Line IT Trading · Q-1042** (search `Q-1042` if needed).
 5. Show the split-screen review: the PDF on one side, extracted fields and confidence on the other. Click a field such as payment terms or the total and show the highlight on the page.
@@ -51,7 +51,7 @@ Mention, but you do not need to sign in as all of them:
 1. Click **Requests**. Open **PR-2026-89FBB2** (Al Ain Tower HQ IT workstation refresh, Omar in IT, AED 27,500).
 2. Show the three linked quotations: Gulf Line, Falcon and Corniche.
 3. Click **Comparisons** (or open the existing comparison from the request). Open the IT comparison that recommends **Gulf Line IT Trading**.
-4. Show the side-by-side matrix (price, lead time, payment terms, warranty) and the written recommendation.
+4. Show the side-by-side matrix (quoted total, lead time, payment terms and validity) and the written recommendation.
 5. Say that if a buyer picks a different supplier, the app asks for a written reason before it will continue. Do not create a new comparison or a new purchase order.
 
 ---

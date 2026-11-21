@@ -28,7 +28,7 @@ This release implements all 19 Must-have user stories and the stretch email inta
 
 ### 2.2 Quote Comparison & Procurement Flow
 - **US-08 (Side-by-Side Matrix):** Comparative evaluation grid for 2 to 5 competing quotations linked to a purchase request.
-- **US-09 (Deterministic Scoring & Explanation):** Multi-criteria weighted scoring algorithm (60% price, 20% delivery speed, 10% payment terms, 10% warranty). AI synthesizes a plain-language summary verified by a deterministic faithfulness checker against source facts JSON.
+- **US-09 (Deterministic Scoring & Explanation):** Multi-criteria weighted scoring algorithm (60% price, 20% delivery speed, 10% payment terms, 10% completeness against the request). AI synthesizes a plain-language summary verified by a deterministic faithfulness checker against source facts JSON.
 - **US-10 (Decision & Purchase Order Creation):** Buyer selects winning vendor or enters a mandatory override justification (≥ 10 characters). Automatically generates a structured Purchase Order.
 
 ### 2.3 Three-Way Matching & Exceptions
@@ -52,7 +52,7 @@ This release implements all 19 Must-have user stories and the stretch email inta
 - **US-29 (Prompt-Injection Defence):** Rule-based pre-scanner detecting 32+ injection patterns, XML delimiter isolation, red alert warning banner, and mandatory Buyer acknowledgement before document confirmation. Fixed: injection screening also reads the PDF text layer so faint embedded payloads are still flagged when OCR misses them.
 
 ### 2.6 Stretch Feature (R13)
-- **Email Intake via Logic Apps:** Automated ingestion channel connecting a demo Outlook.com mailbox to `POST /api/v1/intake/email` using a shared service key authenticated against Key Vault.
+- **Email Intake via Logic Apps:** Automated ingestion channel connecting a demo Outlook.com mailbox to `POST /api/v1/intake/email` using a shared service key authenticated against Key Vault. Built, but switched off on the hosted demo until the Outlook.com connection is authorised; the demo uses in-app upload.
 
 ---
 

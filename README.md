@@ -6,7 +6,7 @@ Artificial intelligence models extract structured data, locate visual bounding b
 Deterministic algorithms enforce all financial calculations, UAE 5% VAT rules, approval routing limits, and segregation of duties.
 Every business state change is cryptographically recorded in an append-only audit trail with tamper-evident SHA-256 hash chaining.
 
-Hosted demo: <link added at release>
+Hosted demo: [https://ca-web-pda-prod-uaen.whitesea-eaa80b88.uaenorth.azurecontainerapps.io](https://ca-web-pda-prod-uaen.whitesea-eaa80b88.uaenorth.azurecontainerapps.io) (fictional demo data; logins are provided separately)
 
 ---
 
@@ -16,13 +16,13 @@ The demo build delivers the complete set of in-scope procurement capabilities:
 
 - **Document Upload & AI Extraction (US-01, US-02, US-04):** Upload PDF, PNG, and JPEG procurement documents with MIME validation, SHA-256 duplicate detection, structured field extraction with confidence scores, and automated UAE VAT and TRN validation.
 - **Interactive Document Review (US-03):** Split-screen review interface pairing an interactive PDF canvas with bounding-box highlighting alongside editable extracted fields. Unconfirmed items block final document approval.
-- **Quote Comparison & Recommendation (US-08, US-09, US-10):** Multi-quote comparison matrix evaluating 2 to 5 competing vendor proposals with deterministic multi-criteria scoring (60% price, 20% delivery, 10% payment, 10% warranty). AI generates plain-language explanations verified by a faithfulness checker, supporting override justifications (≥ 10 chars) and automated Purchase Order generation.
+- **Quote Comparison & Recommendation (US-08, US-09, US-10):** Multi-quote comparison matrix evaluating 2 to 5 competing vendor proposals with deterministic multi-criteria scoring (60% price, 20% delivery, 10% payment terms, 10% completeness against the request). AI generates plain-language explanations verified by a faithfulness checker, supporting override justifications (≥ 10 chars) and automated Purchase Order generation.
 - **Three-Way Matching & Exceptions (US-13, US-14, US-15):** Line-level reconciliation across Purchase Order, Delivery Note, and Vendor Invoice with configurable tolerances. Exceptions are categorized into an actionable queue where Buyers can resolve minor non-quantity variances (≤ AED 500) and escalate over-billing to Managers.
 - **Document Assistant Q&A (US-17, US-18, US-19):** Conversational search assistant retrieving grounded answers citing specific document names and page numbers. Hybrid retrieval (vector embeddings + full-text search) enforces relevance floors to refuse out-of-scope questions and partitions document chunks by department visibility.
 - **Approval Workflows & Segregation of Duties (US-21, US-22, US-23, US-25):** Multi-tier approval routing based on commitment amount (≤ AED 5k, AED 5k–50k, > AED 50k). Approvers review a unified One-Screen Approval Bundle. System strictly prevents self-approval, blocks Buyers from approving their own orders, and prohibits Administrators from approving financial commitments.
 - **Cryptographic Audit Trail (US-24):** Append-only audit table with SHA-256 hash chaining, database mutation triggers, in-app chain verification, and CSV export.
 - **Prompt-Injection Defence (US-29):** Defense-in-depth protection combining rule-based pattern scanning, XML delimiter isolation, red alert banners, and mandatory Buyer acknowledgement before document confirmation.
-- **Email Ingestion Channel (R13):** Automated intake via Azure Logic Apps polling a demo mailbox and securely delivering attachments to the intake API.
+- **Email Ingestion Channel (R13):** Automated intake via Azure Logic Apps polling a demo mailbox and securely delivering attachments to the intake API. Built, but switched off on the hosted demo until the Outlook.com connection is authorised; documents are uploaded in the app instead.
 
 ---
 
@@ -192,7 +192,7 @@ make eval
 The application abstracts all artificial intelligence operations behind the `app/ai` module, supporting two primary operational modes:
 
 1. **Replay Mode (`AI_PROVIDER=replay`, Default):**
-   - Runs completely offline with zero external cloud dependencies or API costs.
+   - Runs completely offline with no external cloud dependencies.
    - Replays high-fidelity Document Intelligence and Azure OpenAI responses from recorded fixtures in `eval/data/replay/`.
    - Perfect for local development, CI pipelines, and repeatable evaluation testing.
 
