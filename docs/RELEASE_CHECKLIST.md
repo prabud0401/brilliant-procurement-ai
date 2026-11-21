@@ -2,7 +2,7 @@
 
 Date checked: 22 Nov 2026, Asia/Dubai (GST, UTC+4)  
 Live app: https://ca-web-pda-prod-uaen.whitesea-eaa80b88.uaenorth.azurecontainerapps.io  
-Hosted image checked: `6d98534` (document titles and earlier must-fixes). Repository `main` is `152b3e6`, which only updates a Playwright heading assertion after cost figures were hidden.  
+Hosted image checked: `6d98534` (document titles and earlier must-fixes). Changes on `main` after `6d98534` are tests and documentation only.  
 Repo: https://github.com/prabud0401/brilliant-procurement-ai
 
 **Overall status: green for the in-scope live demo, with two honest notes.** Email intake is optional and left off. One leftover contrast issue on a loading label is recorded below and is not part of the demo path.
