@@ -246,4 +246,6 @@ export interface MatchResult {
   exceptions: MatchException[];
   tolerances_snapshot: Record<string, unknown>;
   created_at: string;
+  invoice_document_number?: string | null;
+  vendor_name?: string | null;
 }

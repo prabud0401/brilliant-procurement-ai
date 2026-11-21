@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Layers,
@@ -13,6 +13,7 @@ import {
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatMoneyAED, formatGSTDate } from "@/lib/formatters";
 import type { MatchResult } from "@/lib/flow/types";
+import type { DocumentSummary } from "@/lib/documents/types";
 
 export interface MatchDetailProps {
   match: MatchResult;
@@ -22,6 +23,29 @@ export interface MatchDetailProps {
 
 export const MatchDetail: React.FC<MatchDetailProps> = ({ match, userRoles }) => {
   const isComplete = match.overall_status !== "incomplete";
+  const [docSummary, setDocSummary] = useState<DocumentSummary | null>(null);
+
+  useEffect(() => {
+    if (!match.invoice_document_number && !match.vendor_name && match.invoice_document_id) {
+      fetch("/api/v1/documents")
+        .then((res) => (res.ok ? res.json() : []))
+        .then((docs: DocumentSummary[]) => {
+          const found = docs.find((d) => d.id === match.invoice_document_id);
+          if (found) setDocSummary(found);
+        })
+        .catch(() => {});
+    }
+  }, [match.invoice_document_id, match.invoice_document_number, match.vendor_name]);
+
+  const vendor = match.vendor_name || docSummary?.vendor_name;
+  const docNum = match.invoice_document_number || docSummary?.document_number;
+
+  const invoiceLabel = (() => {
+    if (vendor && docNum) return `${vendor} · ${docNum}`;
+    if (docNum) return docNum;
+    if (vendor) return vendor;
+    return null;
+  })();
 
   return (
     <div className="space-y-6">
@@ -36,10 +60,13 @@ export const MatchDetail: React.FC<MatchDetailProps> = ({ match, userRoles }) =>
               <StatusBadge status={match.overall_status} />
             </div>
             <h1 className="mt-1 text-xl font-bold text-slate-900">
-              Match Evaluation for Invoice {match.invoice_document_id.slice(0, 8)}...
+              {invoiceLabel ? `Match Evaluation for Invoice ${invoiceLabel}` : "Match Evaluation for Invoice"}
             </h1>
             <p className="mt-1 text-xs text-slate-500">
               Evaluated {formatGSTDate(match.created_at)}
+              <span className="font-mono text-[11px] text-slate-400 ml-1.5" title={match.invoice_document_id}>
+                ({match.invoice_document_id.slice(0, 8)}...)
+              </span>
               {" • "}
               <Link
                 href={`/documents/${match.invoice_document_id}`}

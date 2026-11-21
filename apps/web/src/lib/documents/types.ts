@@ -26,6 +26,8 @@ export interface DocumentSummary {
   suspicious: boolean;
   pr_id?: string | null;
   vendor_id?: string | null;
+  vendor_name?: string | null;
+  document_number?: string | null;
 }
 
 export interface DocumentResponse {

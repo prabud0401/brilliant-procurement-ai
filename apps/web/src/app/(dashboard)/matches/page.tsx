@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Layers, Play, AlertTriangle, FileText, CheckCircle2, Loader2 } from "lucide-react";
 import { ExceptionQueue } from "@/components/flow/ExceptionQueue";
 import { Toast, type ToastState } from "@/components/ui/Toast";
+import { formatDocumentTitle } from "@/lib/formatters";
 import type { DocumentSummary } from "@/lib/documents/types";
 import type { UserPrincipal } from "@/lib/types";
 
@@ -125,7 +126,7 @@ export default function MatchesPage() {
                 ) : (
                   invoices.map((inv) => (
                     <option key={inv.id} value={inv.id}>
-                      Invoice ({inv.id.slice(0, 8)}...) • Status: {inv.status}
+                      {formatDocumentTitle(inv, "Invoice")} ({inv.id.slice(0, 8)}...) • Status: {inv.status}
                     </option>
                   ))
                 )}

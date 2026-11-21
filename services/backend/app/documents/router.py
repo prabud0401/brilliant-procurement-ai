@@ -24,7 +24,7 @@ from app.audit.service import record as record_audit
 from app.core.database import get_db
 from app.core.errors import ProblemException
 from app.core.middleware import get_current_request_id
-from app.core.models import Document, Job
+from app.core.models import Document, ExtractedField, Extraction, Job, Vendor
 from app.core.policy import Principal, get_current_principal
 from app.documents.file_checks import validate_file
 from app.documents.rate_limit import check_upload_rate_limit
@@ -66,6 +66,10 @@ class DocumentSummary(BaseModel):
     created_at: datetime
     duplicate_of: uuid.UUID | None
     suspicious: bool
+    pr_id: uuid.UUID | None = None
+    vendor_id: uuid.UUID | None = None
+    vendor_name: str | None = None
+    document_number: str | None = None
 
 
 class DocumentPatchRequest(BaseModel):
@@ -227,19 +231,82 @@ def list_documents(
     stmt = stmt.order_by(Document.created_at.desc()).limit(limit).offset(offset)
     docs = db.execute(stmt).scalars().all()
 
-    return [
-        DocumentSummary(
-            id=d.id,
-            doc_type=d.doc_type,
-            status=d.status,
-            pages=d.pages,
-            size_bytes=d.size_bytes,
-            created_at=d.created_at,
-            duplicate_of=d.duplicate_of,
-            suspicious=d.suspicious,
+    if not docs:
+        return []
+
+    doc_ids = [d.id for d in docs]
+    linked_vendor_ids = {d.vendor_id for d in docs if d.vendor_id is not None}
+
+    vendor_name_by_id: dict[uuid.UUID, str] = {}
+    if linked_vendor_ids:
+        vendors = db.execute(
+            select(Vendor.id, Vendor.name).where(Vendor.id.in_(linked_vendor_ids))
+        ).all()
+        vendor_name_by_id = {v_id: v_name for v_id, v_name in vendors}
+
+    # Fetch latest extraction per document (version desc)
+    extractions = db.execute(
+        select(Extraction.id, Extraction.document_id)
+        .where(Extraction.document_id.in_(doc_ids))
+        .order_by(Extraction.document_id, Extraction.version.desc())
+    ).all()
+
+    latest_ext_id_by_doc_id: dict[uuid.UUID, uuid.UUID] = {}
+    for ext_id, ext_doc_id in extractions:
+        if ext_doc_id not in latest_ext_id_by_doc_id:
+            latest_ext_id_by_doc_id[ext_doc_id] = ext_id
+
+    latest_ext_ids = list(latest_ext_id_by_doc_id.values())
+    field_names = ("vendor_name", "document_number", "po_number", "quote_number")
+    fields_by_ext_id: dict[uuid.UUID, dict[str, str]] = {}
+
+    if latest_ext_ids:
+        field_rows = db.execute(
+            select(
+                ExtractedField.extraction_id, ExtractedField.name, ExtractedField.value_raw
+            ).where(
+                ExtractedField.extraction_id.in_(latest_ext_ids),
+                ExtractedField.name.in_(field_names),
+            )
+        ).all()
+        for ext_id, name, val in field_rows:
+            if val is not None and val.strip():
+                fields_by_ext_id.setdefault(ext_id, {})[name] = val.strip()
+
+    result: list[DocumentSummary] = []
+    for d in docs:
+        doc_ext_id = latest_ext_id_by_doc_id.get(d.id)
+        ext_fields = fields_by_ext_id.get(doc_ext_id, {}) if doc_ext_id else {}
+
+        v_name = (
+            vendor_name_by_id.get(d.vendor_id)
+            if d.vendor_id and d.vendor_id in vendor_name_by_id
+            else ext_fields.get("vendor_name")
         )
-        for d in docs
-    ]
+
+        doc_num = (
+            ext_fields.get("document_number")
+            or ext_fields.get("po_number")
+            or ext_fields.get("quote_number")
+        )
+
+        result.append(
+            DocumentSummary(
+                id=d.id,
+                doc_type=d.doc_type,
+                status=d.status,
+                pages=d.pages,
+                size_bytes=d.size_bytes,
+                created_at=d.created_at,
+                duplicate_of=d.duplicate_of,
+                suspicious=d.suspicious,
+                pr_id=d.pr_id,
+                vendor_id=d.vendor_id,
+                vendor_name=v_name,
+                document_number=doc_num,
+            )
+        )
+    return result
 
 
 @router.get("/{id}", response_model=DocumentResponse)
