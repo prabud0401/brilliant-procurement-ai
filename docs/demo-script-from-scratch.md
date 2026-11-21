@@ -61,7 +61,7 @@ All actions use synthetic UAE procurement data (AED currency) and seeded account
 3. Select all 3 quotations and click **Create Comparison**.
 4. Click **Generate Recommendation**:
    - Show the deterministic score banner: **Gulf Line Commercial** ranked #1 (Score: 89.2/100).
-   - Show the side-by-side comparison matrix with price, delivery days, payment terms, and warranty.
+   - Show the side-by-side comparison matrix with quoted total, lead time, payment terms and validity.
    - Show the plain-language explanation and explain that it has passed the automated faithfulness check against the source facts JSON.
 5. Test the override validation dialog:
    - Select non-recommended vendor (Falcon).
