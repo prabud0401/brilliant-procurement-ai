@@ -23,6 +23,7 @@ interface AuditItem {
   action: string;
   entity_type: string;
   entity_id?: string | null;
+  entity_label?: string | null;
   before?: Record<string, any> | null;
   after?: Record<string, any> | null;
   reason?: string | null;
@@ -289,12 +290,9 @@ export default function AuditPage() {
                       {log.action}
                     </td>
                     <td className="px-4 py-2.5">
-                      <span className="font-semibold text-slate-800">{log.entity_type}</span>
-                      {log.entity_id && (
-                        <span className="block text-[10px] font-mono text-slate-400">
-                          {log.entity_id.slice(0, 8)}...
-                        </span>
-                      )}
+                      <span className="font-semibold text-slate-800">
+                        {log.entity_label || `${log.entity_type} —`}
+                      </span>
                     </td>
                     <td className="px-4 py-2.5 text-slate-600">
                       {log.actor_roles && log.actor_roles.length > 0 ? (

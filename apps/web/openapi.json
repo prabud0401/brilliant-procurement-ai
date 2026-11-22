@@ -539,6 +539,22 @@
             }
           },
           {
+            "name": "suspicious",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Suspicious"
+            }
+          },
+          {
             "name": "limit",
             "in": "query",
             "required": false,
@@ -1684,6 +1700,69 @@
         }
       }
     },
+    "/api/v1/purchase-requests/{id}/approval-history": {
+      "get": {
+        "tags": [
+          "purchase-requests"
+        ],
+        "summary": "Get Purchase Request Approval History",
+        "operationId": "get_purchase_request_approval_history_api_v1_purchase_requests__id__approval_history_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprovalStepHistoryResponse"
+                  },
+                  "title": "Response Get Purchase Request Approval History Api V1 Purchase Requests  Id  Approval History Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/purchase-requests/{id}/submit": {
       "post": {
         "tags": [
@@ -1928,6 +2007,69 @@
         }
       }
     },
+    "/api/v1/purchase-orders/{id}/approval-history": {
+      "get": {
+        "tags": [
+          "purchase-orders"
+        ],
+        "summary": "Get Purchase Order Approval History",
+        "operationId": "get_purchase_order_approval_history_api_v1_purchase_orders__id__approval_history_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprovalStepHistoryResponse"
+                  },
+                  "title": "Response Get Purchase Order Approval History Api V1 Purchase Orders  Id  Approval History Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/purchase-orders/{id}/submit": {
       "post": {
         "tags": [
@@ -2114,6 +2256,80 @@
                     "$ref": "#/components/schemas/InboxItemResponse"
                   },
                   "title": "Response List Inbox Api V1 Approvals Inbox Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/approvals/history": {
+      "get": {
+        "tags": [
+          "approvals"
+        ],
+        "summary": "List Approval History",
+        "operationId": "list_approval_history_api_v1_approvals_history_get",
+        "parameters": [
+          {
+            "name": "subject_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "'pr' or 'po'",
+              "title": "Subject Type"
+            },
+            "description": "'pr' or 'po'"
+          },
+          {
+            "name": "subject_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Subject Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprovalStepHistoryResponse"
+                  },
+                  "title": "Response List Approval History Api V1 Approvals History Get"
                 }
               }
             }
@@ -4816,6 +5032,102 @@
         ],
         "title": "ApprovalDecisionResponse"
       },
+      "ApprovalStepHistoryResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "sequence": {
+            "type": "integer",
+            "title": "Sequence"
+          },
+          "tier": {
+            "type": "integer",
+            "title": "Tier"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "approver_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approver Name"
+          },
+          "decided_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By Name"
+          },
+          "department_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Name"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "sequence",
+          "tier",
+          "status"
+        ],
+        "title": "ApprovalStepHistoryResponse"
+      },
       "AuditItemResponse": {
         "properties": {
           "id": {
@@ -4872,6 +5184,17 @@
               }
             ],
             "title": "Entity Id"
+          },
+          "entity_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Label"
           },
           "before": {
             "anyOf": [
@@ -7117,6 +7440,17 @@
             "format": "uuid",
             "title": "Vendor Id"
           },
+          "vendor_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vendor Name"
+          },
           "department_id": {
             "type": "string",
             "format": "uuid",
@@ -7203,6 +7537,13 @@
               }
             ],
             "title": "Current Approver"
+          },
+          "approval_steps": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalStepHistoryResponse"
+            },
+            "type": "array",
+            "title": "Approval Steps"
           }
         },
         "type": "object",
@@ -7456,6 +7797,13 @@
               }
             ],
             "title": "Current Approver"
+          },
+          "approval_steps": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalStepHistoryResponse"
+            },
+            "type": "array",
+            "title": "Approval Steps"
           }
         },
         "type": "object",

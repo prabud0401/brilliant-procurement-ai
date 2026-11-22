@@ -26,6 +26,21 @@ class PRLineResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ApprovalStepHistoryResponse(BaseModel):
+    id: uuid.UUID
+    sequence: int
+    tier: int
+    status: str
+    approver_name: str | None = None
+    decided_by_name: str | None = None
+    department_name: str | None = None
+    role: str | None = None
+    decided_at: datetime | None = None
+    comment: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class PRCreateRequest(BaseModel):
     title: str
     department_id: uuid.UUID | None = None
@@ -53,6 +68,7 @@ class PRResponse(BaseModel):
     lines: list[PRLineResponse] = Field(default_factory=list)
     current_approver_id: uuid.UUID | None = None
     current_approver: str | None = None
+    approval_steps: list[ApprovalStepHistoryResponse] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -85,6 +101,7 @@ class POResponse(BaseModel):
     number: str
     comparison_id: uuid.UUID | None = None
     vendor_id: uuid.UUID
+    vendor_name: str | None = None
     department_id: uuid.UUID
     created_by: uuid.UUID
     status: str
@@ -98,6 +115,7 @@ class POResponse(BaseModel):
     lines: list[POLineResponse] = Field(default_factory=list)
     current_approver_id: uuid.UUID | None = None
     current_approver: str | None = None
+    approval_steps: list[ApprovalStepHistoryResponse] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -64,9 +64,6 @@ export const MatchDetail: React.FC<MatchDetailProps> = ({ match, userRoles }) =>
             </h1>
             <p className="mt-1 text-xs text-slate-500">
               Evaluated {formatGSTDate(match.created_at)}
-              <span className="font-mono text-[11px] text-slate-400 ml-1.5" title={match.invoice_document_id}>
-                ({match.invoice_document_id.slice(0, 8)}...)
-              </span>
               {" • "}
               <Link
                 href={`/documents/${match.invoice_document_id}`}

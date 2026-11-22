@@ -393,6 +393,23 @@ export interface paths {
         patch: operations["update_purchase_request_api_v1_purchase_requests__id__patch"];
         trace?: never;
     };
+    "/api/v1/purchase-requests/{id}/approval-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Purchase Request Approval History */
+        get: operations["get_purchase_request_approval_history_api_v1_purchase_requests__id__approval_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/purchase-requests/{id}/submit": {
         parameters: {
             query?: never;
@@ -445,6 +462,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/purchase-orders/{id}/approval-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Purchase Order Approval History */
+        get: operations["get_purchase_order_approval_history_api_v1_purchase_orders__id__approval_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/purchase-orders/{id}/submit": {
         parameters: {
             query?: never;
@@ -488,6 +522,23 @@ export interface paths {
         };
         /** List Inbox */
         get: operations["list_inbox_api_v1_approvals_inbox_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/approvals/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Approval History */
+        get: operations["list_approval_history_api_v1_approvals_history_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1218,6 +1269,32 @@ export interface components {
             /** Subject Status */
             subject_status: string;
         };
+        /** ApprovalStepHistoryResponse */
+        ApprovalStepHistoryResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Sequence */
+            sequence: number;
+            /** Tier */
+            tier: number;
+            /** Status */
+            status: string;
+            /** Approver Name */
+            approver_name?: string | null;
+            /** Decided By Name */
+            decided_by_name?: string | null;
+            /** Department Name */
+            department_name?: string | null;
+            /** Role */
+            role?: string | null;
+            /** Decided At */
+            decided_at?: string | null;
+            /** Comment */
+            comment?: string | null;
+        };
         /** AuditItemResponse */
         AuditItemResponse: {
             /** Id */
@@ -1237,6 +1314,8 @@ export interface components {
             entity_type: string;
             /** Entity Id */
             entity_id: string | null;
+            /** Entity Label */
+            entity_label?: string | null;
             /** Before */
             before: {
                 [key: string]: unknown;
@@ -1997,6 +2076,8 @@ export interface components {
              * Format: uuid
              */
             vendor_id: string;
+            /** Vendor Name */
+            vendor_name?: string | null;
             /**
              * Department Id
              * Format: uuid
@@ -2032,6 +2113,8 @@ export interface components {
             current_approver_id?: string | null;
             /** Current Approver */
             current_approver?: string | null;
+            /** Approval Steps */
+            approval_steps?: components["schemas"]["ApprovalStepHistoryResponse"][];
         };
         /** PRCreateRequest */
         PRCreateRequest: {
@@ -2128,6 +2211,8 @@ export interface components {
             current_approver_id?: string | null;
             /** Current Approver */
             current_approver?: string | null;
+            /** Approval Steps */
+            approval_steps?: components["schemas"]["ApprovalStepHistoryResponse"][];
         };
         /** PRUpdateRequest */
         PRUpdateRequest: {
@@ -2599,6 +2684,7 @@ export interface operations {
                 doc_type?: string | null;
                 vendor_id?: string | null;
                 pr_id?: string | null;
+                suspicious?: boolean | null;
                 limit?: number;
                 offset?: number;
             };
@@ -3245,6 +3331,39 @@ export interface operations {
             };
         };
     };
+    get_purchase_request_approval_history_api_v1_purchase_requests__id__approval_history_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalStepHistoryResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     submit_purchase_request_api_v1_purchase_requests__id__submit_post: {
         parameters: {
             query?: never;
@@ -3379,6 +3498,39 @@ export interface operations {
             };
         };
     };
+    get_purchase_order_approval_history_api_v1_purchase_orders__id__approval_history_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalStepHistoryResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     submit_purchase_order_api_v1_purchase_orders__id__submit_post: {
         parameters: {
             query?: never;
@@ -3465,6 +3617,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InboxItemResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_approval_history_api_v1_approvals_history_get: {
+        parameters: {
+            query: {
+                /** @description 'pr' or 'po' */
+                subject_type: string;
+                subject_id: string;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalStepHistoryResponse"][];
                 };
             };
             /** @description Validation Error */

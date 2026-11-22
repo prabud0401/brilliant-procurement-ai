@@ -20,10 +20,16 @@ from app.core.models import (
     PurchaseOrder,
     PurchaseRequest,
     User,
+    Vendor,
 )
 from app.core.policy import Principal
 from app.integrations import get_odoo_adapter
-from app.orders.schemas import POCreateRequest, POPushResponse, POResponse
+from app.orders.schemas import (
+    ApprovalStepHistoryResponse,
+    POCreateRequest,
+    POPushResponse,
+    POResponse,
+)
 
 
 def _generate_po_number(db: Session) -> str:
@@ -47,6 +53,68 @@ def _get_current_approver(db: Session, po_id: uuid.UUID) -> tuple[uuid.UUID | No
         return None, None
     user = db.query(User).filter(User.id == step.assigned_to).first()
     return step.assigned_to, user.display_name if user else None
+
+
+def get_approval_history(
+    db: Session,
+    subject_type: str,
+    subject_id: uuid.UUID,
+) -> list[ApprovalStepHistoryResponse]:
+    steps = (
+        db.query(ApprovalStep)
+        .filter(
+            ApprovalStep.subject_type == subject_type,
+            ApprovalStep.subject_id == subject_id,
+        )
+        .order_by(ApprovalStep.sequence.asc())
+        .all()
+    )
+    if not steps:
+        return []
+
+    user_ids: set[uuid.UUID] = set()
+    for s in steps:
+        if s.decided_by:
+            user_ids.add(s.decided_by)
+        if s.assigned_to:
+            user_ids.add(s.assigned_to)
+
+    users_by_id: dict[uuid.UUID, User] = {}
+    if user_ids:
+        users = db.query(User).filter(User.id.in_(user_ids)).all()
+        users_by_id = {u.id: u for u in users}
+
+    history: list[ApprovalStepHistoryResponse] = []
+    for s in steps:
+        approver = (
+            users_by_id.get(s.decided_by)
+            if s.decided_by
+            else users_by_id.get(s.assigned_to)
+            if s.assigned_to
+            else None
+        )
+        approver_name = approver.display_name if approver else None
+        dept_name = approver.department.name if (approver and approver.department) else None
+        role = ", ".join(r.role for r in approver.roles) if (approver and approver.roles) else None
+
+        decided_by_user = users_by_id.get(s.decided_by) if s.decided_by else None
+        decided_by_name = decided_by_user.display_name if decided_by_user else None
+
+        history.append(
+            ApprovalStepHistoryResponse(
+                id=s.id,
+                sequence=s.sequence,
+                tier=s.tier,
+                status=s.status,
+                approver_name=approver_name,
+                decided_by_name=decided_by_name,
+                department_name=dept_name,
+                role=role,
+                decided_at=s.decided_at,
+                comment=s.comment,
+            )
+        )
+    return history
 
 
 def create_po_from_comparison(
@@ -201,7 +269,11 @@ def create_po_from_comparison(
     )
     db.commit()
 
-    return POResponse.model_validate(po)
+    vendor = db.query(Vendor).filter(Vendor.id == po.vendor_id).first()
+    resp = POResponse.model_validate(po)
+    resp.vendor_name = vendor.name if vendor else None
+    resp.approval_steps = get_approval_history(db, "po", po.id)
+    return resp
 
 
 def list_pos(
@@ -231,11 +303,16 @@ def list_pos(
 
     pos = query.order_by(PurchaseOrder.created_at.desc()).all()
     results: list[POResponse] = []
+    vendor_ids = {po.vendor_id for po in pos}
+    vendors = db.query(Vendor).filter(Vendor.id.in_(vendor_ids)).all() if vendor_ids else []
+    vendor_map = {v.id: v.name for v in vendors}
     for po in pos:
         approver_id, approver_name = _get_current_approver(db, po.id)
         resp = POResponse.model_validate(po)
+        resp.vendor_name = vendor_map.get(po.vendor_id)
         resp.current_approver_id = approver_id
         resp.current_approver = approver_name
+        resp.approval_steps = get_approval_history(db, "po", po.id)
         results.append(resp)
     return results
 
@@ -276,10 +353,13 @@ def get_po(db: Session, po_id: uuid.UUID, principal: Principal) -> POResponse:
                     detail="Purchase order not found in owner scope",
                 )
 
+    vendor = db.query(Vendor).filter(Vendor.id == po.vendor_id).first()
     approver_id, approver_name = _get_current_approver(db, po.id)
     resp = POResponse.model_validate(po)
+    resp.vendor_name = vendor.name if vendor else None
     resp.current_approver_id = approver_id
     resp.current_approver = approver_name
+    resp.approval_steps = get_approval_history(db, "po", po.id)
     return resp
 
 
@@ -335,10 +415,13 @@ def submit_po(db: Session, po_id: uuid.UUID, principal: Principal) -> POResponse
     )
     db.commit()
 
+    vendor = db.query(Vendor).filter(Vendor.id == po.vendor_id).first()
     approver_id, approver_name = _get_current_approver(db, po.id)
     resp = POResponse.model_validate(po)
+    resp.vendor_name = vendor.name if vendor else None
     resp.current_approver_id = approver_id
     resp.current_approver = approver_name
+    resp.approval_steps = get_approval_history(db, "po", po.id)
     return resp
 
 
