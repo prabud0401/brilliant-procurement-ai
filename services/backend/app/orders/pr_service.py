@@ -10,6 +10,7 @@ from app.audit.service import record as record_audit
 from app.core.errors import ProblemException
 from app.core.models import ApprovalStep, PRLine, PurchaseRequest, User
 from app.core.policy import Principal
+from app.orders.po_service import get_approval_history
 from app.orders.schemas import PRCreateRequest, PRResponse, PRUpdateRequest
 
 
@@ -92,7 +93,9 @@ def create_pr(db: Session, body: PRCreateRequest, principal: Principal) -> PRRes
     )
     db.commit()
 
-    return PRResponse.model_validate(pr)
+    resp = PRResponse.model_validate(pr)
+    resp.approval_steps = get_approval_history(db, "pr", pr.id)
+    return resp
 
 
 def list_prs(
@@ -126,6 +129,7 @@ def list_prs(
         resp = PRResponse.model_validate(pr)
         resp.current_approver_id = approver_id
         resp.current_approver = approver_name
+        resp.approval_steps = get_approval_history(db, "pr", pr.id)
         results.append(resp)
     return results
 
@@ -163,6 +167,7 @@ def get_pr(db: Session, pr_id: uuid.UUID, principal: Principal) -> PRResponse:
     resp = PRResponse.model_validate(pr)
     resp.current_approver_id = approver_id
     resp.current_approver = approver_name
+    resp.approval_steps = get_approval_history(db, "pr", pr.id)
     return resp
 
 
@@ -238,7 +243,9 @@ def update_pr(
     )
     db.commit()
 
-    return PRResponse.model_validate(pr)
+    resp = PRResponse.model_validate(pr)
+    resp.approval_steps = get_approval_history(db, "pr", pr.id)
+    return resp
 
 
 def submit_pr(db: Session, pr_id: uuid.UUID, principal: Principal) -> PRResponse:
@@ -301,4 +308,5 @@ def submit_pr(db: Session, pr_id: uuid.UUID, principal: Principal) -> PRResponse
     resp = PRResponse.model_validate(pr)
     resp.current_approver_id = approver_id
     resp.current_approver = approver_name
+    resp.approval_steps = get_approval_history(db, "pr", pr.id)
     return resp

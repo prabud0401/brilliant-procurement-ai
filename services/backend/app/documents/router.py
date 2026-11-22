@@ -201,6 +201,7 @@ def list_documents(
     doc_type: str | None = Query(None),
     vendor_id: uuid.UUID | None = Query(None),
     pr_id: uuid.UUID | None = Query(None),
+    suspicious: bool | None = Query(None),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
@@ -227,6 +228,8 @@ def list_documents(
         stmt = stmt.where(Document.vendor_id == vendor_id)
     if pr_id:
         stmt = stmt.where(Document.pr_id == pr_id)
+    if suspicious is not None:
+        stmt = stmt.where(Document.suspicious == suspicious)
 
     stmt = stmt.order_by(Document.created_at.desc()).limit(limit).offset(offset)
     docs = db.execute(stmt).scalars().all()

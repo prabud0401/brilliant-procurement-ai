@@ -154,7 +154,7 @@ export const ReviewClient: React.FC<ReviewClientProps> = ({
               <StatusBadge status={document.status} />
             </div>
             <p className="text-xs text-slate-500 font-mono mt-0.5">
-              ID: {document.id} • {document.pages} page(s) • {(document.size_bytes / 1024).toFixed(0)} KB
+              {document.pages} page(s) • {(document.size_bytes / 1024).toFixed(0)} KB
             </p>
           </div>
         </div>

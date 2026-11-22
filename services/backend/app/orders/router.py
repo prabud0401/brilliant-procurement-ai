@@ -8,6 +8,7 @@ from app.core.errors import ProblemException
 from app.core.policy import Principal, get_current_principal, require
 from app.orders.po_service import (
     create_po_from_comparison,
+    get_approval_history,
     get_po,
     list_pos,
     push_po_to_odoo,
@@ -15,6 +16,7 @@ from app.orders.po_service import (
 )
 from app.orders.pr_service import create_pr, get_pr, list_prs, submit_pr, update_pr
 from app.orders.schemas import (
+    ApprovalStepHistoryResponse,
     POCreateRequest,
     POPushResponse,
     POResponse,
@@ -55,6 +57,17 @@ def get_purchase_request(
     db: Session = Depends(get_db),
 ) -> PRResponse:
     return get_pr(db, id, principal)
+
+
+@pr_router.get("/{id}/approval-history", response_model=list[ApprovalStepHistoryResponse])
+def get_purchase_request_approval_history(
+    id: uuid.UUID,
+    principal: Principal = Depends(get_current_principal),
+    db: Session = Depends(get_db),
+) -> list[ApprovalStepHistoryResponse]:
+    # Scope check matches get_pr
+    get_pr(db, id, principal)
+    return get_approval_history(db, "pr", id)
 
 
 @pr_router.patch("/{id}", response_model=PRResponse)
@@ -104,6 +117,17 @@ def get_purchase_order(
     db: Session = Depends(get_db),
 ) -> POResponse:
     return get_po(db, id, principal)
+
+
+@po_router.get("/{id}/approval-history", response_model=list[ApprovalStepHistoryResponse])
+def get_purchase_order_approval_history(
+    id: uuid.UUID,
+    principal: Principal = Depends(get_current_principal),
+    db: Session = Depends(get_db),
+) -> list[ApprovalStepHistoryResponse]:
+    # Scope check matches get_po
+    get_po(db, id, principal)
+    return get_approval_history(db, "po", id)
 
 
 @po_router.post("/{id}/submit", response_model=POResponse)

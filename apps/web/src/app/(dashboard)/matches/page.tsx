@@ -25,12 +25,15 @@ export default function MatchesPage() {
       .then((data) => setUser(data))
       .catch(() => {});
 
-    fetch("/api/v1/documents?doc_type=invoice")
+    fetch("/api/v1/documents?doc_type=invoice&status=confirmed&suspicious=false")
       .then((res) => (res.ok ? res.json() : []))
       .then((data: DocumentSummary[]) => {
-        setInvoices(data);
-        if (data.length > 0) {
-          setSelectedInvoiceId(data[0].id);
+        const eligible = data.filter((d) => d.status === "confirmed" && !d.suspicious);
+        setInvoices(eligible);
+        if (eligible.length > 0) {
+          setSelectedInvoiceId(eligible[0].id);
+        } else {
+          setSelectedInvoiceId("");
         }
       })
       .catch(() => {});
@@ -122,11 +125,11 @@ export default function MatchesPage() {
                 className="w-full sm:w-96 rounded-md border border-slate-300 p-2 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 {invoices.length === 0 ? (
-                  <option value="">No invoices uploaded</option>
+                  <option value="">No confirmed invoices available</option>
                 ) : (
                   invoices.map((inv) => (
                     <option key={inv.id} value={inv.id}>
-                      {formatDocumentTitle(inv, "Invoice")} ({inv.id.slice(0, 8)}...) • Status: {inv.status}
+                      {formatDocumentTitle(inv, "Invoice")}
                     </option>
                   ))
                 )}

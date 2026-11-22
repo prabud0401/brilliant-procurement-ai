@@ -12,6 +12,7 @@ import {
   Clock,
   Loader2,
   Share2,
+  UserCheck,
 } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatMoneyAED, formatGSTDate, formatVatRate } from "@/lib/formatters";
@@ -113,7 +114,9 @@ export const PODetail: React.FC<PODetailProps> = ({ po: initialPo, userRoles, us
               )}
             </div>
             <h1 className="mt-1 text-xl font-bold text-slate-900">
-              Purchase Order for {po.vendor_name || "Awarded Vendor"}
+              {po.vendor_name && po.number
+                ? `${po.vendor_name} · ${po.number}`
+                : po.vendor_name || po.number || "Purchase Order"}
             </h1>
             <p className="mt-1 text-xs text-slate-500">
               Created {formatGSTDate(po.created_at)}
@@ -193,6 +196,58 @@ export const PODetail: React.FC<PODetailProps> = ({ po: initialPo, userRoles, us
           </div>
         )}
       </div>
+
+      {/* Approval History Section */}
+      {po.approval_steps && po.approval_steps.length > 0 && (
+        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm" data-testid="approval-history-section">
+          <h2 className="text-base font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <UserCheck className="h-4 w-4 text-emerald-600" />
+            Approval History ({po.approval_steps.length})
+          </h2>
+          <div className="space-y-3">
+            {po.approval_steps.map((step) => (
+              <div
+                key={step.id || step.sequence}
+                className="flex items-center justify-between rounded-md border border-slate-200 p-3 hover:bg-slate-50/50"
+                data-testid={`approval-step-${step.sequence}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+                    {step.sequence}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-slate-900" data-testid="approver-name">
+                        {step.approver_name || step.decided_by_name || "Assigned Approver"}
+                      </span>
+                      {step.department_name && (
+                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
+                          {step.department_name}
+                        </span>
+                      )}
+                    </div>
+                    {step.comment && (
+                      <p className="mt-0.5 text-[11px] text-slate-600 italic">
+                        &ldquo;{step.comment}&rdquo;
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <StatusBadge status={step.status} size="sm" />
+                  {step.decided_at ? (
+                    <span className="text-xs text-slate-500 font-mono" data-testid="decided-at">
+                      {formatGSTDate(step.decided_at)}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-400 italic">Pending</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Line Items Table */}
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">

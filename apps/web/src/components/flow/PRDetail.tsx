@@ -198,6 +198,58 @@ export const PRDetail: React.FC<PRDetailProps> = ({ pr: initialPr, userRoles, us
         )}
       </div>
 
+      {/* Approval History Section */}
+      {pr.approval_steps && pr.approval_steps.length > 0 && (
+        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm" data-testid="approval-history-section">
+          <h2 className="text-base font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <UserCheck className="h-4 w-4 text-emerald-600" />
+            Approval History ({pr.approval_steps.length})
+          </h2>
+          <div className="space-y-3">
+            {pr.approval_steps.map((step) => (
+              <div
+                key={step.id || step.sequence}
+                className="flex items-center justify-between rounded-md border border-slate-200 p-3 hover:bg-slate-50/50"
+                data-testid={`approval-step-${step.sequence}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+                    {step.sequence}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-slate-900" data-testid="approver-name">
+                        {step.approver_name || step.decided_by_name || "Assigned Approver"}
+                      </span>
+                      {step.department_name && (
+                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
+                          {step.department_name}
+                        </span>
+                      )}
+                    </div>
+                    {step.comment && (
+                      <p className="mt-0.5 text-[11px] text-slate-600 italic">
+                        &ldquo;{step.comment}&rdquo;
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <StatusBadge status={step.status} size="sm" />
+                  {step.decided_at ? (
+                    <span className="text-xs text-slate-500 font-mono" data-testid="decided-at">
+                      {formatGSTDate(step.decided_at)}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-400 italic">Pending</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Requested Items Table */}
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-base font-semibold text-slate-900 mb-4 flex items-center gap-2">
@@ -298,9 +350,6 @@ export const PRDetail: React.FC<PRDetailProps> = ({ pr: initialPr, userRoles, us
                       </Link>
                       <p className="text-[11px] text-slate-500">
                         Uploaded {formatGSTDate(q.created_at)}
-                        <span className="font-mono text-[10px] text-slate-400 ml-2" title={q.id}>
-                          ({q.id.slice(0, 8)}...)
-                        </span>
                       </p>
                     </div>
                   </div>
@@ -370,9 +419,6 @@ export const PRDetail: React.FC<PRDetailProps> = ({ pr: initialPr, userRoles, us
                       </span>
                       <p className="text-[11px] text-slate-500">
                         Uploaded {formatGSTDate(aq.created_at)}
-                        <span className="font-mono text-[10px] text-slate-400 ml-2" title={aq.id}>
-                          ({aq.id.slice(0, 8)}...)
-                        </span>
                       </p>
                     </div>
                   </label>

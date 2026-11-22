@@ -130,12 +130,6 @@ export const DocumentListTable: React.FC<DocumentListTableProps> = ({
               >
                 {title}
               </Link>
-              <span
-                className="font-mono text-[10px] text-slate-400 block truncate max-w-[220px]"
-                title={row.id}
-              >
-                {row.id}
-              </span>
             </div>
           </div>
         );

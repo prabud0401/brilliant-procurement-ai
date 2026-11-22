@@ -192,9 +192,8 @@ export const ExceptionQueue: React.FC<ExceptionQueueProps> = ({ userRoles, onToa
                         {exc.reason}
                       </h2>
                       <p className="mt-1 text-xs text-slate-500">
-                        Match ID:{" "}
                         <Link href={`/matches/${exc.match_id}`} className="text-blue-600 hover:underline">
-                          {exc.match_id.slice(0, 8)}...
+                          View match
                         </Link>
                         {" • "}
                         Logged {formatGSTDate(exc.created_at)}

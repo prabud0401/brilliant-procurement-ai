@@ -26,6 +26,7 @@ This release implements all 19 Must-have user stories and the stretch email inta
 - **US-04 (Procurement Validation Rules):** Automated checks for line-item sum reconciliation, UAE 5% VAT calculations, valid UAE TRN format, and logical date sequencing.
 - **F33 (Extraction Accuracy):** ISO currency whitelist and AED OCR confusion mapping, canonical payment terms normalization with text-layer validation, and quote delivery lead-time extraction and comparison matrix population.
 - **Document & Linked Quotation Titles:** Document listings, PR linked quotations, and match views display primary titles by vendor name and document number (Vendor · NUMBER) instead of raw UUIDs, with multi-field search support.
+- **Demo UI Enhancements (F34):** Hidden internal UUIDs across document lists, reviews, match headers, linked quotes, and audit tables; enriched PO titles with vendor names; compact multi-manager approval history timeline on PR and PO detail; and filtered match invoice selection to confirmed, non-suspicious invoices.
 
 ### 2.2 Quote Comparison & Procurement Flow
 - **US-08 (Side-by-Side Matrix):** Comparative evaluation grid for 2 to 5 competing quotations linked to a purchase request.

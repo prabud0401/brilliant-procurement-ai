@@ -8,6 +8,19 @@ export interface PRLine {
   est_unit_price: number | string;
 }
 
+export interface ApprovalStepHistory {
+  id: string;
+  sequence: number;
+  tier: number;
+  status: string;
+  approver_name?: string | null;
+  decided_by_name?: string | null;
+  department_name?: string | null;
+  role?: string | null;
+  decided_at?: string | null;
+  comment?: string | null;
+}
+
 export interface PurchaseRequest {
   id: string;
   number: string;
@@ -22,6 +35,7 @@ export interface PurchaseRequest {
   lines: PRLine[];
   current_approver_id?: string | null;
   current_approver?: string | null;
+  approval_steps?: ApprovalStepHistory[];
 }
 
 export interface PRCreateLinePayload {
@@ -130,6 +144,7 @@ export interface PurchaseOrder {
   lines: POLine[];
   current_approver_id?: string | null;
   current_approver?: string | null;
+  approval_steps?: ApprovalStepHistory[];
 }
 
 export interface InboxItem {
