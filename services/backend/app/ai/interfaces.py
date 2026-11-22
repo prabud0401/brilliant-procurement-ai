@@ -41,6 +41,7 @@ class LlmClient(Protocol):
         doc_type: str,
         doc_id: str | None = None,
         file_sha256: str | None = None,
+        text_content: str | None = None,
     ) -> tuple[ExtractionResult, dict[str, Any]]:
         """Extract structured fields using strict JSON schema per design 6.2.
 

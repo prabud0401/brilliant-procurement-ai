@@ -261,6 +261,7 @@ class ReplayLlmClient:
         doc_type: str,
         doc_id: str | None = None,
         file_sha256: str | None = None,
+        text_content: str | None = None,
     ) -> tuple[ExtractionResult, dict[str, Any]]:
         resolved_id = resolve_doc_id(
             doc_id=doc_id,
@@ -277,7 +278,12 @@ class ReplayLlmClient:
 
         content_raw = data["choices"][0]["message"]["content"]
         result = ExtractionResult.model_validate_json(content_raw)
-        result, cleanup_meta = cleanup_extraction_result(result)
+        combined_text = (
+            f"{ocr_result.content}\n{text_content}".strip()
+            if text_content
+            else (ocr_result.content or "")
+        )
+        result, cleanup_meta = cleanup_extraction_result(result, text_content=combined_text)
 
         usage = data.get("usage", {})
         metadata = {

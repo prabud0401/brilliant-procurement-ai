@@ -24,6 +24,7 @@ This release implements all 19 Must-have user stories and the stretch email inta
 - **US-02 (Extraction Pipeline):** Automated extraction of vendor names, TRNs, document numbers, line items, quantities, unit prices, subtotal, VAT, and total amounts with bounding-box coordinates and confidence scores.
 - **US-03 (Human-in-the-Loop Review):** Split-screen review interface displaying the original document with interactive canvas bounding-box overlays alongside editable extracted fields. Open items must be resolved before confirmation.
 - **US-04 (Procurement Validation Rules):** Automated checks for line-item sum reconciliation, UAE 5% VAT calculations, valid UAE TRN format, and logical date sequencing.
+- **F33 (Extraction Accuracy):** ISO currency whitelist and AED OCR confusion mapping, canonical payment terms normalization with text-layer validation, and quote delivery lead-time extraction and comparison matrix population.
 - **Document & Linked Quotation Titles:** Document listings, PR linked quotations, and match views display primary titles by vendor name and document number (Vendor · NUMBER) instead of raw UUIDs, with multi-field search support.
 
 ### 2.2 Quote Comparison & Procurement Flow

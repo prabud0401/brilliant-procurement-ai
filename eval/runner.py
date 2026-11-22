@@ -311,10 +311,14 @@ class EvaluationRunner:
                 else ("other" if d["doc_type"] == "purchase_request" else d["doc_type"])
             )
 
-            ext_result, ext_meta = llm.extract(ocr_result, doc_type_norm, doc_id=doc_id)
+            ext_result, ext_meta = llm.extract(
+                ocr_result, doc_type_norm, doc_id=doc_id, text_content=ocr_result.content
+            )
             cleanup_meta = ext_meta.get("cleanup")
             if cleanup_meta is None:
-                ext_result, cleanup_meta = cleanup_extraction_result(ext_result)
+                ext_result, cleanup_meta = cleanup_extraction_result(
+                    ext_result, text_content=ocr_result.content
+                )
 
             if self.mode == "live":
                 tin = ext_meta.get("tokens_in", 0)

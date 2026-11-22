@@ -362,6 +362,7 @@ class LiveLlmClient:
         doc_type: str,
         doc_id: str | None = None,
         file_sha256: str | None = None,
+        text_content: str | None = None,
     ) -> tuple[ExtractionResult, dict[str, Any]]:
         if not self.endpoint:
             raise ProblemException(
@@ -391,6 +392,8 @@ class LiveLlmClient:
             "- dates (document_date, due_date): ISO format YYYY-MM-DD only, "
             "without leading labels.\n"
             "- currency: 3-letter ISO code only (e.g. 'AED') as a separate field.\n"
+            "- lead_time_days: integer days only, e.g. 5, from "
+            "'Delivery Lead Time: 5 days' (quotations).\n"
             "- amounts (subtotal, vat_amount, total, unit_price, line_total, discount): "
             "plain numbers only (digits and decimal point, e.g. 28875.00), "
             "no currency symbols or codes, and no thousands separators.\n"
@@ -400,7 +403,8 @@ class LiveLlmClient:
             "- For every field, provide the integer page number where the value was found.\n\n"
             "Field guide:\n"
             "- Header fields: vendor_name, vendor_trn, document_number, document_date, "
-            "po_number, currency, payment_terms, due_date, subtotal, vat_amount, total. "
+            "po_number, currency, payment_terms, due_date, subtotal, vat_amount, total, "
+            "lead_time_days. "
             "For each header field, provide an object with 'value', 'page' (integer page number), "
             "and 'source_text' (exact text snippet copied from the document), "
             "or null if the field is not present.\n"
@@ -470,7 +474,12 @@ class LiveLlmClient:
             ) from exc
 
         # Apply deterministic value cleanup
-        result, cleanup_meta = cleanup_extraction_result(result)
+        combined_text = (
+            f"{ocr_result.content}\n{text_content}".strip()
+            if text_content
+            else (ocr_result.content or "")
+        )
+        result, cleanup_meta = cleanup_extraction_result(result, text_content=combined_text)
 
         usage = response.usage
         tokens_in = usage.prompt_tokens if usage else 0

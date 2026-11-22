@@ -43,6 +43,9 @@ KNOWN_LABEL_PREFIXES = [
     r"curr\.?",
     r"payment\s*terms",
     r"terms\s*(?:and\s*conditions)?",
+    r"delivery\s*(?:lead\s*)?time",
+    r"lead\s*time",
+    r"delivery\s*time",
     r"subtotal",
     r"sub-total",
     r"sub\s*total",
@@ -86,6 +89,134 @@ _CURRENCY_MAP: dict[str, str] = {
     "sr": "SAR",
     "saudi riyal": "SAR",
 }
+
+# Whitelist of allowed ISO 4217 currency codes
+ISO_4217_WHITELIST: set[str] = {
+    "AED",
+    "USD",
+    "EUR",
+    "GBP",
+    "SAR",
+    "QAR",
+    "OMR",
+    "BHD",
+    "KWD",
+    "CAD",
+    "AUD",
+    "JPY",
+    "CNY",
+    "CHF",
+    "INR",
+    "SGD",
+    "NZD",
+    "ZAR",
+}
+
+# Known OCR character confusions for AED (e.g. D -> O, D -> F, etc.)
+_AED_OCR_CONFUSIONS: set[str] = {
+    "aeo",
+    "afd",
+    "aee",
+    "aeb",
+    "aep",
+    "aed",
+    "aed.",
+    "aed:",
+}
+
+_COMMERCIAL_NET_TERMS: tuple[int, ...] = (15, 30, 45, 60, 90)
+_ALL_VALID_NET_TERMS: tuple[int, ...] = (7, 10, 14, 15, 30, 45, 60, 90, 120)
+
+
+def _is_uae_context(text: str | None) -> bool:
+    """Check if text contains UAE indicators (15-digit TRN, UAE cities/emirates, AED)."""
+    if not text:
+        return False
+    patterns = [
+        r"\b100\d{12}\b",
+        r"\b(?:Abu\s*Dhabi|Dubai|Sharjah|Ajman|Umm\s*Al\s*Quwain|Ras\s*Al\s*Khaimah|Fujairah|UAE|U\.A\.E\.?|United\s*Arab\s*Emirates)\b",
+        r"(?i)\b(?:AED|Dhs|Dirham|Dirhams|د\.إ|درهم)\b",
+    ]
+    return any(re.search(pat, text, re.IGNORECASE) for pat in patterns)
+
+
+def _extract_currency_from_text(text: str | None) -> str | None:
+    """Extract and validate ISO 4217 currency code from document / page text."""
+    if not text:
+        return None
+    # 1. Explicit label e.g. "Currency: AED", "Currency: USD"
+    m = re.search(
+        r"(?i)\b(?:currency|curr\.?)\s*[:#-]?\s*([a-zA-Z]{3}|د\.إ|درهم|dhs?|dirhams?)\b",
+        text,
+    )
+    if m:
+        token = m.group(1).strip()
+        token_lower = token.lower()
+        if token_lower in _CURRENCY_MAP:
+            return _CURRENCY_MAP[token_lower]
+        if token_lower in _AED_OCR_CONFUSIONS:
+            return "AED"
+        if token.upper() in ISO_4217_WHITELIST:
+            return token.upper()
+
+    # 2. If text contains obvious UAE indicators, default to AED
+    if _is_uae_context(text):
+        return "AED"
+
+    return None
+
+
+def _extract_payment_terms_from_text(text: str | None) -> int | None:
+    """Extract standard payment terms days from document / page text."""
+    if not text:
+        return None
+    # 1. Explicit "Payment Terms: Net X" or "Payment Terms: X days"
+    m = re.search(
+        r"(?i)\b(?:payment\s*terms?|terms?)\s*[:#-]?\s*net\s*(\d{1,3})\b",
+        text,
+    )
+    if m:
+        return int(m.group(1))
+
+    # 2. "Net 30", "Net 60", etc. in text
+    all_net = re.findall(r"(?i)\bnet\s*(\d{1,3})\b", text)
+    for n_str in all_net:
+        n = int(n_str)
+        if n in _COMMERCIAL_NET_TERMS:
+            return n
+    if all_net:
+        return int(all_net[0])
+
+    return None
+
+
+def _extract_lead_time_from_text(text: str | None) -> int | None:
+    """Extract delivery lead time in days from document / page text."""
+    if not text:
+        return None
+    # 1. "Delivery Lead Time: N days" / "Lead Time: N days" / "Delivery Time: N days"
+    m = re.search(
+        r"(?i)\b(?:delivery\s*(?:lead\s*)?time|lead\s*time|delivery\s*time|delivery\s*within)\s*[:#-]?\s*(\d+)\s*(?:business\s*days?|working\s*days?|days?)?\b",
+        text,
+    )
+    if m:
+        return int(m.group(1))
+
+    # 2. "Delivery Lead Time: N weeks"
+    m_w = re.search(
+        r"(?i)\b(?:delivery\s*(?:lead\s*)?time|lead\s*time|delivery\s*time)\s*[:#-]?\s*(\d+)\s*weeks?\b",
+        text,
+    )
+    if m_w:
+        return int(m_w.group(1)) * 7
+
+    # 3. "N-day delivery" / "N days delivery"
+    m_d = re.search(r"(?i)\b(\d+)[ -]day\s*delivery\b", text)
+    if m_d:
+        return int(m_d.group(1))
+
+    return None
+
 
 # Regex to detect vendor name cutoff markers (TRN, structured address, phone, email)
 _VENDOR_NAME_CUTOFF_REGEX = re.compile(
@@ -203,33 +334,184 @@ def clean_amount(val: str | None) -> tuple[str | None, bool, bool]:
         return s, False, True
 
 
-def clean_currency(val: str | None) -> tuple[str | None, bool, bool]:
+def clean_currency(
+    val: str | None, text_content: str | None = None
+) -> tuple[str | None, bool, bool]:
     """Map currency string to ISO 4217 code (AED, USD, EUR, etc.).
 
+    Enforces ISO 4217 whitelist. Resolves OCR confusions (e.g. AEO -> AED).
+    Falls back to valid ISO code or UAE context found in document text layer.
     Returns (cleaned_val, was_changed, parse_failed).
     """
     if val is None:
+        if text_content:
+            found = _extract_currency_from_text(text_content)
+            if found:
+                return found, True, False
         return None, False, False
+
     s = val.strip()
     if not s:
+        if text_content:
+            found = _extract_currency_from_text(text_content)
+            if found:
+                return found, True, False
         return None, False, False
 
     # Strip leading label e.g. "Currency:", "Curr:"
     stripped, _ = strip_known_label(s)
     clean_lower = stripped.lower().strip()
 
+    # 1. Known symbol / word mapping
     for k, iso in _CURRENCY_MAP.items():
-        if k in clean_lower:
+        if k == clean_lower or (len(k) > 2 and k in clean_lower):
             changed = s != iso
             return iso, changed, False
 
-    # If already a 3-letter code, uppercase it
-    if re.match(r"^[a-zA-Z]{3}$", stripped):
+    # 2. Known OCR confusions for AED (e.g. AEO, AFD) -> map to AED
+    if clean_lower in _AED_OCR_CONFUSIONS or stripped.upper() == "AEO":
+        return "AED", (s != "AED"), False
+
+    # 3. Check ISO 4217 whitelist
+    if stripped.upper() in ISO_4217_WHITELIST:
         iso_val = stripped.upper()
-        changed = s != iso_val
-        return iso_val, changed, False
+        return iso_val, (s != iso_val), False
+
+    # 4. Unknown code: check document text layer for a valid currency
+    if text_content:
+        found = _extract_currency_from_text(text_content)
+        if found:
+            return found, (s != found), False
+
+    # 5. Fallback for UAE context or near AED
+    if clean_lower.startswith("ae") or _is_uae_context(text_content) or _is_uae_context(s):
+        return "AED", (s != "AED"), False
+
+    # 6. Parse failed for unknown 3-letter code or non-currency string
+    return stripped, (s != stripped), True
+
+
+def clean_payment_terms(
+    val: str | None, text_content: str | None = None
+) -> tuple[str | None, bool, bool]:
+    """Parse and normalise payment terms to canonical form e.g. 'Net 30'.
+
+    Sanity-checks against document/page text layer to resolve OCR digit confusions
+    (e.g. 'net 38' -> 'Net 30', 'Net 68' -> 'Net 60').
+    Returns (cleaned_val, was_changed, parse_failed).
+    """
+    if val is None:
+        return None, False, False
+
+    s = val.strip()
+    if not s:
+        return None, False, False
+
+    stripped, _ = strip_known_label(s)
+    clean_lower = stripped.lower().strip()
+
+    # Look for confirmed term in text_content
+    confirmed_text_days = _extract_payment_terms_from_text(text_content)
+
+    # 1. Matches "net XX" or "XX days net" or "XX days"
+    m = re.search(r"(?i)\bnet\s*(\d+)\b", stripped)
+    if not m:
+        m = re.search(r"\b(\d+)\s*days?\b", stripped, re.IGNORECASE)
+
+    if m:
+        extracted_days = int(m.group(1))
+
+        # Check if text layer confirms a canonical term
+        if confirmed_text_days is not None:
+            if extracted_days == confirmed_text_days:
+                canonical = f"Net {confirmed_text_days}"
+                return canonical, (s != canonical), False
+
+            # Near miss check: digit confusion (0 vs 8: 38 vs 30, 68 vs 60, 98 vs 90)
+            s_ext = str(extracted_days)
+            s_conf = str(confirmed_text_days)
+            is_digit_confusion = (
+                s_ext.replace("8", "0") == s_conf
+                or s_ext.replace("0", "8") == s_conf
+                or (len(s_ext) == len(s_conf) and sum(a != b for a, b in zip(s_ext, s_conf)) <= 1)
+            )
+            if is_digit_confusion:
+                canonical = f"Net {confirmed_text_days}"
+                return canonical, True, False
+
+        # If extracted_days is one of the valid standard terms, normalise to Net XX
+        if extracted_days in _ALL_VALID_NET_TERMS:
+            canonical = f"Net {extracted_days}"
+            return canonical, (s != canonical), False
+
+        # If no explicit text confirmation, check text_content for common commercial terms
+        if text_content:
+            for standard in _COMMERCIAL_NET_TERMS:
+                s_std = str(standard)
+                s_ext = str(extracted_days)
+                if s_ext.replace("8", "0") == s_std and re.search(rf"\b{standard}\b", text_content):
+                    canonical = f"Net {standard}"
+                    return canonical, True, False
+
+        canonical = f"Net {extracted_days}"
+        return canonical, (s != canonical), False
+
+    # Non-net phrases e.g. "immediate", "due on receipt", "advance", "cod"
+    if "immediate" in clean_lower:
+        return "Immediate", (s != "Immediate"), False
+    if "receipt" in clean_lower or "due on" in clean_lower:
+        return "Due on Receipt", (s != "Due on Receipt"), False
+    if "advance" in clean_lower:
+        return "Advance", (s != "Advance"), False
+    if "cod" in clean_lower or "cash on delivery" in clean_lower:
+        return "COD", (s != "COD"), False
 
     return stripped, (s != stripped), False
+
+
+def clean_lead_time(
+    val: str | None, text_content: str | None = None
+) -> tuple[str | None, bool, bool]:
+    """Parse and normalise delivery lead time in days (e.g. '5').
+
+    Returns (cleaned_val_as_str_int, was_changed, parse_failed).
+    """
+    if val is not None:
+        s = val.strip()
+        if s and s.lower() not in (
+            "none",
+            "null",
+            "n/a",
+            "not specified",
+            "unspecified",
+            "unknown",
+        ):
+            stripped, _ = strip_known_label(s)
+            m_w = re.search(r"\b(\d+)\s*weeks?\b", stripped, re.IGNORECASE)
+            if m_w:
+                days = int(m_w.group(1)) * 7
+                result = str(days)
+                return result, (s != result), False
+
+            m = re.search(r"\b(\d+)\b", stripped)
+            if m:
+                days = int(m.group(1))
+                if days > 0:
+                    result = str(days)
+                    return result, (s != result), False
+
+    # If val is missing, empty, or unparseable, recover from text_content
+    if text_content:
+        extracted_days = _extract_lead_time_from_text(text_content)
+        if extracted_days is not None and extracted_days > 0:
+            result = str(extracted_days)
+            changed = val is None or val.strip() != result
+            return result, changed, False
+
+    if val is not None and val.strip():
+        return val.strip(), False, True
+
+    return None, False, False
 
 
 def clean_date(val: str | None) -> tuple[str | None, bool, bool]:
@@ -315,12 +597,14 @@ def clean_quantity(val: str | None) -> tuple[str | None, bool, bool]:
         return stripped, (s != stripped), True
 
 
-def clean_header_field(fname: str, val: str | None) -> tuple[str | None, bool, bool]:
+def clean_header_field(
+    fname: str, val: str | None, text_content: str | None = None
+) -> tuple[str | None, bool, bool]:
     """Dispatch cleanup for a specific header field.
 
     Returns (cleaned_val, was_changed, parse_failed).
     """
-    if val is None:
+    if val is None and fname not in ("lead_time_days", "delivery_lead_time", "currency"):
         return None, False, False
 
     if fname == "vendor_name":
@@ -332,13 +616,17 @@ def clean_header_field(fname: str, val: str | None) -> tuple[str | None, bool, b
     if fname in ("document_date", "due_date"):
         return clean_date(val)
     if fname == "currency":
-        return clean_currency(val)
-    if fname in ("document_number", "po_number", "payment_terms"):
-        stripped, changed = strip_known_label(val)
+        return clean_currency(val, text_content=text_content)
+    if fname == "payment_terms":
+        return clean_payment_terms(val, text_content=text_content)
+    if fname in ("lead_time_days", "delivery_lead_time", "lead_time"):
+        return clean_lead_time(val, text_content=text_content)
+    if fname in ("document_number", "po_number"):
+        stripped, changed = strip_known_label(val or "")
         return stripped, changed, False
 
     # Default fallback: strip known label
-    stripped, changed = strip_known_label(val)
+    stripped, changed = strip_known_label(val or "")
     return stripped, changed, False
 
 
@@ -369,6 +657,7 @@ class CleanupMetadata:
 
 def cleanup_extraction_result(
     result: ExtractionResult,
+    text_content: str | None = None,
 ) -> tuple[ExtractionResult, CleanupMetadata]:
     """Apply deterministic value cleanup across all header fields and line items.
 
@@ -377,11 +666,20 @@ def cleanup_extraction_result(
     """
     meta = CleanupMetadata()
 
+    # Collect source text snippets for fallback context
+    source_texts = [
+        fval.source_text for fval in result.header.values() if fval and fval.source_text
+    ]
+    full_context_text = f"{text_content or ''}\n" + "\n".join(source_texts)
+
     # 1. Clean header fields
     for fname, draft_field in result.header.items():
         if draft_field is None or draft_field.value is None:
             continue
-        cleaned_val, was_changed, parse_err = clean_header_field(fname, draft_field.value)
+        field_context = f"{full_context_text}\n{draft_field.source_text or ''}"
+        cleaned_val, was_changed, parse_err = clean_header_field(
+            fname, draft_field.value, text_content=field_context
+        )
         draft_field.value = cleaned_val
         if was_changed:
             meta.changed_fields.add(fname)
@@ -403,6 +701,39 @@ def cleanup_extraction_result(
                 doc_num_field.value = po_num_field.value
                 doc_num_field.source_text = po_num_field.source_text
             meta.changed_fields.add("document_number")
+
+    # 1c. Recover lead_time_days if omitted or missing
+    lead_time_field = result.header.get("lead_time_days")
+    if lead_time_field is None or lead_time_field.value is None:
+        lt_val, lt_changed, lt_err = clean_lead_time(None, text_content=full_context_text)
+        if lt_val is not None:
+            matched_snippet = f"Delivery Lead Time: {lt_val} days"
+            if lead_time_field is None:
+                result.header["lead_time_days"] = FieldValue(
+                    value=lt_val,
+                    page=1,
+                    source_text=matched_snippet,
+                )
+            else:
+                lead_time_field.value = lt_val
+                if not lead_time_field.source_text:
+                    lead_time_field.source_text = matched_snippet
+            meta.changed_fields.add("lead_time_days")
+
+    # 1d. Recover currency if omitted or missing and found in text
+    curr_field = result.header.get("currency")
+    if curr_field is None or curr_field.value is None:
+        c_val, c_changed, c_err = clean_currency(None, text_content=full_context_text)
+        if c_val is not None:
+            if curr_field is None:
+                result.header["currency"] = FieldValue(
+                    value=c_val,
+                    page=1,
+                    source_text=f"Currency: {c_val}",
+                )
+            else:
+                curr_field.value = c_val
+            meta.changed_fields.add("currency")
 
     # 2. Clean line items
     for idx, line in enumerate(result.lines):

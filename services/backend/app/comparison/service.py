@@ -58,7 +58,7 @@ def _get_doc_field(db: Session, doc_id: uuid.UUID, field_name: str) -> str | Non
 def parse_lead_time(val: Any) -> int | None:
     """Parse lead time in days from an extracted field value.
 
-    Handles integers, floats, and strings such as '5 days', '14 days', '5', '14'.
+    Handles integers, floats, and strings such as '5 days', '14 days', '5', '14', '2 weeks'.
     Returns None if missing, unparseable, or non-positive. Never invents a default.
     """
     if val is None:
@@ -80,6 +80,10 @@ def parse_lead_time(val: Any) -> int | None:
             "unknown",
         ):
             return None
+        week_match = re.search(r"\b(\d+)\s*weeks?\b", cleaned, re.IGNORECASE)
+        if week_match:
+            parsed = int(week_match.group(1)) * 7
+            return parsed if parsed > 0 else None
         match = re.search(r"\b(\d+)\b", cleaned)
         if match:
             parsed = int(match.group(1))
@@ -89,13 +93,34 @@ def parse_lead_time(val: Any) -> int | None:
 
 def get_doc_lead_time(db: Session, doc_id: uuid.UUID) -> int | None:
     """Read lead time in days from extracted fields for a quote document."""
-    for field_name in ("lead_time_days", "delivery_lead_time", "lead_time", "delivery_time"):
+    for field_name in (
+        "lead_time_days",
+        "delivery_lead_time",
+        "lead_time",
+        "delivery_time",
+        "delivery_days",
+    ):
         raw_val = _get_doc_field(db, doc_id, field_name)
         if raw_val is not None:
             parsed = parse_lead_time(raw_val)
             if parsed is not None:
                 return parsed
     return None
+
+
+def _get_doc_payment_terms_days(
+    db: Session, doc_id: uuid.UUID, vendor_default: int | None = 30
+) -> int:
+    """Read payment terms days from payment_terms_days or payment_terms field."""
+    pay_val = _get_doc_field(db, doc_id, "payment_terms_days")
+    if pay_val and pay_val.isdigit():
+        return int(pay_val)
+    raw_terms = _get_doc_field(db, doc_id, "payment_terms")
+    if raw_terms:
+        m = re.search(r"(?i)\b(?:net\s*)?(\d+)\b", raw_terms)
+        if m:
+            return int(m.group(1))
+    return vendor_default if vendor_default is not None else 30
 
 
 def create_comparison(
@@ -326,11 +351,8 @@ def get_comparison(
         total_val = _get_doc_field(db, cq.document_id, "total")
         total_aed = Decimal(str(total_val)) if total_val else Decimal("0.00")
         lead_time = get_doc_lead_time(db, cq.document_id)
-        pay_val = _get_doc_field(db, cq.document_id, "payment_terms_days")
-        pay_terms = (
-            int(pay_val)
-            if pay_val and pay_val.isdigit()
-            else (vendor.payment_terms_days if vendor else 30)
+        pay_terms = _get_doc_payment_terms_days(
+            db, cq.document_id, vendor.payment_terms_days if vendor else 30
         )
 
         quotes_data.append(
@@ -603,11 +625,8 @@ def compute_recommendation(
 
         lead_time = get_doc_lead_time(db, cq.document_id)
 
-        pay_val = _get_doc_field(db, cq.document_id, "payment_terms_days")
-        pay_terms = (
-            int(pay_val)
-            if pay_val and pay_val.isdigit()
-            else (vendor.payment_terms_days if vendor else 30)
+        pay_terms = _get_doc_payment_terms_days(
+            db, cq.document_id, vendor.payment_terms_days if vendor else 30
         )
 
         quotes_data.append(
