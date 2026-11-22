@@ -133,6 +133,7 @@ class MockLlmClient:
         doc_type: str,
         doc_id: str | None = None,
         file_sha256: str | None = None,
+        text_content: str | None = None,
     ) -> tuple[ExtractionResult, dict[str, Any]]:
         text = ocr_result.content
 
@@ -165,6 +166,9 @@ class MockLlmClient:
         po_match = re.search(r"PO Number:\s*([A-Za-z0-9\-]+)", text)
         po_number = po_match.group(1) if po_match else None
 
+        lead_match = re.search(r"(?i)delivery\s*(?:lead\s*)?time:\s*(\d+)", text)
+        lead_time = lead_match.group(1) if lead_match else None
+
         header: dict[str, FieldValue | None] = {
             "vendor_name": FieldValue(value=vendor_name, page=1, source_text=vendor_name),
             "vendor_trn": FieldValue(value=vendor_trn, page=1, source_text=f"TRN: {vendor_trn}"),
@@ -178,6 +182,11 @@ class MockLlmClient:
                 value="Net 30", page=1, source_text="Payment Terms: Net 30"
             ),
             "due_date": None,
+            "lead_time_days": FieldValue(
+                value=lead_time, page=1, source_text=f"Delivery Lead Time: {lead_time} days"
+            )
+            if lead_time
+            else None,
             "subtotal": FieldValue(value=subtotal, page=1, source_text=f"Subtotal: {subtotal}"),
             "vat_amount": FieldValue(value=vat, page=1, source_text=f"VAT (5%): {vat}"),
             "total": FieldValue(value=total, page=1, source_text=f"Total: {total}"),
@@ -200,7 +209,12 @@ class MockLlmClient:
         ]
 
         result = ExtractionResult(doc_type=doc_type, header=header, lines=lines)
-        result, cleanup_meta = cleanup_extraction_result(result)
+        combined_text = (
+            f"{ocr_result.content}\n{text_content}".strip()
+            if text_content
+            else (ocr_result.content or "")
+        )
+        result, cleanup_meta = cleanup_extraction_result(result, text_content=combined_text)
         metadata = {
             "tokens_in": 500,
             "tokens_out": 200,

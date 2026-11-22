@@ -19,6 +19,7 @@ KNOWN_HEADER_FIELDS: list[str] = [
     "subtotal",
     "vat_amount",
     "total",
+    "lead_time_days",
 ]
 
 

@@ -192,23 +192,50 @@ def run_extraction(session: Session, document_id: uuid.UUID) -> Extraction:
                 document.doc_type = "other"
 
     # 5. Structured LLM extraction with response caching (NFR-COST-03)
+    pdf_text = ""
+    if _is_pdf(document) and file_bytes:
+        try:
+            import io
+
+            import pypdf
+
+            reader = pypdf.PdfReader(io.BytesIO(file_bytes))
+            extracted_pages = [p.extract_text() or "" for p in reader.pages]
+            pdf_text = "\n".join(t for t in extracted_pages if t)
+        except Exception as exc:
+            logger.debug("Could not extract PDF text layer with pypdf: %s", exc)
+
+    doc_text = (
+        f"{ocr_result.content or ''}\n{pdf_text}".strip()
+        if pdf_text
+        else (ocr_result.content or "")
+    )
+
     prompt_version = "prompts/extract_v1.md"
+    cleanup_meta: CleanupMetadata | None = None
     cached = get_cached_extraction(document.file_sha256, prompt_version)
     if cached is not None:
         extraction_result, metadata = cached
+        extraction_result, cleanup_meta = cleanup_extraction_result(
+            extraction_result, text_content=doc_text
+        )
+        metadata["cleanup"] = cleanup_meta
     else:
         llm = get_llm_client()
         extraction_result, metadata = llm.extract(
             ocr_result=ocr_result,
             doc_type=document.doc_type,
             file_sha256=document.file_sha256,
+            text_content=doc_text,
         )
         store_cached_extraction(document.file_sha256, prompt_version, extraction_result, metadata)
+        cleanup_meta = metadata.get("cleanup")
 
     # Ensure deterministic cleanup is applied and metadata available
-    cleanup_meta: CleanupMetadata | None = metadata.get("cleanup")
     if cleanup_meta is None:
-        extraction_result, cleanup_meta = cleanup_extraction_result(extraction_result)
+        extraction_result, cleanup_meta = cleanup_extraction_result(
+            extraction_result, text_content=doc_text
+        )
 
     # If doc_type was generic "other", update from classified type
     if document.doc_type == "other" and extraction_result.doc_type:

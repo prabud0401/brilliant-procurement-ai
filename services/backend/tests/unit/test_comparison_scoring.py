@@ -1,5 +1,6 @@
 import uuid
 from decimal import Decimal
+from typing import Any
 
 import pytest
 
@@ -145,3 +146,45 @@ def test_explanation_writer_unknown_lead_time_not_invented() -> None:
     assert "not specified" in explanation
     assert "7 days" not in explanation
     assert "None days" not in explanation
+
+
+@pytest.mark.unit
+def test_get_doc_lead_time_returns_extracted_days() -> None:
+    from unittest.mock import MagicMock
+
+    from app.comparison.service import get_doc_lead_time
+    from app.core.models import ExtractedField, Extraction
+
+    mock_db = MagicMock()
+    doc_id = uuid.uuid4()
+    mock_ext = MagicMock(spec=Extraction)
+    mock_ext.id = uuid.uuid4()
+    mock_field = MagicMock(spec=ExtractedField)
+    mock_field.value_raw = "5"
+
+    def query_mock(model: Any) -> Any:
+        q = MagicMock()
+        if model is Extraction:
+            q.filter.return_value.order_by.return_value.first.return_value = mock_ext
+        elif model is ExtractedField:
+            q.filter.return_value.first.return_value = mock_field
+        return q
+
+    mock_db.query.side_effect = query_mock
+    res = get_doc_lead_time(mock_db, doc_id)
+    assert res == 5
+
+
+@pytest.mark.unit
+def test_comparison_quote_response_lead_time_days() -> None:
+    from app.comparison.schemas import ComparisonQuoteResponse
+
+    doc_id = uuid.uuid4()
+    resp = ComparisonQuoteResponse(
+        document_id=doc_id,
+        included=True,
+        lead_time_days=5,
+        total_aed=Decimal("28875.00"),
+    )
+    assert resp.lead_time_days == 5
+    assert resp.total_aed == Decimal("28875.00")

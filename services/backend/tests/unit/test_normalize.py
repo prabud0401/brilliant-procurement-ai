@@ -8,6 +8,9 @@ from app.ai.normalize import (
     clean_amount,
     clean_currency,
     clean_date,
+    clean_header_field,
+    clean_lead_time,
+    clean_payment_terms,
     clean_quantity,
     clean_trn,
     clean_vendor_name,
@@ -15,6 +18,7 @@ from app.ai.normalize import (
     strip_known_label,
 )
 from app.ai.schemas import ExtractionLineItem, ExtractionResult, FieldValue
+from app.comparison.service import parse_lead_time
 
 
 @pytest.mark.unit
@@ -238,8 +242,141 @@ def test_clean_currency() -> None:
     assert val == "USD"
     assert changed is False
 
+    # OCR confusions (e.g. AEO -> AED, AFD -> AED)
+    val, changed, err = clean_currency("AEO")
+    assert val == "AED"
+    assert changed is True
+    assert err is False
+
+    val, changed, err = clean_currency("AFD")
+    assert val == "AED"
+    assert changed is True
+    assert err is False
+
+    # AEO + text content Currency: AED -> AED
+    val, changed, err = clean_currency("AEO", text_content="Currency: AED")
+    assert val == "AED"
+    assert changed is True
+    assert err is False
+
+    # Unknown 3-letter code not in ISO whitelist fails parse unless context confirms
+    val, changed, err = clean_currency("ZZZ")
+    assert val == "ZZZ"
+    assert err is True
+
+    # Unknown code with UAE context defaults to AED
+    val, changed, err = clean_currency("ZZZ", text_content="TRN: 100000000000002 Abu Dhabi UAE")
+    assert val == "AED"
+    assert changed is True
+    assert err is False
+
     assert clean_currency(None) == (None, False, False)
     assert clean_currency("") == (None, False, False)
+
+
+@pytest.mark.unit
+def test_clean_payment_terms() -> None:
+    # Basic canonical normalization
+    val, changed, err = clean_payment_terms("Payment Terms: Net 30")
+    assert val == "Net 30"
+    assert changed is True
+    assert err is False
+
+    val, changed, err = clean_payment_terms("Net 30")
+    assert val == "Net 30"
+    assert changed is False
+    assert err is False
+
+    val, changed, err = clean_payment_terms("net 45")
+    assert val == "Net 45"
+    assert changed is True
+    assert err is False
+
+    val, changed, err = clean_payment_terms("30 days")
+    assert val == "Net 30"
+    assert changed is True
+    assert err is False
+
+    # Digit OCR confusions resolved by text layer (0 vs 8)
+    val, changed, err = clean_payment_terms("net 38", text_content="Payment Terms: Net 30")
+    assert val == "Net 30"
+    assert changed is True
+    assert err is False
+
+    val, changed, err = clean_payment_terms("Net 68", text_content="Net 60")
+    assert val == "Net 60"
+    assert changed is True
+    assert err is False
+
+    # Clean Net 30 with matching text stays Net 30
+    val, changed, err = clean_payment_terms("Net 30", text_content="Payment Terms: Net 30")
+    assert val == "Net 30"
+    assert changed is False
+    assert err is False
+
+    # Via clean_header_field dispatch
+    val_hf, _, _ = clean_header_field(
+        "payment_terms", "net 38", text_content="Payment Terms: Net 30"
+    )
+    assert val_hf == "Net 30"
+    val_curr, _, _ = clean_header_field("currency", "AEO")
+    assert val_curr == "AED"
+    val_lt, _, _ = clean_header_field("lead_time_days", "5 days")
+    assert val_lt == "5"
+
+    assert clean_payment_terms(None) == (None, False, False)
+    assert clean_payment_terms("") == (None, False, False)
+
+
+@pytest.mark.unit
+def test_clean_lead_time() -> None:
+    val, changed, err = clean_lead_time("Delivery Lead Time: 5 days")
+    assert val == "5"
+    assert changed is True
+    assert err is False
+    assert parse_lead_time(val) == 5
+
+    val, changed, err = clean_lead_time("7 days")
+    assert val == "7"
+    assert changed is True
+    assert err is False
+    assert parse_lead_time(val) == 7
+
+    val, changed, err = clean_lead_time("10 days")
+    assert val == "10"
+    assert changed is True
+    assert err is False
+    assert parse_lead_time(val) == 10
+
+    val, changed, err = clean_lead_time("5")
+    assert val == "5"
+    assert changed is False
+    assert err is False
+    assert parse_lead_time(val) == 5
+
+    val, changed, err = clean_lead_time("2 weeks")
+    assert val == "14"
+    assert changed is True
+    assert err is False
+    assert parse_lead_time(val) == 14
+
+    # Missing value recovered from text layer
+    val, changed, err = clean_lead_time(None, text_content="Delivery Lead Time: 5 days")
+    assert val == "5"
+    assert changed is True
+    assert err is False
+    assert parse_lead_time(val) == 5
+
+    val, changed, err = clean_lead_time(
+        None, text_content="Landscape format quote with 10-day delivery"
+    )
+    assert val == "10"
+    assert changed is True
+    assert err is False
+    assert parse_lead_time(val) == 10
+
+    assert clean_lead_time(None) == (None, False, False)
+    assert clean_lead_time("") == (None, False, False)
 
 
 @pytest.mark.unit
@@ -431,3 +568,71 @@ def test_cleanup_detects_arithmetic_mismatch() -> None:
     assert meta.has_arithmetic_mismatch("total") is True
     assert meta.has_arithmetic_mismatch("subtotal") is True
     assert meta.has_arithmetic_mismatch("vat_amount") is True
+
+
+@pytest.mark.unit
+def test_cleanup_extraction_result_recovers_lead_time_from_text() -> None:
+    ext = ExtractionResult(
+        doc_type="quote",
+        header={
+            "vendor_name": FieldValue(value="Gulf Line IT Trading", page=1),
+            "document_number": FieldValue(value="Q-1042", page=1),
+            "currency": FieldValue(value="AED", page=1),
+            "total": FieldValue(value="28875.00", page=1),
+        },
+        lines=[],
+    )
+    page_text = (
+        "Gulf Line IT Trading\n"
+        "QUOTATION Number: Q-1042\n"
+        "Currency: AED\n"
+        "Payment Terms: Net 30\n"
+        "Delivery Lead Time: 5 days\n"
+        "Total: 28875.00 AED"
+    )
+    cleaned, meta = cleanup_extraction_result(ext, text_content=page_text)
+
+    assert "lead_time_days" in cleaned.header
+    assert cleaned.header["lead_time_days"] is not None
+    assert cleaned.header["lead_time_days"].value == "5"
+    assert parse_lead_time(cleaned.header["lead_time_days"].value) == 5
+    assert meta.was_cleaned("lead_time_days") is True
+
+
+@pytest.mark.unit
+def test_cleanup_extraction_result_fixes_aeo_and_terms() -> None:
+    ext = ExtractionResult(
+        doc_type="quote",
+        header={
+            "vendor_name": FieldValue(value="Gulf Line IT Trading", page=1),
+            "document_number": FieldValue(value="Q-1042", page=1),
+            "currency": FieldValue(value="AEO", page=1, source_text="Currency: AEO"),
+            "payment_terms": FieldValue(
+                value="net 38", page=1, source_text="Payment Terms: net 38"
+            ),
+            "total": FieldValue(value="28875.00", page=1),
+        },
+        lines=[],
+    )
+    page_text = (
+        "Gulf Line IT Trading\n"
+        "QUOTATION Number: Q-1042\n"
+        "Currency: AED\n"
+        "Payment Terms: Net 30\n"
+        "Delivery Lead Time: 5 days\n"
+        "Total Amount: 28875.00 AED"
+    )
+    cleaned, meta = cleanup_extraction_result(ext, text_content=page_text)
+
+    # AEO fixed to AED
+    assert cleaned.header["currency"].value == "AED"
+    assert meta.was_cleaned("currency") is True
+
+    # net 38 fixed to Net 30
+    assert cleaned.header["payment_terms"].value == "Net 30"
+    assert meta.was_cleaned("payment_terms") is True
+
+    # Lead time recovered
+    assert cleaned.header["lead_time_days"].value == "5"
+    assert parse_lead_time(cleaned.header["lead_time_days"].value) == 5
+    assert meta.was_cleaned("lead_time_days") is True

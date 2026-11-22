@@ -256,6 +256,8 @@ def test_full_procurement_flow_pr_to_po_to_odoo(db_session: Session) -> None:
     comp_id = comp_data["id"]
     assert len(comp_data["quotes"]) == 2
     assert len(comp_data["pairings"]) == 4  # 2 PR lines * 2 quotes
+    q2 = next(q for q in comp_data["quotes"] if q["document_id"] == str(doc2.id))
+    assert q2["lead_time_days"] == 5
 
     # 7. Generate recommendation
     rec_resp = client.post(
